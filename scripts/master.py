@@ -9,7 +9,7 @@ from examples_master import EXAMPLES_MASTER
 
 MASTER = {
     'path': '/',
-    'title': '케라스: 파이썬 딥러닝 라이브러리 - 비공식 문서',
+    'title': '케라스: 파이썬 딥러닝 라이브러리',
     'children': [
         {
             'path': 'about',
