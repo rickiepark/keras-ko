@@ -21,23 +21,23 @@ MASTER = {
             'children': [
                 {
                     'path': 'intro_to_keras_for_engineers',
-                    'title': 'Introduction to Keras for engineers',
+                    'title': '엔지니어에게 맞는 케라스 소개',
                 },
                 {
                     'path': 'intro_to_keras_for_researchers',
-                    'title': 'Introduction to Keras for researchers',
+                    'title': '연구자에게 맞는 케라스 소개',
                 },
                 {
                     'path': 'ecosystem',
-                    'title': 'The Keras ecosystem',
+                    'title': '케라스 생태계',
                 },
                 {
                     'path': 'learning_resources',
-                    'title': 'Learning resources',
+                    'title': '학습 자료',
                 },
                 {
                     'path': 'faq',
-                    'title': 'Frequently Asked Questions',
+                    'title': '자주 묻는 질문',
                     'outline': False,
                 },
             ]
@@ -45,7 +45,7 @@ MASTER = {
         GUIDES_MASTER,
         {
             'path': 'api/',
-            'title': 'Keras API reference',
+            'title': '케라스 API',
             'toc': True,
             'children': [
                 MODELS_MASTER,
@@ -53,12 +53,12 @@ MASTER = {
                 CALLBACKS_MASTER,
                 {
                     'path': 'preprocessing/',
-                    'title': 'Data preprocessing',
+                    'title': '데이터 전처리',
                     'toc': True,
                     'children': [
                         {
                             'path': 'image',
-                            'title': 'Image data preprocessing',
+                            'title': '이미지 데이터 전처리',
                             'generate': [
                                 'tensorflow.keras.preprocessing.image_dataset_from_directory',
                                 'tensorflow.keras.preprocessing.image.load_img',
@@ -71,7 +71,7 @@ MASTER = {
                         },
                         {
                             'path': 'timeseries',
-                            'title': 'Timeseries data preprocessing',
+                            'title': '시계열 데이터 전처리',
                             'generate': [
                                 'tensorflow.keras.preprocessing.timeseries_dataset_from_array',
                                 'tensorflow.keras.preprocessing.sequence.pad_sequences',
@@ -80,7 +80,7 @@ MASTER = {
                         },
                         {
                             'path': 'text',
-                            'title': 'Text data preprocessing',
+                            'title': '텍스트 데이터 전처리',
                             'generate': [
                                 'tensorflow.keras.preprocessing.text_dataset_from_directory',
                                 'tensorflow.keras.preprocessing.text.Tokenizer',  # LEGACY
@@ -90,7 +90,7 @@ MASTER = {
                 },
                 {
                     'path': 'optimizers/',
-                    'title': 'Optimizers',
+                    'title': '옵티마이저',
                     'toc': True,
                     'generate': [
                         'tensorflow.keras.optimizers.Optimizer.apply_gradients',
@@ -141,7 +141,7 @@ MASTER = {
                         },
                         {
                             'path': 'learning_rate_schedules/',
-                            'title': 'Learning rate schedules API',  # TODO
+                            'title': '학습률 스케줄 API',  # TODO
                             'toc': True,
                             'skip_from_toc': True,
                             'children': [
@@ -176,12 +176,12 @@ MASTER = {
                 },
                 {
                     'path': 'metrics/',
-                    'title': 'Metrics',
+                    'title': '측정 지표',
                     'toc': True,
                     'children': [
                         {
                             'path': 'accuracy_metrics',
-                            'title': 'Accuracy metrics',
+                            'title': '정확도',
                             'generate': [
                                 'tensorflow.keras.metrics.Accuracy',
                                 'tensorflow.keras.metrics.BinaryAccuracy',
@@ -192,7 +192,7 @@ MASTER = {
                         },
                         {
                             'path': 'probabilistic_metrics',
-                            'title': 'Probabilistic metrics',  # TODO: easter egg for poisson
+                            'title': '확률 지표',  # TODO: easter egg for poisson
                             'generate': [
                                 'tensorflow.keras.metrics.BinaryCrossentropy',
                                 'tensorflow.keras.metrics.CategoricalCrossentropy',
@@ -203,7 +203,7 @@ MASTER = {
                         },
                         {
                             'path': 'regression_metrics',
-                            'title': 'Regression metrics',
+                            'title': '회귀 지표',
                             'generate': [
                                 'tensorflow.keras.metrics.MeanSquaredError',
                                 'tensorflow.keras.metrics.RootMeanSquaredError',
@@ -216,7 +216,7 @@ MASTER = {
                         },
                         {
                             'path': 'classification_metrics',
-                            'title': 'Classification metrics based on True/False positives & negatives',
+                            'title': 'True/False(양성/음성) 기반의 분류 지표',
                             'generate': [
                                 'tensorflow.keras.metrics.AUC',
                                 'tensorflow.keras.metrics.Precision',
@@ -232,12 +232,12 @@ MASTER = {
                         },
                         {
                             'path': 'segmentation_metrics',  # MeanIoU
-                            'title': 'Image segmentation metrics',
+                            'title': '이미지 분할 지표',
                             'generate': ['tensorflow.keras.metrics.MeanIoU']
                         },
                         {
                             'path': 'hinge_metrics',
-                            'title': 'Hinge metrics for "maximum-margin" classification',
+                            'title': '"최대-마진" 분류를 위한 힌지 지표',
                             'generate': [
                                 'tensorflow.keras.metrics.Hinge',
                                 'tensorflow.keras.metrics.SquaredHinge',
@@ -253,7 +253,7 @@ MASTER = {
                     'children': [
                         {
                             'path': 'probabilistic_losses',
-                            'title': 'Probabilistic losses',
+                            'title': '확률 손실',
                             'generate': [
                                 'tensorflow.keras.losses.BinaryCrossentropy',
                                 'tensorflow.keras.losses.CategoricalCrossentropy',
@@ -270,7 +270,7 @@ MASTER = {
                         },
                         {
                             'path': 'regression_losses',
-                            'title': 'Regression losses',
+                            'title': '회귀 손실',
                             'generate': [
                                 'tensorflow.keras.losses.MeanSquaredError',
                                 'tensorflow.keras.losses.MeanAbsoluteError',
@@ -291,7 +291,7 @@ MASTER = {
                         },
                         {
                             'path': 'hinge_losses',
-                            'title': 'Hinge losses for "maximum-margin" classification',
+                            'title': '"최대-마진" 분류를 위한 힌지 손실',
                             'generate': [
                                 'tensorflow.keras.losses.Hinge',
                                 'tensorflow.keras.losses.SquaredHinge',
@@ -306,27 +306,27 @@ MASTER = {
                 },
                 {
                     'path': 'datasets/',
-                    'title': 'Built-in small datasets',
+                    'title': '내장 데이터셋',
                     'toc': True,
                     'children': [
                         {
                             'path': 'mnist',
-                            'title': 'MNIST digits classification dataset',
+                            'title': 'MNIST 숫자 분류 데이터셋',
                             'generate': ['tensorflow.keras.datasets.mnist.load_data']
                         },
                         {
                             'path': 'cifar10',
-                            'title': 'CIFAR10 small images classification dataset',
+                            'title': 'CIFAR10 이미지 분류 데이터셋',
                             'generate': ['tensorflow.keras.datasets.cifar10.load_data']
                         },
                         {
                             'path': 'cifar100',
-                            'title': 'CIFAR100 small images classification dataset',
+                            'title': 'CIFAR100 이미지 분류 데이터셋',
                             'generate': ['tensorflow.keras.datasets.cifar100.load_data']
                         },
                         {
                             'path': 'imdb',
-                            'title': 'IMDB movie review sentiment classification dataset',
+                            'title': 'IMDB 영화 리뷰 감성 분류 데이터셋',
                             'generate': [
                                 'tensorflow.keras.datasets.imdb.load_data',
                                 'tensorflow.keras.datasets.imdb.get_word_index',
@@ -334,7 +334,7 @@ MASTER = {
                         },
                         {
                             'path': 'reuters',
-                            'title': 'Reuters newswire classification dataset',
+                            'title': '로이터 뉴스 분류 데이터셋',
                             'generate': [
                                 'tensorflow.keras.datasets.reuters.load_data',
                                 'tensorflow.keras.datasets.reuters.get_word_index',
@@ -342,19 +342,19 @@ MASTER = {
                         },
                         {
                             'path': 'fashion_mnist',
-                            'title': 'Fashion MNIST dataset, an alternative to MNIST',
+                            'title': '패션 MNIST 데이터셋',
                             'generate': ['tensorflow.keras.datasets.fashion_mnist.load_data']
                         },
                         {
                             'path': 'boston_housing',
-                            'title': 'Boston Housing price regression dataset',
+                            'title': '보스턴 주택 가격 회귀 데이터셋',
                             'generate': ['tensorflow.keras.datasets.boston_housing.load_data']
                         },
                     ]
                 },
                 {
                     'path': 'applications/',
-                    'title': 'Keras Applications',
+                    'title': '케라스 애플리케이션',
                     'children': [
                         {
                             'path': 'xception',
@@ -363,7 +363,7 @@ MASTER = {
                         },
                         {
                             'path': 'efficientnet',
-                            'title': 'EfficientNet B0 to B7',
+                            'title': 'EfficientNet B0~B7',
                             'generate': [
                                 'tensorflow.keras.applications.EfficientNetB0',
                                 'tensorflow.keras.applications.EfficientNetB1',
@@ -377,7 +377,7 @@ MASTER = {
                         },
                         {
                             'path': 'vgg',
-                            'title': 'VGG16 and VGG19',
+                            'title': 'VGG16와 VGG19',
                             'generate': [
                                 'tensorflow.keras.applications.VGG16',
                                 'tensorflow.keras.applications.VGG19'
@@ -385,7 +385,7 @@ MASTER = {
                         },
                         {
                             'path': 'resnet',
-                            'title': 'ResNet and ResNetV2',
+                            'title': 'ResNet와 ResNetV2',
                             'generate': [
                                 'tensorflow.keras.applications.ResNet50',
                                 'tensorflow.keras.applications.ResNet101',
@@ -397,7 +397,7 @@ MASTER = {
                         },
                         {
                             'path': 'mobilenet',
-                            'title': 'MobileNet and MobileNetV2',
+                            'title': 'MobileNet와 MobileNetV2',
                             'generate': [
                                 'tensorflow.keras.applications.MobileNet',
                                 'tensorflow.keras.applications.MobileNetV2',
@@ -414,7 +414,7 @@ MASTER = {
                         },
                         {
                             'path': 'nasnet',
-                            'title': 'NasNetLarge and NasNetMobile',
+                            'title': 'NasNetLarge와 NasNetMobile',
                             'generate': [
                                 'tensorflow.keras.applications.NASNetLarge',
                                 'tensorflow.keras.applications.NASNetMobile',
@@ -442,15 +442,15 @@ MASTER = {
         EXAMPLES_MASTER,  # The examples section master will be mostly autogenerated.
         {
             'path': 'why_keras',
-            'title': 'Why choose Keras?',
+            'title': '왜 케라스인가?',
         },
         {
             'path': 'governance',
-            'title': 'Community & governance',
+            'title': '커뮤니티 & 거버넌스',
         },
         {
             'path': 'contributing',
-            'title': 'Contributing to Keras',
+            'title': '케라스에 기여하기',
         },
     ]
 }
