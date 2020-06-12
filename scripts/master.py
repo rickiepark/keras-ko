@@ -9,15 +9,15 @@ from examples_master import EXAMPLES_MASTER
 
 MASTER = {
     'path': '/',
-    'title': 'Keras: the Python Deep Learning library',
+    'title': '케라스: 파이썬 딥러닝 라이브러리 - 비공식 문서',
     'children': [
         {
             'path': 'about',
-            'title': 'About Keras'  # TODO
+            'title': '케라스에 대하여'  # TODO
         },
         {
             'path': 'getting_started/',
-            'title': 'Getting started',
+            'title': '시작하기',
             'children': [
                 {
                     'path': 'intro_to_keras_for_engineers',
