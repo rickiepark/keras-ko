@@ -154,16 +154,17 @@ You can also post **bug reports and feature requests** (only) in [GitHub issues]
 
 ---
 
-## Why this name, Keras?
+## 왜 이름이 케라스(Keras)인가요?
 
+>**옮긴이** 아래 문단은 [keras.io/ko/](https://keras.io/ko/#_7)에서 가져왔습니다.
 
-Keras (κέρας) means _horn_ in Greek. It is a reference to a literary image from ancient Greek and Latin literature, first found in the _Odyssey_, where dream spirits (_Oneiroi_, singular _Oneiros_) are divided between those who deceive dreamers with false visions, who arrive to Earth through a gate of ivory, and those who announce a future that will come to pass, who arrive through a gate of horn. It's a play on the words κέρας (horn) / κραίνω (fulfill), and ἐλέφας (ivory) / ἐλεφαίρομαι (deceive).
+케라스(κέρας)는 그리스어로 _뿔_ 이라는 뜻입니다. _Odyssey_에서 최초로 언급된, 고대 그리스와 라틴 문학의 신화적 존재에 대한 이야기로, 두 가지 꿈의 정령(_Oneiroi_, 단수 _Oneiros_) 중 하나는 상아문을 통해 땅으로 내려와 거짓된 환상으로 사람을 속이며, 다른 하나는 뿔을 통해 내려와 앞으로 벌어질 미래를 예언합니다. 이는 κέρας(뿔) / κραίνω(이뤄지다)와 ἐλέφας(상아) / ἐλεφαίρομαι(속이다)에 대한 언어유희이기도 합니다.
 
-Keras was initially developed as part of the research effort of project ONEIROS (Open-ended Neuro-Electronic Intelligent Robot Operating System).
+케라스는 초기에 ONEIROS(Open-ended Neuro-Electronic Intelligent Robot Operating System)라는 프로젝트의 일환으로 개발되었습니다.
 
 >_"Oneiroi are beyond our unravelling - who can be sure what tale they tell? Not all that men look for comes to pass. Two gates there are that give passage to fleeting Oneiroi; one is made of horn, one of ivory. The Oneiroi that pass through sawn ivory are deceitful, bearing a message that will not be fulfilled; those that come out through polished horn have truth behind them, to be accomplished for men who see them."_ Homer, Odyssey 19. 562 ff (Shewring translation).
 
 ---
 
->_keras-ko.kr은 [keras.io](https://keras.io)의 비공식 한국어 번역입니다. keras-ko.kr은 최신 버전을 유지하지 않으며 keras.io의 내용과 다를 수 있습니다. 이 사이트에 포함된 코드와 문서에 대한 어떠한 책임도 지지않습니다. 문서 번역에 참여하시려면 [keras-ko](https://github.com/rickiepark/keras-ko) 깃허브를 참고하세요._
+>**옮긴이** keras-ko.kr은 [keras.io](https://keras.io)의 비공식 한국어 번역입니다. keras-ko.kr은 최신 버전을 유지하지 않으며 keras.io의 내용과 다를 수 있습니다. 이 사이트에 포함된 코드와 문서에 대한 어떠한 책임도 지지않습니다. 문서 번역에 참여하시려면 [keras-ko](https://github.com/rickiepark/keras-ko) 깃허브를 참고하세요.
 
