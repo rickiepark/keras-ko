@@ -1,19 +1,19 @@
 # 케라스에 대하여
 
-케라스는 파이썬으로 작성된 딥러닝 API로 [텐서플로](https://github.com/tensorflow/tensorflow) 머신러닝 플랫폼 위에서 실행됩니다.
+케라스는 파이썬으로 작성된 딥러닝 API이며 [텐서플로](https://github.com/tensorflow/tensorflow) 머신러닝 플랫폼 위에서 실행됩니다.
 케라스는 실험을 빨리 수행하는데 초점을 맞추어 개발되었습니다. *가능한 빠르게 아이디어를 결과로 만드는 것이 성공적인 연구의 핵심 요소이기 때문입니다.*
 
 ---
 
-## Keras & TensorFlow 2.0
+## 케라스와 텐서플로 2.0
 
-[TensorFlow 2.0](https://www.tensorflow.org/) is an end-to-end, open-source machine learning platform. You can think of it as an infrastructure layer for
-[differentiable programming](https://en.wikipedia.org/wiki/Differentiable_programming). It combines four key abilities:
+[텐서플로 2.0](https://www.tensorflow.org/)은 엔드-투-엔드(end-to-end) 오픈소스 머신러닝 플랫폼입니다. 텐서플로를 [미분가능한 프로그래밍](https://en.wikipedia.org/wiki/Differentiable_programming)을 위한 인프라 계층으로 생각할 수 있습니다. 텐서플로를 구성하는 핵심 기능 네가지는 다음과 같습니다:
 
-- Efficiently executing low-level tensor operations on CPU, GPU, or TPU.
-- Computing the gradient of arbitrary differentiable expressions.
-- Scaling computation to many devices (e.g. the [Summit supercomputer](https://www.olcf.ornl.gov/summit/) at Oak Ridge National Lab, which spans 27,000 GPUs).
-- Exporting programs ("graphs") to external runtimes such as servers, browsers, mobile and embedded devices.
+- CPU, GPU, TPU에서 효율적으로 저수준 텐서 연산을 실행합니다.
+- 어떤한 미분가능한 표현식에 대해서도 그레이디언트(gradient)를 계산할 수 있습니다.
+- 여러 장치로 계산을 확장할 수 있습니다(예를 들면, Oak Ridge National Lab의 [Summit 수퍼컴퓨터](https://www.olcf.ornl.gov/summit/)는 GPU 27,000개를 가지고 있습니다).
+- 프로그램("그래프")를 서버, 브라우저, 모바일, 임베디드 장치와 같은 외부 런타임으로 내보낼 수 있습니다.
+
 
 Keras is the high-level API of TensorFlow 2.0: an approchable, highly-productive interface for solving machine learning problems,
 with a focus on modern deep learning. It provides essential abstractions and building blocks for developing
@@ -165,4 +165,5 @@ Keras was initially developed as part of the research effort of project ONEIROS 
 
 ---
 
+>_keras-ko.kr은 [keras.io](https://keras.io)의 비공식 한국어 번역입니다. keras-ko.kr은 최신 버전을 유지하지 않으며 keras.io의 내용과 다를 수 있습니다. 이 사이트에 포함된 코드와 문서에 대한 어떠한 책임도 지지않습니다. 문서 번역에 참여하시려면 [keras-ko](https://github.com/rickiepark/keras-ko) 깃허브를 참고하세요._
 
