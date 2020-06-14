@@ -14,14 +14,11 @@
 - 여러 장치로 계산을 확장할 수 있습니다(예를 들면, Oak Ridge National Lab의 [Summit 수퍼컴퓨터](https://www.olcf.ornl.gov/summit/)는 GPU 27,000개를 가지고 있습니다).
 - 프로그램("그래프")를 서버, 브라우저, 모바일, 임베디드 장치와 같은 외부 런타임으로 내보낼 수 있습니다.
 
+케라스는 텐서플로 2.0의 고수준 API입니다. 머신러닝 문제, 특히 최신 딥러닝에 초점을 맞춘 사용하기 쉽고 생산성이 높은 인터페이스입니다. 
+빠른 속도로 반복하여 머신러닝 솔루션을 개발하고 배포하기 위해 꼭 필요한 기능을 추상화한 기초 구성 요소를 제공합니다.
 
-Keras is the high-level API of TensorFlow 2.0: an approchable, highly-productive interface for solving machine learning problems,
-with a focus on modern deep learning. It provides essential abstractions and building blocks for developing
-and shipping machine learning solutions with high iteration velocity.
-
-Keras empowers engineers and researchers to take full advantage of the scalability
-and cross-platform capabilities of TensorFlow 2.0: you can run Keras on TPU or on large clusters of GPUs,
-and you can export your Keras models to run in the browser or on a mobile device. 
+케라스를 사용하면 엔지니어와 연구자들은 텐서플로 2.0의 확장성과 크로스-플랫폼 능력을 모두 활용할 수 있습니다.
+TPU나 대규모 GPU 클러스터에서 케라스를 실행하거나 케라스 모델을 브라우저나 모바일 장치에서 실행할 수 있습니다.
 
 ---
 
