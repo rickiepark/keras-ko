@@ -22,14 +22,13 @@ TPU나 대규모 GPU 클러스터에서 케라스를 실행하거나 케라스 �
 
 ---
 
-## First contact with Keras
+## 케라스 맛보기
 
-The core data structures of Keras are __layers__ and __models__.
-The simplest type of model is the [`Sequential` model](/guides/sequential_model/), a linear stack of layers.
-For more complex architectures, you should use the [Keras functional API](/guides/functional_api/),
-which allows to build arbitrary graphs of layers, or [write models entirely from scratch via subclasssing](/guides/model_subclassing/).
+케라스의 핵심 데이터 구조는 __층__ 과 __모델__ 입니다.
+가장 간단한 모델은 차례대로 층을 쌓은 [`Sequential` 모델](/guides/sequential_model/)입니다.
+더 복잡한 모델을 만들려면 [케라스 함수형 API](/guides/functional_api/)를 사용해야 합니다. 층으로 구성된 임의의 그래프를 만들거나 [서브클래싱을 사용해 완전히 밑바닥부터](/guides/making_new_layers_and_models_via_subclassing/) 만들 수 있습니다.
 
-Here is the `Sequential` model:
+`Sequential` 모델은 다음과 같습니다.
 
 ```python
 from tensorflow.keras.models import Sequential
@@ -37,7 +36,7 @@ from tensorflow.keras.models import Sequential
 model = Sequential()
 ```
 
-Stacking layers is as easy as `.add()`:
+층을 쌓으려면 `.add()` 메서드를 사용합니다.
 
 ```python
 from tensorflow.keras.layers import Dense
@@ -46,7 +45,7 @@ model.add(Dense(units=64, activation='relu'))
 model.add(Dense(units=10, activation='softmax'))
 ```
 
-Once your model looks good, configure its learning process with `.compile()`:
+모델 구성이 끝나면 `.compile()` 메서드로 학습 과정을 설정합니다.
 
 ```python
 model.compile(loss='categorical_crossentropy',
