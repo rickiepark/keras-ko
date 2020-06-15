@@ -17,7 +17,7 @@
 케라스는 텐서플로 2.0의 고수준 API입니다. 머신러닝 문제, 특히 최신 딥러닝에 초점을 맞춘 사용하기 쉽고 생산성이 높은 인터페이스입니다. 
 빠른 속도로 반복하여 머신러닝 솔루션을 개발하고 배포하기 위해 꼭 필요한 기능을 추상화한 기초 구성 요소를 제공합니다.
 
-케라스를 사용하면 엔지니어와 연구자들은 텐서플로 2.0의 확장성과 크로스-플랫폼 능력을 모두 활용할 수 있습니다.
+케라스를 사용하면 엔지니어와 연구자들이 텐서플로 2.0의 확장성과 크로스-플랫폼 능력을 모두 활용할 수 있습니다.
 TPU나 대규모 GPU 클러스터에서 케라스를 실행하거나 케라스 모델을 브라우저나 모바일 장치에서 실행할 수 있습니다.
 
 ---
@@ -53,100 +53,100 @@ model.compile(loss='categorical_crossentropy',
               metrics=['accuracy'])
 ```
 
-If you need to, you can further configure your optimizer. The Keras philosophy is to simple things simple,
-while allowing the user to be fully in control when they need to (the ultimate control being the easy extensibility of the source code via subclassing).
+필요하면 옵티마이저 기본 설정을 바꿀 수 있습니다. 케라스의 철학은 간단한 것은 간단하게 놔두고 필요할 때 사용자가 완전하게 제어할 수 있도록 하는 것입니다(궁극의 제어는 서브클래싱을 통해 소스 코드를 확장하는 것입니다).
 
 ```python
 model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.SGD(learning_rate=0.01, momentum=0.9, nesterov=True))
 ```
 
-You can now iterate on your training data in batches:
+이제 훈련 데이터 배치에서 반복합니다:
 
 ```python
-# x_train and y_train are Numpy arrays --just like in the Scikit-Learn API.
+# 사이킷런(Scikit-Learn) API와 비슷하게 x_train과 y_train은 넘파이 배열입니다.
 model.fit(x_train, y_train, epochs=5, batch_size=32)
 ```
 
-Evaluate your test loss and metrics in one line:
+다음 한 줄 코드로 손실과 성능을 평가합니다:
 
 ```python
 loss_and_metrics = model.evaluate(x_test, y_test, batch_size=128)
 ```
 
-Or generate predictions on new data:
+또는 새로운 데이터에 대한 예측을 만듭니다:
 
 ```python
 classes = model.predict(x_test, batch_size=128)
 ```
 
-What you just saw is the most elementary way to use Keras: it mirrors the Scikit-Learn API.
+방금 본 것은 매우 기본적인 케라스 사용 방법으로 사이킷런 API와 닮았습니다.
 
-However, Keras is also a highly-flexible framework suitable to iterate on state-of-the-art research ideas.
-Keras follows the principle of **progressive discloure of complexity**: it makes it easy to get started,
-yet it makes it possible to handle arbitrarily advanced use cases,
-only requiring incremental learning at each step.
+하지만 케라스는 매우 유연한 프레임워크로 최신 연구를 수행하는데 적합합니다.
+케라스는 **단계적인 복잡성 노출** 원칙을 따릅니다.
+처음 시작할 때는 간단하지만 필요하면 어떤 고급 방식도 다룰 수 있습니다.
+단계마다 추가로 필요한 내용을 학습하면 됩니다. 
 
-In much the same way that you were able to train & evaluate a simple neural network above in a few lines,
-you can use Keras to quickly develop new training procedures or exotic model architectures.
-Here's a low-level training loop example, combining Keras functionality with the TensorFlow `GradientTape`:
+위에서 몇 줄의 코드로 간단한 신경망을 훈련하고 평가하는 것과 비슷하게 
+케라스를 사용해 새로운 훈련 방식이나 특이한 모델 구조를 빠르게 개발할 수 있습니다.
+다음은 텐서플로의 `GradientTape`과 케라스를 연결하여 저수준에서 훈련을 반복하는 예입니다:
 
 ```python
 import tensorflow as tf
 
-# Prepare an optimizer.
+# 옵티마이저를 준비합니다.
 optimizer = tf.keras.optimizers.Adam()
-# Prepare a loss function.
+# 손실 함수를 준비합니다.
 loss_fn = tf.keras.losses.kl_divergence
 
-# Iterate over the batches of a dataset.
+# 데이터셋 배치를 반복합니다.
 for inputs, targets in dataset:
-    # Open a GradientTape.
+    # GradientTape를 시작합니다.
     with tf.GradientTape() as tape:
-        # Forward pass.
+        # 정방향 계산을 수행합니다.
         predictions = model(inputs)
-        # Compute the loss value for this batch.
+        # 이 배치에 대한 손실을 계산합니다.
         loss_value = loss_fn(targets, predictions)
 
-    # Get gradients of loss wrt the weights.
+    # 가중치에 대한 손실의 그레이디언트를 구합니다.
     gradients = tape.gradient(loss_value, model.trainable_weights)
-    # Update the weights of the model.
+    # 모델 가중치를 업데이트합니다.
     optimizer.apply_gradients(zip(gradients, model.trainable_weights))
 ```
 
-The ideas behind deep learning are simple, so why should their implementation be painful?
+딥러닝 이면에 있는 아이디어는 간단합니다. 따라서 구현이 어려울 필요가 있을까요?
 
-For more in-depth tutorials about Keras, you can check out:
+더 자세한 케라스 튜토리얼은 다음을 참고하세요:
 
-- [Introduction to Keras for engineers](/getting_started/intro_to_keras_for_engineers/)
-- [Introduction to Keras for researchers](/getting_started/intro_to_keras_for_researchers/)
-- [Developer guides](/guides/)
-
----
-
-## Installation & compatibility
-
-Keras comes packaged with TensorFlow 2.0 as `tensorflow.keras`.
-To start using Keras, simply [install TensorFlow 2.0](https://www.tensorflow.org/install).
-
-Keras/TensorFlow are compatible with:
-
-- Python 3.5–3.8
-- Ubuntu 16.04 or later
-- Windows 7 or later
-- macOS 10.12.6 (Sierra) or later.
-
+- [엔지니어에게 맞는 케라스 소개](/getting_started/intro_to_keras_for_engineers/)
+- [연구자에게 맞는 케라스 소개](/getting_started/intro_to_keras_for_researchers/)
+- [개발자 가이드](/guides/)
 
 ---
 
-## Support
+## 설치와 호환성
 
-You can ask questions and join the development discussion:
+케라스는 텐서플로 2.0에 `tensorflow.keras`로 포함되어 있으므로 케라스를 사용하려면 [텐서플로 2.0을 설치](https://www.tensorflow.org/install)하면 됩니다.
 
-- On the [Keras Google group](https://groups.google.com/forum/#!forum/keras-users).
-- On the [Keras Slack channel](https://kerasteam.slack.com). Use [this link](https://keras-slack-autojoin.herokuapp.com/) to request an invitation to the channel.
+케라스/텐서플로는 다음 환경에서 사용할 수 있습니다:
 
-You can also post **bug reports and feature requests** (only) in [GitHub issues](https://github.com/keras-team/keras/issues). Make sure to read [our guidelines](https://github.com/keras-team/keras/blob/master/CONTRIBUTING.md) first.
+- 파이썬 3.5–3.8
+- 우분투 16.04 이상
+- 윈도우 7 이상
+- macOS 10.12.6 (시에라) 이상
+
+
+---
+
+## 지원
+
+개발 포럼에 가입하여 궁금한 점을 질문할 수 있습니다:
+
+- [케라스 구글 그룹](https://groups.google.com/forum/#!forum/keras-users).
+- [케라스 슬랙 채널](https://kerasteam.slack.com). 채널에 초대 요청을 하려면 [이 링크](https://keras-slack-autojoin.herokuapp.com/)를 사용하세요.
+
+>**옮긴이** 한국 사용자 모임으로는 [케라스 코리아](https://www.facebook.com/groups/KerasKorea/)가 있습니다.
+
+**버그 리포트와 기능 요청**은 [GitHub issues](https://github.com/keras-team/keras/issues)에서만 받습니다. 먼저 [가이드라인](https://github.com/keras-team/keras/blob/master/CONTRIBUTING.md)을 읽어 보세요.
 
 ---
 
