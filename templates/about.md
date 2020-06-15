@@ -24,7 +24,7 @@ TPU나 대규모 GPU 클러스터에서 케라스를 실행하거나 케라스 �
 
 ## 케라스 맛보기
 
-케라스의 핵심 데이터 구조는 __층__ 과 __모델__ 입니다.
+케라스의 핵심 데이터 구조는 **층**과 **모델**입니다.
 가장 간단한 모델은 차례대로 층을 쌓은 [`Sequential` 모델](/guides/sequential_model/)입니다.
 더 복잡한 모델을 만들려면 [케라스 함수형 API](/guides/functional_api/)를 사용해야 합니다. 층으로 구성된 임의의 그래프를 만들거나 [서브클래싱을 사용해 완전히 밑바닥부터](/guides/making_new_layers_and_models_via_subclassing/) 만들 수 있습니다.
 
