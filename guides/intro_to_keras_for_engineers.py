@@ -30,32 +30,27 @@ from tensorflow import keras
 - 여러 개의 GPU를 사용해 훈련 속도를 높이는 방법.
 - 하이퍼파라미터를 튜닝하여 모델의 성능을 높이는 방법.
 
-At the end of this guide, you will get pointers to end-to-end examples to solidify
- these concepts:
+이 문서 끝에 다음 주제에 대한 엔드-투-엔드 예제 링크를 소개하겠습니다:
 
-- Image classification
-- Text classification
-- Credit card fraud detection
+- 이미지 분류
+- 텍스트 분류
+- 신용 카드 부정 거래 감지
 
-
-"""
 
 """
-## Data loading & preprocessing
 
-Neural networks don't process raw data, like text files, encoded JPEG image files, or
- CSV files. They process **vectorized** & **standardized** representations.
+"""
+## 데이터 적재와 전처리
 
-- Text files needs to be read into string tensors, then split into words. Finally, the
- words need to be indexed & turned into integer tensors.
-- Images need to be read and decoded into integer tensors, then converted to floating
- point and normalized to small values (usually between 0 and 1).
-- CSV data needs to be parsed, with numerical features converted to floating point
- tensors and categorical features indexed and converted to integer tensors.
-Then each feature typically needs to be normalized to zero-mean and unit-variance.
-- Etc.
+신경망은 텍스트 파일, JPEG 이미지 파일, CSV 파일 같은 원본 데이터를 그대로 처리하지 않습니다.
+신경망은 **벡터화**되거나 **표준화**된 표현을 처리합니다.
 
-Let's start with data loading.
+- 텍스트 파일을 문자열 텐서로 읽어 단어로 분리합니다. 마지막에 단어를 정수 텐서로 인덱싱하고 변환합니다.
+- 이미지를 읽어 정수 텐서로 디코딩합니다. 그다음 부동 소수로 변환하고 (보통 0에서 1사이) 작은 값으로 정규화합니다.
+- CSV 데이터를 파싱하여 정수 특성은 부동 소수 텐서로 변환하고, 범주형 특성은 정수 텐서로 인덱싱하고 변환합니다.
+그다음 일반적으로 각 특성을 평균 0, 단위 분산으로 정규화합니다.
+
+먼저 데이터를 적재해 보죠.
 
 ## Data loading
 
