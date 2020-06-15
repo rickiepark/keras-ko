@@ -1,17 +1,17 @@
-# Introduction to Keras for Engineers
+# 엔지니어에게 맞는 케라스 소개
 
-**Author:** [fchollet](https://twitter.com/fchollet)<br>
-**Date created:** 2020/04/01<br>
-**Last modified:** 2020/04/28<br>
-**Description:** Everything you need to know to use Keras to build real-world machine learning solutions.
+**작성자:** [fchollet](https://twitter.com/fchollet)<br>
+**생성일:** 2020/04/01<br>
+**마지막 수정일:** 2020/04/28<br>
+**설명:** 케라스로 실전 머신러닝 솔루션을 만들기 위해 알아야 할 모든 것.
 
 
-<img class="k-inline-icon" src="https://colab.research.google.com/img/colab_favicon.ico"/> [**View in Colab**](https://colab.research.google.com/github/keras-team/keras-io/blob/master/guides/ipynb/intro_to_keras_for_engineers.ipynb)  <span class="k-dot">•</span><img class="k-inline-icon" src="https://github.com/favicon.ico"/> [**GitHub source**](https://github.com/keras-team/keras-io/blob/master/guides/intro_to_keras_for_engineers.py)
+<img class="k-inline-icon" src="https://colab.research.google.com/img/colab_favicon.ico"/> [**코랩에서 보기**](https://colab.research.google.com/github/rickiepark/keras-ko/blob/master/guides/ipynb/intro_to_keras_for_engineers.ipynb)  <span class="k-dot">•</span><img class="k-inline-icon" src="https://github.com/favicon.ico"/> [**깃허브 소스**](https://github.com/rickiepark/keras-ko/blob/master/guides/intro_to_keras_for_engineers.py)
 
 
 
 ---
-## Setup
+## 설정
 
 
 
@@ -23,26 +23,20 @@ from tensorflow import keras
 ```
 
 ---
-## Introduction
+## 소개
 
-Are you a machine learning engineer looking to use Keras
-to ship deep-learning powered features in real products? This guide will serve
-as your first introduction to core Keras API concepts.
+케라스로 제품에 딥러닝을 적용하고 싶은 머신러닝 엔지니어인가요? 이 가이드에서 케라스 API의 핵심 부분을 소개하겠습니다.
 
-In this guide, you will learn about:
+이 가이드에서 다음 내용을 배울 수 있습니다:
 
-- How to prepare you data before training a model (by turning it into either NumPy
- arrays or `tf.data.Dataset` objects).
-- How to do data preprocessing, for instance feature normalization or vocabulary
- indexing.
-- How to build a model that turns your data into useful predictions,
-using the Keras Functional API.
-- How to train your model with the built-in Keras `fit()` method, while being
-mindful of checkpointing, metrics monitoring, and fault tolerance.
-- How to evaluate your model on a test data and how to use it for inference on new data.
-- How to customize what `fit()` does, for instance to build a GAN.
-- How to speed up training by leveraging multiple GPUs.
-- How to refine your model through hyperparameter tuning.
+- 모델을 훈련하기 전에 데이터를 준비하는 방법(넘파이 배열이나 `tf.data.Dataset` 객체로 변환합니다).
+- 데이터 전처리 방법. 예를 들면 특성 정규화나 어휘 사전 구축.
+- 케라스 함수형 API로 데이터에서 예측을 만드는 모델 구축 방법.
+- 케라스의 기본 `fit()` 메서드로 체크포인팅(checkpointing), 성능 지표 모니터링, 내결함성(fault tolerance)을 고려한 모델 훈련 방법.
+- 테스트 데이터에서 모델 평가하고 새로운 데이터에서 모델을 사용해 추론하는 방법.
+- GAN과 같은 모델을 만들기 위해 `fit()` 메서드를 커스터마이징하는 방법.
+- 여러 개의 GPU를 사용해 훈련 속도를 높이는 방법.
+- 하이퍼파라미터를 튜닝하여 모델의 성능을 높이는 방법.
 
 At the end of this guide, you will get pointers to end-to-end examples to solidify
  these concepts:

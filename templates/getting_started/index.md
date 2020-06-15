@@ -1,15 +1,15 @@
-# Getting started
+# 시작하기
 
 
-Are you an engineer or data scientist? Do you ship real-world machine learning solutions?<br>
-Check out our **[Introduction to Keras for engineers](/getting_started/intro_to_keras_for_engineers)**.
+엔지니어나 데이터 과학자인가요? 실전 머신러닝 솔루션을 배포하고 싶은가요?<br>
+**[엔지니어에게 맞는 케라스 소개](/getting_started/intro_to_keras_for_engineers)**를 확인해 보세요.
 
-Are you a machine learning researcher? Do you publish at NeurIPS and push the state-of-the-art in CV and NLP?<br>
-Check out our **[Introduction to Keras for researchers](/getting_started/intro_to_keras_for_researchers)**.
+머신러닝 연구자인가요? NeurIPS에 논문을 제출하고 컴퓨터 비전이나 자연어 처리 분야의 최신 연구를 수행하나요?<br>
+**[연구자에게 맞는 케라스 소개](/getting_started/intro_to_keras_for_researchers)**를 확인해 보세요.
 
 
-## Further starter resources
+## 시작하기 좋은 다른 자료
 
-- [The Keras ecosystem](/getting_started/ecosystem)
-- [Learning resources](/getting_started/learning_resources)
-- [Frequently Asked Questions](/getting_started/faq)
+- [케라스 생태계](/getting_started/ecosystem)
+- [학습 자료](/getting_started/learning_resources)
+- [자주하는 질문](/getting_started/faq)
