@@ -35,8 +35,8 @@ import tutobooks
 import generate_tf_guides
 
 
-EXAMPLES_GH_LOCATION = "keras-team/keras-io/blob/master/examples/"
-GUIDES_GH_LOCATION = "keras-team/keras-io/blob/master/guides/"
+EXAMPLES_GH_LOCATION = "rickiepark/keras-ko/blob/master/examples/"
+GUIDES_GH_LOCATION = "rickiepark/keras-ko/blob/master/guides/"
 
 
 class KerasIO:
@@ -134,16 +134,17 @@ class KerasIO:
         button_lines = [
             "\n",
             '<img class="k-inline-icon" src="https://colab.research.google.com/img/colab_favicon.ico"/> '
-            "[**View in Colab**](https://colab.research.google.com/github/"
+            "[**코랩에서 보기**](https://colab.research.google.com/github/"
             + github_repo_dir
             + "ipynb/"
             + name + ".ipynb"
             + ")  "
             '<span class="k-dot">•</span>'
             '<img class="k-inline-icon" src="https://github.com/favicon.ico"/> '
-            "[**GitHub source**](https://github.com/" + github_repo_dir + fname + ")",
+            "[**깃허브 소스**](https://github.com/" + github_repo_dir + fname + ")",
             "\n",
         ]
+        print(button_lines)
         md_content_lines = md_content_lines[:6] + button_lines + md_content_lines[6:]
         md_content = "\n".join(md_content_lines)
         # Normalize img urls
@@ -883,8 +884,8 @@ if __name__ == "__main__":
         theme_dir="../theme/",
         guides_dir="../guides/",
         examples_dir="../examples/",
-        refresh_guides=False,
-        refresh_examples=False,
+        refresh_guides=True,
+        refresh_examples=True,
     )
 
     cmd = sys.argv[1]

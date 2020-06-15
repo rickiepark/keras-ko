@@ -68,7 +68,7 @@ import shutil
 from pathlib import Path
 
 TIMEOUT = 60 * 60
-MAX_LOC = 300
+MAX_LOC = 500
 
 
 def nb_to_py(nb_path, py_path):
