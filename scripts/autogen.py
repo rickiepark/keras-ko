@@ -885,7 +885,7 @@ if __name__ == "__main__":
         guides_dir="../guides/",
         examples_dir="../examples/",
         refresh_guides=True,
-        refresh_examples=True,
+        refresh_examples=False,
     )
 
     cmd = sys.argv[1]
