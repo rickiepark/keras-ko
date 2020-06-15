@@ -884,7 +884,7 @@ if __name__ == "__main__":
         theme_dir="../theme/",
         guides_dir="../guides/",
         examples_dir="../examples/",
-        refresh_guides=True,
+        refresh_guides=False,
         refresh_examples=False,
     )
 
