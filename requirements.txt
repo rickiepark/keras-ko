@@ -6,4 +6,11 @@ mdx_truly_sane_lists
 sphinx~=3.0.3
 black==19.10b0
 pathlib
-tf-nightly==2.2.0.dev20200508
+tensorflow
+tensorflow_datasets
+jupyter
+matplotlib
+scikit-learn
+numpy
+scipy
+panda
