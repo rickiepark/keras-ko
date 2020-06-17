@@ -58,9 +58,9 @@ from tensorflow import keras
 
 - **넘파이(NumPy) 배열**. 사이킷런(Scikit-Learn)이나 다른 파이썬 라이브러리와 비슷합니다.
 데이터 크기가 메모리에 맞을 때 좋습니다.
-- **[텐서플로 `Dataset` 객체](https://www.tensorflow.org/guide/data)**. 
+- **[텐서플로 `Dataset` 객체](https://www.tensorflow.org/guide/data)**.
 데이터가 메모리보다 커서 디스크나 분산 파일 시스템에서 스트림으로 읽어야할 때 적합한 고성능 방식입니다.
-- **파이썬 제너레이터(generator)**. 배치 데이터를 만듭니다(`keras.utils.Sequence` 클래스의 
+- **파이썬 제너레이터(generator)**. 배치 데이터를 만듭니다(`keras.utils.Sequence` 클래스의
 사용자 정의 서브클래스와 비슷합니다).
 
 모델을 훈련하기 전에 이런 포맷 중에 하나로 데이터를 준비해야 합니다.
@@ -71,14 +71,14 @@ from tensorflow import keras
 - GPU 메모리에 데이터를 프리페치(prefetch)하여 GPU에서 이전 배치에 대한 처리가 끝나는대로 즉시 사용할 수 있습니다.
 이를 통해 GPU를 최대로 활용할 수 있습니다.
 
-케라스는 디스크에 있는 원시 데이터를 `Dataset`으로 변환해 주는 
+케라스는 디스크에 있는 원시 데이터를 `Dataset`으로 변환해 주는
 여러 유틸리티를 제공합니다(**옮긴이_** 아래 함수는 아직 tf-nightly 패키지에서만 제공합니다):
 
-- `tf.keras.preprocessing.image_dataset_from_directory`는 클래스별로 폴더에 나뉘어 있는 이미지 파일을 
+- `tf.keras.preprocessing.image_dataset_from_directory`는 클래스별로 폴더에 나뉘어 있는 이미지 파일을
 레이블된 이미지 텐서 데이터셋으로 변환합니다.
 - `tf.keras.preprocessing.text_dataset_from_directory`는 텍스트 파일에 대해 동일한 작업을 수행합니다.
 
-또한 텐서플로의 `tf.data`는 CSV 파일에서 정형화된 데이터를 로드하는 
+또한 텐서플로의 `tf.data`는 CSV 파일에서 정형화된 데이터를 로드하는
 `tf.data.experimental.make_csv_dataset`와 같은 유틸리티를 제공합니다.
 
 **예제: 디스크에 있는 이미지 파일에서 레이블된 데이터셋 만들기**
@@ -138,13 +138,13 @@ for data, labels in dataset:
 """
 ## 케라스를 사용한 데이터 전처리
 
-데이터가 문자열/정수/실수 넘파이 배열이거나 
+데이터가 문자열/정수/실수 넘파이 배열이거나
 문자열/정수/실수 텐서의 배치를 반환하는 `Dataset` 객체(또는 파이썬 제너레이터)로 준비되었다면
 이제 데이터를 **전처리**할 차례입니다. 이 과정은 다음과 같은 작업을 의미합니다:
 
 - 문자열 데이터를 토큰으로 나누고 인덱싱합니다.
 - 특성을 정규화합니다.
-- 데이터를 작은 값으로 스케일을 조정합니다(일반적으로 신경망의 입력은 0에 가까워야 합니다. 
+- 데이터를 작은 값으로 스케일을 조정합니다(일반적으로 신경망의 입력은 0에 가까워야 합니다.
 평균이 0이고 분산이 1이거나 `[0, 1]` 범위의 데이터를 기대합니다).
 
 ### 이상적인 머신러닝 모델은 엔드-투-엔드 모델입니다
@@ -199,7 +199,7 @@ training_data = np.array([["This is the 1st sample."], ["And here's the 2nd samp
 # 텍스트 표준화와 텍스트 분할 알고리즘을 완전히 커스터마이징할 수 있습니다.
 vectorizer = TextVectorization(output_mode="int")
 
-# 배열이나 데이터셋에 대해 `adapt` 메서드를 호출하면 이 데이터를 사용해 어휘 인덱스를 생성합니다. 
+# 배열이나 데이터셋에 대해 `adapt` 메서드를 호출하면 이 데이터를 사용해 어휘 인덱스를 생성합니다.
 # 이 어휘 인덱스는 새로운 데이터를 처리할 때 재사용됩니다.
 vectorizer.adapt(training_data)
 
