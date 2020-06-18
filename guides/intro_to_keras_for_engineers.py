@@ -367,43 +367,40 @@ model.compile(optimizer=keras.optimizers.RMSprop(learning_rate=1e-3),
               loss=keras.losses.CategoricalCrossentropy())
 ```
 
-Loss and optimizer can be specified via their string identifiers (in this case
-their default constructor argument values are used):
+손실 함수와 옵티마이저는 문자열로 지정할 수 있습니다(기본 생성자 매개변수가 사용됩니다):
 
 
 ```python
 model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
 ```
 
-Once your model is compiled, you can start "fitting" the model to the data.
-Here's what fitting a model looks like with NumPy data:
+모델이 컴파일되면 데이터에서 "훈련"을 시작할 수 있습니다.
+다음은 넘파이 데이터를 사용해 모델을 훈련하는 예입니다:
 
 ```python
 model.fit(numpy_array_of_samples, numpy_array_of_labels,
           batch_size=32, epochs=10)
 ```
 
-Besides the data, you have to specify two key parameters: the `batch_size` and
-the number of epochs (iterations on the data). Here our data will get sliced on batches
- of 32 samples, and the model will iterate 10 times over the data during training.
+데이터 외에도 두 개의 핵심 매개변수를 지정해야 합니다.
+`batch_size`와 에포크 횟수(데이터를 반복할 횟수)입니다.
+여기에서는 데이터를 32개 샘플씩 배치로 나누어 사용하고 훈련하는 동안 전체 데이터에 대해 10번 반복합니다.
 
-Here's what fitting a model looks like with a dataset:
+다음은 데이터셋을 사용해 모델을 훈련하는 예입니다:
 
 ```python
 model.fit(dataset_of_samples_and_labels, epochs=10)
 ```
 
-Since the data yielded by a dataset is expect to be already batched, you don't need to
- specify the batch size here.
+데이터셋은 배치 데이터를 반환하기 때문에 배치 크기를 지정할 필요가 없습니다.
 
-Let's look at it in practice with a toy example model that learns to classify MNIST
- digits:
+MNIST 숫자를 분류하는 작은 예제 모델을 만들어 보겠습니다:
 """
 
-# Get the data as Numpy arrays
+# 넘파이 배열로 데이터를 가져옵니다.
 (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
 
-# Build a simple model
+# 간단한 모델을 만듭니다.
 inputs = keras.Input(shape=(28, 28))
 x = layers.experimental.preprocessing.Rescaling(1.0 / 255)(inputs)
 x = layers.Flatten()(x)
@@ -413,44 +410,42 @@ outputs = layers.Dense(10, activation="softmax")(x)
 model = keras.Model(inputs, outputs)
 model.summary()
 
-# Compile the model
+# 모델을 컴파일합니다.
 model.compile(optimizer="adam", loss="sparse_categorical_crossentropy")
 
-# Train the model for 1 epoch from Numpy data
+# 넘파이 데이터에서 1 에포크 동안 모델을 훈련합니다.
 batch_size = 64
-print("Fit on NumPy data")
+print("넘파이 데이터에서 훈련하기")
 history = model.fit(x_train, y_train, batch_size=batch_size, epochs=1)
 
-# Train the model for 1 epoch using a dataset
+# 데이터셋을 사용해 1 에포크 동안 모델을 훈련합니다.
 dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train)).batch(batch_size)
-print("Fit on Dataset")
+print("데이터셋에서 훈련하기")
 history = model.fit(dataset, epochs=1)
 
 """
-The `fit()` call returns a "history" object which records what happened over the course
-of training. The `history.history` dict contains per-epoch timeseries of metrics
-values (here we have only one metric, the loss, and one epoch, so we only get a single
- scalar):
+`fit()` 메서드는 훈련 동안 발생하는 정보를 기록한 "history" 객체를 반환합니다.
+`history.history` 딕셔너리는 에포크 순서대로 측정 값을 담고 있습니다(여기에서는
+손실 하나와 에포크 횟수가 1이므로 하나의 스칼라 값만 담고 있습니다):
 """
 
 print(history.history)
 
 """
-For a detailed overview of how to use `fit()`, see the
-[guide to training & evaluation with the built-in Keras methods](
-  /guides/training_with_built_in_methods/).
+`fit()` 메서드를 사용하는 자세한 방법은
+[케라스 내장 메서드를 사용한 훈련과 평가 가이드](/guides/training_with_built_in_methods/)를
+참고하세요.
 """
 
 """
-### Keeping track of performance metrics
+### 성능 지표 기록하기
 
-As you're training a model, you want to keep of track of metrics such as classification
-accuracy, precision, recall, AUC, etc. Besides, you want to monitor these metrics not
- only on the training data, but also on a validation set.
+모델을 훈련하면서 분류 정확도, 정밀도, 재현율, AUC와 같은 지표를 기록할 필요가 있습니다.
+이외에도 훈련 데이터에 대한 지표뿐만 아니라 검증 세트에 대한 모니터링도 필요합니다.
 
-**Monitoring metrics**
+**성능 지표 모니터링**
 
-You can pass a list of metric objects to `compile()`, like this:
+다음처럼 `compile()` 메서드에 측정 지표의 객체 리스트를 전달할 수 있습니다:
 
 
 """
@@ -464,10 +459,10 @@ history = model.fit(dataset, epochs=1)
 
 """
 
-**Passing validation data to `fit()`**
+**`fit()` 메서드에 검증 데이터 전달하기**
 
-You can pass validation data to `fit()` to monitor your validation loss & validation
- metrics. Validation metrics get reported at the end of each epoch.
+`fit()` 메서드에 검증 데이터를 전달하여 검증 손실과 성능 지표를 모니터링할 수 있습니다.
+측정 값은 매 에포크 끝에서 출력됩니다.
 
 """
 
@@ -475,19 +470,18 @@ val_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(batch_s
 history = model.fit(dataset, epochs=1, validation_data=val_dataset)
 
 """
-### Using callbacks for checkpointing (and more)
+### 콜백을 사용해 체크포인트와 다른 여러 작업 수행하기
 
-If training goes on for more than a few minutes, it's important to save your model at
- regular intervals during training. You can then use your saved models
-to restart training in case your training process crashes (this is important for
-multi-worker distributed training, since with many workers at least one of them is
- bound to fail at some point).
+훈련이 몇 분 이상 지속되면 훈련하는 동안 일정 간격으로 모델을 저장하는 것이 좋습니다.
+그러면 훈련 과정에 문제가 생겼을 때 저장된 모델을 사용해 훈련을 다시 시작할 수
+있습니다(다중 워커(multi-worker) 분산 훈련일 경우
+여러 워커 중 하나가 어느 순간 장애를 일으킬 수 있기 때문에 이 설정이 중요합니다).
 
-An important feature of Keras is **callbacks**, configured in `fit()`. Callbacks are
- objects that get called by the model at different point during training, in particular:
+케라스의 중요한 기능 중 하나는 `fit()` 메서드에 설정할 수 있는 **콜백**(callback)입니다.
+콜백은 훈련하는 동안 각기 다른 지점에서 모델이 호출하는 객체입니다. 예를 들면 다음과 같습니다:
 
-- At the beginning and end of each batch
-- At the beginning and end of each epoch
+- 각 배치의 시작과 끝에서
+- 각 에포크의 시작과 끝에서
 
 Callbacks are a way to make model trainable entirely scriptable.
 
