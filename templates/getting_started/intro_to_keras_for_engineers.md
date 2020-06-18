@@ -46,7 +46,7 @@ from tensorflow import keras
 ---
 ## 데이터 적재와 전처리
 
-신경망은 텍스트 파일, JPEG 이미지 파일, CSV 파일 같은 원본 데이터를 그대로 처리하지 않습니다.
+신경망은 텍스트 파일, JPEG 이미지 파일, CSV 파일 같은 원시 데이터를 그대로 처리하지 않습니다.
 신경망은 **벡터화**되거나 **표준화**된 표현을 처리합니다.
 
 - 텍스트 파일을 문자열 텐서로 읽어 단어로 분리합니다. 마지막에 단어를 정수 텐서로 인덱싱하고 변환합니다.
@@ -57,40 +57,38 @@ from tensorflow import keras
 먼저 데이터를 적재해 보죠.
 
 ---
-## Data loading
+## 데이터 적재
 
-Keras models accept three types of inputs:
+케라스 모델은 세 종류의 입력을 받습니다:
 
-- **NumPy arrays**, just like Scikit-Learn and many other Python-based libraries. This
- is a good option if your data fits in memory.
-- **[TensorFlow `Dataset` objects](https://www.tensorflow.org/guide/data)**. This is a
-high-performance option that is more suitable for datasets that do not fit in memory
- and that are streamed from disk or from a distributed filesystem.
-- **Python generators** that yield batches of data (such as custom subclasses of
-the `keras.utils.Sequence` class).
+- **넘파이(NumPy) 배열**. 사이킷런(Scikit-Learn)이나 다른 파이썬 라이브러리와 비슷합니다.
+데이터 크기가 메모리에 맞을 때 좋습니다.
+- **[텐서플로 `Dataset` 객체](https://www.tensorflow.org/guide/data)**.
+데이터가 메모리보다 커서 디스크나 분산 파일 시스템에서 스트림으로 읽어야할 때 적합한 고성능 방식입니다.
+- **파이썬 제너레이터(generator)**. 배치 데이터를 만듭니다(`keras.utils.Sequence` 클래스의
+사용자 정의 서브클래스와 비슷합니다).
 
-Before you start training a model, you will need to make your data available as one of
-these formats. If you have a large dataset and you are training on GPU(s), consider
-using `Dataset` objects, since they will take care of performance-critical details,
- such as:
+모델을 훈련하기 전에 이런 포맷 중에 하나로 데이터를 준비해야 합니다.
+데이터셋이 크고 GPU에서 훈련한다면 `Dataset` 객체를 사용하는 것이 좋습니다.
+다음 같이 성능에 아주 중요한 기능을 제공하기 때문입니다:
 
-- Asynchronously preprocessing your data on CPU while your GPU is busy, and bufferring
- it into a queue.
-- Prefetching data on GPU memory so it's immediately available when the GPU has
- finished processing the previous batch, so you can reach full GPU utilization.
+- GPU가 바쁠 때 CPU에서 데이터를 비동기적으로 전처리하고 큐에 버퍼링합니다.
+- GPU 메모리에 데이터를 프리페치(prefetch)하여 GPU에서 이전 배치에 대한 처리가 끝나는대로 즉시 사용할 수 있습니다.
+이를 통해 GPU를 최대로 활용할 수 있습니다.
 
-Keras features a range of utilities to help you turn raw data on disk into a `Dataset`:
+케라스는 디스크에 있는 원시 데이터를 `Dataset`으로 변환해 주는
+여러 유틸리티를 제공합니다(**옮긴이_** 아래 함수는 아직 tf-nightly 패키지에서만 제공합니다):
 
-- `tf.keras.preprocessing.image_dataset_from_directory` turns image files sorted into
- class-specific folders into a labeled dataset of image tensors.
-- `tf.keras.preprocessing.text_dataset_from_directory` does the same for text files.
+- `tf.keras.preprocessing.image_dataset_from_directory`는 클래스별로 폴더에 나뉘어 있는 이미지 파일을
+레이블된 이미지 텐서 데이터셋으로 변환합니다.
+- `tf.keras.preprocessing.text_dataset_from_directory`는 텍스트 파일에 대해 동일한 작업을 수행합니다.
 
-In addition, the TensorFlow `tf.data` includes other similar utilities, such as
-`tf.data.experimental.make_csv_dataset` to load structured data from CSV files.
+또한 텐서플로의 `tf.data`는 CSV 파일에서 정형화된 데이터를 로드하는
+`tf.data.experimental.make_csv_dataset`와 같은 유틸리티를 제공합니다.
 
-**Example: obtaining a labeled dataset from image files on disk**
+**예제: 디스크에 있는 이미지 파일에서 레이블된 데이터셋 만들기**
 
-Supposed you have image files sorted by class in different folders, like this:
+다음처럼 클래스별로 각기 다른 폴더에 이미지 파일이 들어 있다고 가정해 보죠:
 
 ```
 main_directory/
@@ -102,14 +100,14 @@ main_directory/
 ......b_image_2.jpg
 ```
 
-Then you can do:
+그럼 다음처럼 쓸 수 있습니다:
 
 ```python
-# Create a dataset.
+# 데이터셋을 만듭니다.
 dataset = keras.preprocessing.image_dataset_from_directory(
   'path/to/main_directory', batch_size=64, image_size=(200, 200))
 
-# For demonstration, iterate over the batches yielded by the dataset.
+# 예시를 위해 데이터셋의 배치를 순회합니다.
 for data, labels in dataset:
    print(data.shape)  # (64, 200, 200, 3)
    print(data.dtype)  # float32
@@ -117,21 +115,20 @@ for data, labels in dataset:
    print(labels.dtype)  # int32
 ```
 
-The label of a sample is the rank of its folder in alphanumeric order. Naturally, this
- can also be configured explicitly by passing, e.g.
-`class_names=['class_a', 'class_b']`, in which cases label `0` will be `class_a` and
- `1` will be `class_b`.
+샘플의 레이블은 폴더의 알파벳 순서대로 매겨집니다.
+매개변수를 사용해 명시적으로 지정할 수도 있습니다.
+예를 들어 `class_names=['class_a', 'class_b']`라고 쓸 경우 다
+클래스 레이블 `0`은 `class_a`가 되고 `1`은 `class_b`가 됩니.
 
-**Example: obtaining a labeled dataset from text files on disk**
+**예제: 디스크에 있는 텍스트 파일에서 레이블된 데이터셋 만들기**
 
-Likewise for text: if you have `.txt` documents sorted by class in different folders,
- you can do:
+텍스트도 비슷합니다. 클래스별로 다른 폴더에 `.txt` 파일이 있다면 다음과 같이 쓸 수 있습니다:
 
 ```python
 dataset = keras.preprocessing.text_dataset_from_directory(
   'path/to/main_directory', batch_size=64)
 
-# For demonstration, iterate over the batches yielded by the dataset.
+# 예시를 위해 데이터셋의 배치를 순회합니다.
 for data, labels in dataset:
    print(data.shape)  # (64,)
    print(data.dtype)  # string
@@ -142,82 +139,75 @@ for data, labels in dataset:
 
 
 ---
-## Data preprocessing with Keras
+## 케라스를 사용한 데이터 전처리
 
-Once your data is in the form of string/int/float NumpPy arrays, or a `Dataset` object
- (or Python generator) that yields batches of string/int/float tensors,
-it is time to **preprocess** the data. This can mean:
+데이터가 문자열/정수/실수 넘파이 배열이거나
+문자열/정수/실수 텐서의 배치를 반환하는 `Dataset` 객체(또는 파이썬 제너레이터)로 준비되었다면
+이제 데이터를 **전처리**할 차례입니다. 이 과정은 다음과 같은 작업을 의미합니다:
 
-- Tokenization of string data, followed by token indexing.
-- Feature normalization.
-- Rescaling the data to small values (in general, input values to a neural network
-should be close to zero -- typically we expect either data with zero-mean and
- unit-variance, or data in the `[0, 1]` range.
+- 문자열 데이터를 토큰으로 나누고 인덱싱합니다.
+- 특성을 정규화합니다.
+- 데이터를 작은 값으로 스케일을 조정합니다(일반적으로 신경망의 입력은 0에 가까워야 합니다.
+평균이 0이고 분산이 1이거나 `[0, 1]` 범위의 데이터를 기대합니다).
 
-### The ideal machine learning model is end-to-end
+### 이상적인 머신러닝 모델은 엔드-투-엔드 모델입니다
 
-In general, you should seek to do data preprocessing **as part of your model** as much
-as possible, not via an external data preprocessing pipeline. That's because external
-data preprocessing makes your models less portable when it's time to use them in
-production. Consider a model that processes text: it uses a specific tokenization
-algorithm and a specific vocabulary index. When you want to ship your model to a
-mobile app or a JavaScript app, you will need to recreate the exact same preprocessing
-setup in the target language. This can get very tricky: any small discrepancy between
-the original pipeline and the one you recreate has the potential to completely
- invalidate your model, or at least severely degrade its performance.
+일반적으로 가능하면 데이터 전처리를 별도의 파이프라인으로 만들지 않고 **모델의 일부**가 되도록 해야 합니다.
+별도의 데이터 전처리 파이프라인은 모델을 제품에 투입할 때 이식하기 어렵게 만들기 때문입니다.
+텍스트 처리를 하는 모델을 생각해 보죠.
+이 모델은 특별한 토큰화 알고리즘과 어휘 사전 인덱스를 사용합니다.
+이 모델을 모바일 앱이나 자바스크립트 앱에 적용할 때 해당 언어로 동일한 전처리 과정을 다시 구현해야 합니다.
+이는 매우 위험한 작업입니다.
+원래 파이프라인과 다시 만든 파이프라인 사이에 작은 차이가 모델을 완전히 망가뜨리거나
+성능을 크게 낮출 수 있기 때문입니다.
 
-It would be much easier to be able to simply export an end-to-end model that already
-includes preprocessing. **The ideal model should expect as input something as close as
-possible to raw data: an image model should expect RGB pixel values in the `[0, 255]`
-range, and a text model should accept strings of `utf-8` characters.** That way, the
- consumer of the exported model doesn't have
-to know about the preprocessing pipeline.
+전처리를 포함한 엔드-투-엔드(end-to-end) 모델로 만들 수 있다면 훨씬 간단합니다.
+**이상적인 모델은 가능한 원시 데이터에 가까운 입력을 기대해야 합니다.
+이미지 모델은 `[0, 255]` 사이의 RGB 픽셀 값을 기대합니다.
+텍스트 모델은 `utf-8` 문자열을 기대합니다.**
+따라서 이 모델을 사용하는 애플리케이션은 전처리 파이프라인에 대해 신경쓸 필요가 없습니다.
 
-### Using Keras preprocessing layers
+### 케라스 전처리 층 사용하기
 
-In Keras, you do in-model data preprocessing via **preprocessing layers**. This
- includes:
+케라스에서는 **전처리 층**으로 모델에서 데이터 전처리를 수행합니다.
+다음과 같은 기능을 제공합니다:
 
-- Vectorizing raw strings of text via the `TextVectorization` layer
-- Feature normalization via the `Normalization` layer
-- Image rescaling, cropping, or image data augmentation
+- `TextVectorization` 층으로 텍스트 원시 문자열을 벡터화합니다.
+- `Normalization` 층으로 특성을 정규화합니다.
+- 이미지 스케일 조정, 자르기, 데이터 증식을 수행합니다.
 
-The key advatange of using Keras preprocessing layers is that **they can be included
- directly into your model**, either during training or after training,
-which makes your models portable.
+케라스 전처리 층을 사용할 때 가장 큰 장점은 훈련하는 중간이나 훈련이 끝난 후에
+이 층을 **모델에 직접 포함하여** 모델의 이식성을 높일 수 있다는 점입니다.
 
-Some preprocessing layers have a state:
+일부 전처리 층은 상태를 가집니다:
 
-- `TextVectorization` holds an index mapping words or tokens to integer indices
-- `Normalization` holds the mean and variance of your features
+- `TextVectorization`는 정수 인덱스로 매핑된 단어나 토큰을 저장합니다.
+- `Normalization`는 특성의 평균과 분산을 저장합니다.
 
-The state of a preprocessing layers is obtained by calling `layer.adapt(data)` on a
- sample of the training data (or all of it).
+훈련 데이터의 샘플(또는 전체 데이터)을 사용해 `layer.adapt(data)`를 호출하면 전처리 층의 상태가 반환됩니다.
 
 
-**Example: turning strings into sequences of integer word indices**
+**예제: 문자열을 정수 단어 인덱스의 시퀀스로 변환하기**
 
 
 
 ```python
 from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 
-# Example training data, of dtype `string`.
+# dtype이 `string`인 예제 훈련 데이터.
 training_data = np.array([["This is the 1st sample."], ["And here's the 2nd sample."]])
 
-# Create a TextVectorization layer instance. It can be configured to either
-# return integer token indices, or a dense token representation (e.g. multi-hot
-# or TF-IDF). The text standardization and text splitting algorithms are fully
-# configurable.
+# TextVectorization 층 객체를 만듭니다.
+# 정수 토큰 인덱스 또는 토큰의 밀집 표현(예를 들어 멀티-핫(multi-hot)이나 TF-IDF)을 반환하도록 설정할 수 있습니다.
+# 텍스트 표준화와 텍스트 분할 알고리즘을 완전히 커스터마이징할 수 있습니다.
 vectorizer = TextVectorization(output_mode="int")
 
-# Calling `adapt` on an array or dataset makes the layer generate a vocabulary
-# index for the data, which can then be reused when seeing new data.
+# 배열이나 데이터셋에 대해 `adapt` 메서드를 호출하면 이 데이터를 사용해 어휘 인덱스를 생성합니다.
+# 이 어휘 인덱스는 새로운 데이터를 처리할 때 재사용됩니다.
 vectorizer.adapt(training_data)
 
-# After calling adapt, the layer is able to encode any n-gram it has seen before
-# in the `adapt()` data. Unknown n-grams are encoded via an "out-of-vocabulary"
-# token.
+# `adapt`를 호출하고 나면 이 메서드가 데이터에서 보았던 n-그램(n-gram)을 인코딩할 수 있습니다.
+# 본적 없는 n-그램은 OOB(out-of-vocabulary) 토큰으로 인코딩됩니다.
 integer_data = vectorizer(training_data)
 print(integer_data)
 ```
@@ -551,9 +541,9 @@ Trainable params: 118,282
 Non-trainable params: 0
 _________________________________________________________________
 Fit on NumPy data
-938/938 [==============================] - 1s 857us/step - loss: 0.2684
+938/938 [==============================] - 1s 865us/step - loss: 0.2650
 Fit on Dataset
-938/938 [==============================] - 1s 873us/step - loss: 0.1135
+938/938 [==============================] - 1s 873us/step - loss: 0.1157
 
 ```
 </div>
@@ -569,7 +559,7 @@ print(history.history)
 
 <div class="k-default-codeblock">
 ```
-{'loss': [0.11346682161092758]}
+{'loss': [0.11566691845655441]}
 
 ```
 </div>
@@ -600,7 +590,7 @@ history = model.fit(dataset, epochs=1)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 897us/step - loss: 0.0784 - acc: 0.9771
+938/938 [==============================] - 1s 914us/step - loss: 0.0807 - acc: 0.9757
 
 ```
 </div>
@@ -617,7 +607,7 @@ history = model.fit(dataset, epochs=1, validation_data=val_dataset)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 1ms/step - loss: 0.0542 - acc: 0.9838 - val_loss: 0.0984 - val_acc: 0.9704
+938/938 [==============================] - 1s 1ms/step - loss: 0.0567 - acc: 0.9830 - val_loss: 0.1205 - val_acc: 0.9640
 
 ```
 </div>
@@ -702,9 +692,9 @@ print("acc: %.2f" % acc)
 
 <div class="k-default-codeblock">
 ```
-157/157 [==============================] - 0s 737us/step - loss: 0.0984 - acc: 0.9704
-loss: 0.10
-acc: 0.97
+157/157 [==============================] - 0s 750us/step - loss: 0.1205 - acc: 0.9640
+loss: 0.12
+acc: 0.96
 
 ```
 </div>
@@ -888,9 +878,9 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 784us/step - loss: 0.5031
+1/1 [==============================] - 0s 778us/step - loss: 0.4963
 
-<tensorflow.python.keras.callbacks.History at 0x7ff392bc9278>
+<tensorflow.python.keras.callbacks.History at 0x7f017028a278>
 
 ```
 </div>
@@ -914,9 +904,9 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 757us/step - loss: 0.5244
+1/1 [==============================] - 0s 730us/step - loss: 0.5075
 
-<tensorflow.python.keras.callbacks.History at 0x7ff380025c88>
+<tensorflow.python.keras.callbacks.History at 0x7f015c121be0>
 
 ```
 </div>
