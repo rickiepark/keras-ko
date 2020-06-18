@@ -195,7 +195,7 @@ from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 training_data = np.array([["This is the 1st sample."], ["And here's the 2nd sample."]])
 
 # TextVectorization 층 객체를 만듭니다.
-# 정수 토큰 인덱스 또는 토큰의 밀집 표현(예를 들어 멀티-핫(multi-hot)이나 TF-IDF)을 반환하도록 설정할 수 있습니다.
+# 정수 토큰 인덱스 또는 토큰의 밀집 표현(예를 들어 멀티-핫(multi-hot)이나 TF-IDF)을 반환할 수 있습니다.
 # 텍스트 표준화와 텍스트 분할 알고리즘을 완전히 커스터마이징할 수 있습니다.
 vectorizer = TextVectorization(output_mode="int")
 
