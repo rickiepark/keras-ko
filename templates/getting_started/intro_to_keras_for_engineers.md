@@ -198,11 +198,11 @@ from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 training_data = np.array([["This is the 1st sample."], ["And here's the 2nd sample."]])
 
 # TextVectorization 층 객체를 만듭니다.
-# 정수 토큰 인덱스 또는 토큰의 밀집 표현(예를 들어 멀티-핫(multi-hot)이나 TF-IDF)을 반환하도록 설정할 수 있습니다.
+# 정수 토큰 인덱스 또는 토큰의 밀집 표현(예를 들어 멀티-핫(multi-hot)이나 TF-IDF)을 반환할 수 있습니다.
 # 텍스트 표준화와 텍스트 분할 알고리즘을 완전히 커스터마이징할 수 있습니다.
 vectorizer = TextVectorization(output_mode="int")
 
-# 배열이나 데이터셋에 대해 `adapt` 메서드를 호출하면 이 데이터를 사용해 어휘 인덱스를 생성합니다.
+# 배열이나 데이터셋에 대해 `adapt` 메서드를 호출하면 어휘 인덱스를 생성합니다.
 # 이 어휘 인덱스는 새로운 데이터를 처리할 때 재사용됩니다.
 vectorizer.adapt(training_data)
 
@@ -220,28 +220,27 @@ tf.Tensor(
 
 ```
 </div>
-**Example: turning strings into sequences of one-hot encoded bigrams**
+**예제: 문자열을 원-핫 인코딩된 바이그램(bigram) 시퀀스로 변환하기**
 
 
 ```python
 from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 
-# Example training data, of dtype `string`.
+# dtype이 `string`인 예제 훈련 데이터.
 training_data = np.array([["This is the 1st sample."], ["And here's the 2nd sample."]])
 
-# Create a TextVectorization layer instance. It can be configured to either
+# TextVectorization 층 객체를 만듭니다.
+# 정수 토큰 인덱스 또는 토큰의 밀집 표현(예를 들어 멀티-핫(multi-hot)이나 TF-IDF)을 반환할 수 있습니다.
 # return integer token indices, or a dense token representation (e.g. multi-hot
-# or TF-IDF). The text standardization and text splitting algorithms are fully
-# configurable.
+# 텍스트 표준화와 텍스트 분할 알고리즘을 완전히 커스터마이징할 수 있습니다.
 vectorizer = TextVectorization(output_mode="binary", ngrams=2)
 
-# Calling `adapt` on an array or dataset makes the layer generate a vocabulary
-# index for the data, which can then be reused when seeing new data.
+# 배열이나 데이터셋에 대해 `adapt` 메서드를 호출하면 어휘 인덱스를 생성합니다.
+# 이 어휘 인덱스는 새로운 데이터를 처리할 때 재사용됩니다.
 vectorizer.adapt(training_data)
 
-# After calling adapt, the layer is able to encode any n-gram it has seen before
-# in the `adapt()` data. Unknown n-grams are encoded via an "out-of-vocabulary"
-# token.
+# `adapt`를 호출하고 나면 이 메서드가 데이터에서 보았던 n-그램(n-gram)을 인코딩할 수 있습니다.
+# 본적 없는 n-그램은 OOB(out-of-vocabulary) 토큰으로 인코딩됩니다.
 integer_data = vectorizer(training_data)
 print(integer_data)
 ```
@@ -254,125 +253,119 @@ tf.Tensor(
 
 ```
 </div>
-**Example: normalizing features**
+**예제: 특성 정규화**
 
 
 ```python
 from tensorflow.keras.layers.experimental.preprocessing import Normalization
 
-# Example image data, with values in the [0, 255] range
+# [0, 255] 사이의 값을 가진 예제 이미지 데이터
 training_data = np.random.randint(0, 256, size=(64, 200, 200, 3)).astype("float32")
 
 normalizer = Normalization(axis=-1)
 normalizer.adapt(training_data)
 
 normalized_data = normalizer(training_data)
-print("var: %.4f" % np.var(normalized_data))
-print("mean: %.4f" % np.mean(normalized_data))
+print("분산: %.4f" % np.var(normalized_data))
+print("평균: %.4f" % np.mean(normalized_data))
 ```
 
 <div class="k-default-codeblock">
 ```
-var: 1.0000
-mean: -0.0000
+분산: 1.0000
+평균: 0.0000
 
 ```
 </div>
-**Example: rescaling & center-cropping images**
+**예제: 이미지 스케일 조정과 자르기**
 
-Both the `Rescaling` layer and the `CenterCrop` layer are stateless, so it isn't
- necessary to call `adapt()` in this case.
+`Rescaling` 층과 `CenterCrop` 층은 상태가 없습니다.
+따라서 `adapt()` 메서드를 호출할 필요가 없습니다.
 
 
 ```python
 from tensorflow.keras.layers.experimental.preprocessing import CenterCrop
 from tensorflow.keras.layers.experimental.preprocessing import Rescaling
 
-# Example image data, with values in the [0, 255] range
+# [0, 255] 사이의 값을 가진 예제 이미지 데이터
 training_data = np.random.randint(0, 256, size=(64, 200, 200, 3)).astype("float32")
 
 cropper = CenterCrop(height=150, width=150)
 scaler = Rescaling(scale=1.0 / 255)
 
 output_data = scaler(cropper(training_data))
-print("shape:", output_data.shape)
-print("min:", np.min(output_data))
-print("max:", np.max(output_data))
+print("크기:", output_data.shape)
+print("최소:", np.min(output_data))
+print("최대:", np.max(output_data))
 ```
 
 <div class="k-default-codeblock">
 ```
-shape: (64, 150, 150, 3)
-min: 0.0
-max: 1.0
+크기: (64, 150, 150, 3)
+최소: 0.0
+최대: 1.0
 
 ```
 </div>
 ---
-## Building models with the Keras Functional API
+## 케라스 함수형 API로 모델을 만들기
 
-A "layer" is a simple input-output transformation (such as the scaling &
-center-cropping transformations above). For instance, here's a linear projection layer
- that maps its inputs to a 16-dimensional feature space:
+"층"은 (위의 스케일 조정이나 자르기처럼) 단순한 입력-출력 변환입니다.
+예를 들어 다음은 입력을 16차원 특성 공간으로 매핑하는 선형 변환 층입니다:
 
 ```python
 dense = keras.layers.Dense(units=16)
 ```
 
-A "model" is a directed acyclic graph of layers. You can think of a model as a
-"bigger layer" that encompasses multiple sublayers and that can be trained via exposure
- to data.
+"모델"은 층의 유향 비순환 그래프(directed acyclic graph)입니다.
+모델을 여러 하위 층을 감싸고 있고 데이터에 노출되어 훈련할 수 있는 "큰 층"으로 생각할 수 있습니다.
 
-The most common and most powerful way to build Keras models is the Functional API. To
-build models with the Functional API, you start by specifying the shape (and
-optionally the dtype) of your inputs. If any dimension of your input can vary, you can
-specify it as `None`. For instance, an input for 200x200 RGB image would have shape
-`(200, 200, 3)`, but an input for RGB images of any size would have shape `(None,
- None, 3)`.
+케라스 모델을 만들 때 가장 강력하고 널리 사용하는 방법은 함수형 API(Functional API)입니다.
+함수형 API로 모델을 만들려면 먼저 입력의 크기(그리고 선택적으로 dtype)를 지정해야 합니다.
+입력 차원이 변경될 수 있으면 `None`으로 지정합니다.
+예를 들어 200x200 RGB 이미지의 입력 크기는 `(200, 200, 3)`로 지정하고
+임의의 크기를 가진 RGB 이미지의 입력 크기는 `(None, None, 3)`으로 지정합니다.
 
 
 ```python
-# Let's say we expect our inputs to be RGB images of arbitrary size
+# 임의의 크기를 가진 RGB 이미지 입력을 사용한다고 가정해 보죠.
 inputs = keras.Input(shape=(None, None, 3))
 ```
 
-After defining your input(s), you chain layer transformations on top of your inputs,
- until your final output:
+입력을 정의한 후 이 입력에서 최종 출력까지 층 변환을 연결합니다:
 
 
 ```python
 from tensorflow.keras import layers
 
-# Center-crop images to 150x150
+# 150x150 중앙 부분을 오려냅니다.
 x = CenterCrop(height=150, width=150)(inputs)
-# Rescale images to [0, 1]
+# [0, 1] 사이로 이미지 스케일을 조정합니다.
 x = Rescaling(scale=1.0 / 255)(x)
 
-# Apply some convolution and pooling layers
+# 합성곱과 풀링 층을 적용합니다.
 x = layers.Conv2D(filters=32, kernel_size=(3, 3), activation="relu")(x)
 x = layers.MaxPooling2D(pool_size=(3, 3))(x)
 x = layers.Conv2D(filters=32, kernel_size=(3, 3), activation="relu")(x)
 x = layers.MaxPooling2D(pool_size=(3, 3))(x)
 x = layers.Conv2D(filters=32, kernel_size=(3, 3), activation="relu")(x)
 
-# Apply global average pooling to get flat feature vectors
+# 전역 풀링 층을 적용하여 일렬로 펼친 특성 벡터를 얻습니다.
 x = layers.GlobalAveragePooling2D()(x)
 
-# Add a dense classifier on top
+# 그 다음에 분류를 위해 밀집 층을 추가합니다.
 num_classes = 10
 outputs = layers.Dense(num_classes, activation="softmax")(x)
 ```
 
-Once you have defined the directed acyclic graph of layers that turns your input(s) into
- your outputs, instantiate a `Model` object:
+입력을 출력으로 바꾸는 층의 유향 비순환 그래프를 정의하고 나서 `Model` 객체를 만듭니다:
 
 
 ```python
 model = keras.Model(inputs=inputs, outputs=outputs)
 ```
 
-This model behaves basically like a bigger layer. You can call it on batches of data, like
- this:
+이 모델은 기본적으로 큰 층처럼 동작합니다. 다음처럼 배치 데이터에서 모델을 호출할 수 있습니다:
 
 
 ```python
@@ -387,11 +380,10 @@ print(processed_data.shape)
 
 ```
 </div>
-You can print a summary of how your data gets transformed at each stage of the model.
- This is useful for debugging.
+모델의 각 단계에서 데이터가 어떻게 변환되는지 요약 정보를 출력하면 디버깅에 도움이 됩니다.
 
-Note that the output shape displayed for each layers includes the **batch size**. Here
- the batch size is None, which indicates our model can process batchs of any size.
+각 층에 표시되는 출력 크기는 **배치 크기**를 포함합니다.
+배치 크기가 `None`이면 이 모델이 어떤 크기의 배치도 처리할 수 있다는 의미입니다.
 
 
 ```python
@@ -431,70 +423,65 @@ _________________________________________________________________
 
 ```
 </div>
-The Functional API also makes it easy to build models that have multiple inputs (for
-instance, an image *and* its metadata) or multiple outputs (for instance, predicting
-the class of the image *and* the likelihood that a user will click on it). For a
- deeper dive into what you can do, see our
-[guide to the Functional API](/guides/functional_api/).
+함수형 API는 여러 개의 입력(예를 들어 이미지와 메타데이터)이나
+여러 개의 출력(예를 들어 이미지 클래스와 클릭 확률을 예측)을 사용하는 모델도 쉽게 만들 수 있습니다.
+이에 대해 더 자세한 정보는 [함수형 API 가이드](/guides/functional_api/)를 참고하세요.
 
 ---
-## Training models with `fit()`
+## `fit()`으로 모델 훈련하기
 
-At this point, you know:
+지금까지 다음 내용을 배웠습니다:
 
-- How to prepare your data (e.g. as a NumPy array or a `tf.data.Dataset` object)
-- How to build a model that will process your data
+- 데이터를 준비하는 방법(예를 들어 넘파이 배열이나 `tf.data.Dataset` 객체)
+- 데이터를 처리할 모델을 만드는 방법
 
-The next step is to train your model on your data. The `Model` class features a
-built-in training loop, the `fit()` method. It accepts `Dataset` objects, Python
- generators that yield batches of data, or NumPy arrays.
+다음 단계는 데이터에서 모델을 훈련하는 것입니다.
+`Model` 클래스는 `fit()` 메서드에서 훈련을 반복합니다.
+이 메서드는 `Dataset` 객체, 배치 데이터를 반환하는 파이썬 제너레이터, 넘파이 배열을 받습니다.
 
-Before you can call `fit()`, you need to specify an optimizer and a loss function (we
- assume you are already familiar with these concepts). This is the `compile()` step:
+`fit()` 메서드를 호출하기 전에 옵티마이저와 손실 함수를 지정해야 합니다(여러분이
+이런 개념을 이미 알고 있다고 가정하겠습니다). 이것이 `compile()` 단계입니다:
 
 ```python
 model.compile(optimizer=keras.optimizers.RMSprop(learning_rate=1e-3),
               loss=keras.losses.CategoricalCrossentropy())
 ```
 
-Loss and optimizer can be specified via their string identifiers (in this case
-their default constructor argument values are used):
+손실 함수와 옵티마이저는 문자열로 지정할 수 있습니다(기본 생성자 매개변수가 사용됩니다):
 
 
 ```python
 model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
 ```
 
-Once your model is compiled, you can start "fitting" the model to the data.
-Here's what fitting a model looks like with NumPy data:
+모델이 컴파일되면 데이터에서 "훈련"을 시작할 수 있습니다.
+다음은 넘파이 데이터를 사용해 모델을 훈련하는 예입니다:
 
 ```python
 model.fit(numpy_array_of_samples, numpy_array_of_labels,
           batch_size=32, epochs=10)
 ```
 
-Besides the data, you have to specify two key parameters: the `batch_size` and
-the number of epochs (iterations on the data). Here our data will get sliced on batches
- of 32 samples, and the model will iterate 10 times over the data during training.
+데이터 외에도 두 개의 핵심 매개변수를 지정해야 합니다.
+`batch_size`와 에포크 횟수(데이터를 반복할 횟수)입니다.
+여기에서는 데이터를 32개 샘플씩 배치로 나누어 사용하고 훈련하는 동안 전체 데이터에 대해 10번 반복합니다.
 
-Here's what fitting a model looks like with a dataset:
+다음은 데이터셋을 사용해 모델을 훈련하는 예입니다:
 
 ```python
 model.fit(dataset_of_samples_and_labels, epochs=10)
 ```
 
-Since the data yielded by a dataset is expect to be already batched, you don't need to
- specify the batch size here.
+데이터셋은 배치 데이터를 반환하기 때문에 배치 크기를 지정할 필요가 없습니다.
 
-Let's look at it in practice with a toy example model that learns to classify MNIST
- digits:
+MNIST 숫자를 분류하는 작은 예제 모델을 만들어 보겠습니다:
 
 
 ```python
-# Get the data as Numpy arrays
+# 넘파이 배열로 데이터를 가져옵니다.
 (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
 
-# Build a simple model
+# 간단한 모델을 만듭니다.
 inputs = keras.Input(shape=(28, 28))
 x = layers.experimental.preprocessing.Rescaling(1.0 / 255)(inputs)
 x = layers.Flatten()(x)
@@ -504,17 +491,17 @@ outputs = layers.Dense(10, activation="softmax")(x)
 model = keras.Model(inputs, outputs)
 model.summary()
 
-# Compile the model
+# 모델을 컴파일합니다.
 model.compile(optimizer="adam", loss="sparse_categorical_crossentropy")
 
-# Train the model for 1 epoch from Numpy data
+# 넘파이 데이터에서 1 에포크 동안 모델을 훈련합니다.
 batch_size = 64
-print("Fit on NumPy data")
+print("넘파이 데이터에서 훈련하기")
 history = model.fit(x_train, y_train, batch_size=batch_size, epochs=1)
 
-# Train the model for 1 epoch using a dataset
+# 데이터셋을 사용해 1 에포크 동안 모델을 훈련합니다.
 dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train)).batch(batch_size)
-print("Fit on Dataset")
+print("데이터셋에서 훈련하기")
 history = model.fit(dataset, epochs=1)
 ```
 
@@ -540,17 +527,16 @@ Total params: 118,282
 Trainable params: 118,282
 Non-trainable params: 0
 _________________________________________________________________
-Fit on NumPy data
-938/938 [==============================] - 1s 865us/step - loss: 0.2650
-Fit on Dataset
-938/938 [==============================] - 1s 873us/step - loss: 0.1157
+넘파이 데이터에서 훈련하기
+938/938 [==============================] - 1s 864us/step - loss: 0.2658
+데이터셋에서 훈련하기
+938/938 [==============================] - 1s 899us/step - loss: 0.1171
 
 ```
 </div>
-The `fit()` call returns a "history" object which records what happened over the course
-of training. The `history.history` dict contains per-epoch timeseries of metrics
-values (here we have only one metric, the loss, and one epoch, so we only get a single
- scalar):
+`fit()` 메서드는 훈련 동안 발생하는 정보를 기록한 "history" 객체를 반환합니다.
+`history.history` 딕셔너리는 에포크 순서대로 측정 값을 담고 있습니다(여기에서는
+손실 하나와 에포크 횟수가 1이므로 하나의 스칼라 값만 담고 있습니다):
 
 
 ```python
@@ -559,23 +545,22 @@ print(history.history)
 
 <div class="k-default-codeblock">
 ```
-{'loss': [0.11566691845655441]}
+{'loss': [0.11709258705377579]}
 
 ```
 </div>
-For a detailed overview of how to use `fit()`, see the
-[guide to training & evaluation with the built-in Keras methods](
-  /guides/training_with_built_in_methods/).
+`fit()` 메서드를 사용하는 자세한 방법은
+[케라스 내장 메서드를 사용한 훈련과 평가 가이드](/guides/training_with_built_in_methods/)를
+참고하세요.
 
-### Keeping track of performance metrics
+### 성능 지표 기록하기
 
-As you're training a model, you want to keep of track of metrics such as classification
-accuracy, precision, recall, AUC, etc. Besides, you want to monitor these metrics not
- only on the training data, but also on a validation set.
+모델을 훈련하면서 분류 정확도, 정밀도, 재현율, AUC와 같은 지표를 기록할 필요가 있습니다.
+이외에도 훈련 데이터에 대한 지표뿐만 아니라 검증 세트에 대한 모니터링도 필요합니다.
 
-**Monitoring metrics**
+**성능 지표 모니터링**
 
-You can pass a list of metric objects to `compile()`, like this:
+다음처럼 `compile()` 메서드에 측정 지표의 객체 리스트를 전달할 수 있습니다:
 
 
 
@@ -590,14 +575,14 @@ history = model.fit(dataset, epochs=1)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 914us/step - loss: 0.0807 - acc: 0.9757
+938/938 [==============================] - 1s 886us/step - loss: 0.0814 - acc: 0.9755
 
 ```
 </div>
-**Passing validation data to `fit()`**
+**`fit()` 메서드에 검증 데이터 전달하기**
 
-You can pass validation data to `fit()` to monitor your validation loss & validation
- metrics. Validation metrics get reported at the end of each epoch.
+`fit()` 메서드에 검증 데이터를 전달하여 검증 손실과 성능 지표를 모니터링할 수 있습니다.
+측정 값은 매 에포크 끝에서 출력됩니다.
 
 
 ```python
@@ -607,23 +592,22 @@ history = model.fit(dataset, epochs=1, validation_data=val_dataset)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 1ms/step - loss: 0.0567 - acc: 0.9830 - val_loss: 0.1205 - val_acc: 0.9640
+938/938 [==============================] - 1s 1ms/step - loss: 0.0566 - acc: 0.9831 - val_loss: 0.1126 - val_acc: 0.9659
 
 ```
 </div>
-### Using callbacks for checkpointing (and more)
+### 콜백을 사용해 체크포인트와 다른 여러 작업 수행하기
 
-If training goes on for more than a few minutes, it's important to save your model at
- regular intervals during training. You can then use your saved models
-to restart training in case your training process crashes (this is important for
-multi-worker distributed training, since with many workers at least one of them is
- bound to fail at some point).
+훈련이 몇 분 이상 지속되면 훈련하는 동안 일정 간격으로 모델을 저장하는 것이 좋습니다.
+그러면 훈련 과정에 문제가 생겼을 때 저장된 모델을 사용해 훈련을 다시 시작할 수
+있습니다(다중 워커(multi-worker) 분산 훈련일 경우
+여러 워커 중 하나가 어느 순간 장애를 일으킬 수 있기 때문에 이 설정이 중요합니다).
 
-An important feature of Keras is **callbacks**, configured in `fit()`. Callbacks are
- objects that get called by the model at different point during training, in particular:
+케라스의 중요한 기능 중 하나는 `fit()` 메서드에 설정할 수 있는 **콜백**(callback)입니다.
+콜백은 훈련하는 동안 각기 다른 지점에서 모델이 호출하는 객체입니다. 예를 들면 다음과 같습니다:
 
-- At the beginning and end of each batch
-- At the beginning and end of each epoch
+- 각 배치의 시작과 끝에서
+- 각 에포크의 시작과 끝에서
 
 Callbacks are a way to make model trainable entirely scriptable.
 
@@ -692,9 +676,9 @@ print("acc: %.2f" % acc)
 
 <div class="k-default-codeblock">
 ```
-157/157 [==============================] - 0s 750us/step - loss: 0.1205 - acc: 0.9640
-loss: 0.12
-acc: 0.96
+157/157 [==============================] - 0s 749us/step - loss: 0.1126 - acc: 0.9659
+loss: 0.11
+acc: 0.97
 
 ```
 </div>
@@ -878,9 +862,9 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 778us/step - loss: 0.4963
+1/1 [==============================] - 0s 753us/step - loss: 0.5193
 
-<tensorflow.python.keras.callbacks.History at 0x7f017028a278>
+<tensorflow.python.keras.callbacks.History at 0x7eff44378048>
 
 ```
 </div>
@@ -904,9 +888,9 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 730us/step - loss: 0.5075
+1/1 [==============================] - 0s 676us/step - loss: 0.4930
 
-<tensorflow.python.keras.callbacks.History at 0x7f015c121be0>
+<tensorflow.python.keras.callbacks.History at 0x7eff440edba8>
 
 ```
 </div>

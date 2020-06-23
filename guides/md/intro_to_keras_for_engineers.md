@@ -231,7 +231,6 @@ training_data = np.array([["This is the 1st sample."], ["And here's the 2nd samp
 
 # TextVectorization 층 객체를 만듭니다.
 # 정수 토큰 인덱스 또는 토큰의 밀집 표현(예를 들어 멀티-핫(multi-hot)이나 TF-IDF)을 반환할 수 있습니다.
-# return integer token indices, or a dense token representation (e.g. multi-hot
 # 텍스트 표준화와 텍스트 분할 알고리즘을 완전히 커스터마이징할 수 있습니다.
 vectorizer = TextVectorization(output_mode="binary", ngrams=2)
 
@@ -528,9 +527,9 @@ Trainable params: 118,282
 Non-trainable params: 0
 _________________________________________________________________
 넘파이 데이터에서 훈련하기
-938/938 [==============================] - 1s 864us/step - loss: 0.2658
+938/938 [==============================] - 1s 870us/step - loss: 0.2615
 데이터셋에서 훈련하기
-938/938 [==============================] - 1s 899us/step - loss: 0.1171
+938/938 [==============================] - 1s 855us/step - loss: 0.1151
 
 ```
 </div>
@@ -545,7 +544,7 @@ print(history.history)
 
 <div class="k-default-codeblock">
 ```
-{'loss': [0.11709258705377579]}
+{'loss': [0.11514837294816971]}
 
 ```
 </div>
@@ -575,7 +574,7 @@ history = model.fit(dataset, epochs=1)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 886us/step - loss: 0.0814 - acc: 0.9755
+938/938 [==============================] - 1s 890us/step - loss: 0.0815 - acc: 0.9753
 
 ```
 </div>
@@ -592,7 +591,7 @@ history = model.fit(dataset, epochs=1, validation_data=val_dataset)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 1ms/step - loss: 0.0566 - acc: 0.9831 - val_loss: 0.1126 - val_acc: 0.9659
+938/938 [==============================] - 1s 1ms/step - loss: 0.0573 - acc: 0.9826 - val_loss: 0.1295 - val_acc: 0.9614
 
 ```
 </div>
@@ -609,12 +608,11 @@ history = model.fit(dataset, epochs=1, validation_data=val_dataset)
 - 각 배치의 시작과 끝에서
 - 각 에포크의 시작과 끝에서
 
-Callbacks are a way to make model trainable entirely scriptable.
+콜백을 사용하면 모델의 훈련을 완전하게 제어할 수 있습니다.
 
-You can use callbacks to periodically save your model. Here's a simple example: a
- `ModelCheckpoint` callback
-configured to save the model at the end of every epoch. The filename will include the
- current epoch.
+콜백을 사용해 일정한 간격으로 모델을 저장할 수 있습니다. 다음이 간단한 예입니다.
+에포크가 종료될 때마다 모델을 저장하도록 `ModelCheckpoint` 콜백을 설정하고
+파일 이름에 현재 에포크를 포함시켰습니다.
 
 ```python
 callbacks = [
@@ -625,23 +623,22 @@ callbacks = [
 model.fit(dataset, epochs=2, callbacks=callbacks)
 ```
 
-You can also use callbacks to do things like periodically changing the learning of your
-optimizer, streaming metrics to a Slack bot, sending yourself an email notification
- when training is complete, etc.
+또 콜백을 사용해 일정한 간격으로 옵티마이저의 학습률을 바꾸거나,
+슬랙 봇에 측정 값을 보내거나, 훈련이 완료됐을 때 이메일 알림을 보낼 수 있습니다.
 
-For detailed overview of what callbacks are available and how to write your own, see
-the [callbacks API documentation](/api/callbacks/) and the
-[guide to writing custom callbacks](/guides/writing_your_own_callbacks/).
+사용할 수 있는 콜백과 사용자 정의 콜백을 작성하는 자세한 방법은
+[콜백 API 문서](/api/callbacks/)와
+[사용자 정의 콜백 가이드](/guides/writing_your_own_callbacks/)를 참고하세요.
 
-### Monitoring training progress with TensorBoard
+### 텐서보드로 훈련 과정 모니터링하기
 
-Staring at the Keras progress bar isn't the most ergonomic way to monitor how your loss
- and metrics are evolving over time. There's a better solution:
-[TensorBoard](https://www.tensorflow.org/tensorboard),
-a web application that can display real-time graphs of your metrics (and more).
+케라스 진행 표시줄(progress bar)은 손실과 측정 지표가 시간에 따라
+어떻게 변하는지 모니터링하기 편리한 도구는 아닙니다.
+더 나은 방법은 실시간 측정 값을 그래프로 (그리고 다른 여러 정보를) 보여주는 웹 애플리케이션인
+[텐서보드](https://www.tensorflow.org/tensorboard)(TensorBoard)입니다.
 
-To use TensorBoard with `fit()`, simply pass a `keras.callbacks.TensorBoard` callback
- specifying the directory where to store TensorBoard logs:
+`fit()` 메서드에 텐서보드를 사용하려면 간단하게 텐서보드 로그 저장
+디렉토리를 설정한 `keras.callbacks.TensorBoard` 콜백을 전달하면 됩니다:
 
 
 ```python
@@ -651,39 +648,35 @@ callbacks = [
 model.fit(dataset, epochs=2, callbacks=callbacks)
 ```
 
-You can then launch a TensorBoard instance that you can open in your browser to monitor
- the logs getting written to this location:
+그다음 텐서보드 프로그램을 실행하여 브라우저에서 저장된 로그를 모니터링할 수 있습니다:
 
 ```
 tensorboard --logdir=./logs
 ```
 
-What's more, you can launch an in-line TensorBoard tab when training models in Jupyter
- / Colab notebooks.
-[Here's more information](https://www.tensorflow.org/tensorboard/tensorboard_in_notebooks).
+또한 주피터 노트북이나 코랩 노트북에서 모델을 훈련할 때 인라인으로 텐서보드 탭을 실행할 수 있습니다.
+[자세한 정보는 여기를 참고하세요](https://www.tensorflow.org/tensorboard/tensorboard_in_notebooks).
 
-### After `fit()`: evaluating test performance & generating predictions on new data
+### `fit()` 메서드 실행 후 테스트 성능을 평가하고 새로운 데이터에 대해 예측 만들기
 
-Once you have a trained model, you can evaluate its loss and metrics on new data via
- `evaluate()`:
+모델 훈련을 마치면 `evaluate()` 메서드로 새로운 데이터에 대한 손실과 측정 지표를 평가할 수 있습니다:
 
 
 ```python
-loss, acc = model.evaluate(val_dataset)  # returns loss and metrics
-print("loss: %.2f" % loss)
-print("acc: %.2f" % acc)
+loss, acc = model.evaluate(val_dataset)  # 손실과 측정 값을 반환합니다.
+print("손실: %.2f" % loss)
+print("정확도: %.2f" % acc)
 ```
 
 <div class="k-default-codeblock">
 ```
-157/157 [==============================] - 0s 749us/step - loss: 0.1126 - acc: 0.9659
-loss: 0.11
-acc: 0.97
+157/157 [==============================] - 0s 743us/step - loss: 0.1295 - acc: 0.9614
+손실: 0.13
+정확도: 0.96
 
 ```
 </div>
-You can also generate NumPy arrays of predictions (the activations of the output
- layer(s) in the model) via `predict()`:
+`predict()` 메서드로 넘파이 배열로 예측(모델에 있는 출력층의 활성화 값)을 만들 수도 있습니다:
 
 
 ```python
@@ -862,9 +855,9 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 753us/step - loss: 0.5193
+1/1 [==============================] - 0s 808us/step - loss: 0.4842
 
-<tensorflow.python.keras.callbacks.History at 0x7eff44378048>
+<tensorflow.python.keras.callbacks.History at 0x7f08f021d588>
 
 ```
 </div>
@@ -888,9 +881,9 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 676us/step - loss: 0.4930
+1/1 [==============================] - 0s 683us/step - loss: 0.5114
 
-<tensorflow.python.keras.callbacks.History at 0x7eff440edba8>
+<tensorflow.python.keras.callbacks.History at 0x7f08dc0e1b70>
 
 ```
 </div>
