@@ -527,9 +527,9 @@ Trainable params: 118,282
 Non-trainable params: 0
 _________________________________________________________________
 넘파이 데이터에서 훈련하기
-938/938 [==============================] - 1s 853us/step - loss: 0.2654
+938/938 [==============================] - 1s 842us/step - loss: 0.2594
 데이터셋에서 훈련하기
-938/938 [==============================] - 1s 841us/step - loss: 0.1183
+938/938 [==============================] - 1s 858us/step - loss: 0.1156
 
 ```
 </div>
@@ -544,7 +544,7 @@ print(history.history)
 
 <div class="k-default-codeblock">
 ```
-{'loss': [0.1183030903339386]}
+{'loss': [0.11561845988035202]}
 
 ```
 </div>
@@ -574,7 +574,7 @@ history = model.fit(dataset, epochs=1)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 905us/step - loss: 0.0811 - acc: 0.9752
+938/938 [==============================] - 1s 885us/step - loss: 0.0826 - acc: 0.9756
 
 ```
 </div>
@@ -591,7 +591,7 @@ history = model.fit(dataset, epochs=1, validation_data=val_dataset)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 1ms/step - loss: 0.0550 - acc: 0.9832 - val_loss: 0.1134 - val_acc: 0.9659
+938/938 [==============================] - 1s 1ms/step - loss: 0.0562 - acc: 0.9832 - val_loss: 0.0991 - val_acc: 0.9702
 
 ```
 </div>
@@ -670,8 +670,8 @@ print("정확도: %.2f" % acc)
 
 <div class="k-default-codeblock">
 ```
-157/157 [==============================] - 0s 722us/step - loss: 0.1134 - acc: 0.9659
-손실: 0.11
+157/157 [==============================] - 0s 719us/step - loss: 0.0991 - acc: 0.9702
+손실: 0.10
 정확도: 0.97
 
 ```
@@ -766,81 +766,75 @@ model.compile(optimizer='adam', loss='mse', run_eagerly=True)
 일반적으로 `fit()` 메서드를 디버깅하고 싶을 때 `run_eagerly=True`를 사용합니다.
 
 ---
-## Speeding up training with multiple GPUs
+## 다중 GPU로 훈련 속도 높이기
 
-Keras has built-in industry-strength support for multi-GPU training and distributed
- multi-worker training, via the `tf.distribute` API.
+케라스는 `tf.distribute` API를 통해 다중 GPU 훈련과 분산 다중 워커(multi-worker) 훈련을 기본으로 지원합니다.
 
-If you have multiple GPUs on your machine, you can train your model on all of them by:
+다중 GPU를 가지고 있다면 모델 훈련에 모두 활용할 수 있습니다:
 
-- Creating a `tf.distribute.MirroredStrategy` object
-- Building & compiling your model inside the strategy's scope
-- Calling `fit()` and `evaluate()` on a dataset as usual
+- `tf.distribute.MirroredStrategy` 객체를 만듭니다.
+- 이 분산 정책 스코프(scope) 안에서 모델을 만들고 컴파일합니다.
+- 보통과 같이 데이터셋으로 `fit()` 메서드와 `evaluate()` 메서드를 호출합니다.
 
 ```python
-# Create a MirroredStrategy.
+# MirroredStrategy 객체를 만듭니다.
 strategy = tf.distribute.MirroredStrategy()
 
-# Open a strategy scope.
+# 분산 정책 스코프를 시작합니다.
 with strategy.scope():
-  # Everything that creates variables should be under the strategy scope.
-  # In general this is only model construction & `compile()`.
+  # 변수를 만드는 작업은 분산 정책 스코프 안에서 수행해야 합니다.
+  # 일반적으로 모델 생성과 `compile()` 메서드에 해당합니다.
   model = Model(...)
   model.compile(...)
 
-# Train the model on all available devices.
+# 가용한 모든 장치로 모델을 훈련합니다.
 train_dataset, val_dataset, test_dataset = get_dataset()
 model.fit(train_dataset, epochs=2, validation_data=val_dataset)
 
-# Test the model on all available devices.
+# 가용한 모든 장치로 모델을 테스트합니다.
 model.evaluate(test_dataset)
 ```
 
-For a detailed introduction to multi-GPU & distributed training, see
-[this guide](/guides/distributed_training/).
+다중 GPU와 분산 훈련에 관한 자세한 내용은 이 [가이드](/guides/distributed_training/)를 참고하세요.
 
 ---
-## Doing preprocessing synchronously on-device vs. asynchronously on host CPU
+## 온-디바이스 동기 전처리 vs CPU 비동기 전처리
 
-You've learned about preprocessing, and you've seen example where we put image
- preprocessing layers (`CenterCrop` and `Rescaling`) directly inside our model.
+앞서 전처리에 대해 소개했습니다. 이미지 전처리 층(`CenterCrop`과 `Rescaling`)을 모델 안에 직접 넣는 예제도 보았습니다.
 
-Having preprocessing happen as part of the model during training
-is great if you want to do on-device preprocessing, for instance, GPU-accelerated
-feature normalization or image augmentation. But there are kinds of preprocessing that
-are not suited to this setup: in particular, text preprocessing with the
-`TextVectorization` layer. Due to its sequential nature and due to the fact that it
- can only run on CPU, it's often a good idea to do **asynchronous preprocessing**.
+GPU 가속을 사용한 특성 정규화나 이미지 증식 같은 온-디바이스(on-device) 전처리가 필요하다면
+훈련하는 동안 모델의 일부로 전처리가 수행되는 것이 좋습니다.
+하지만 이런 환경에 어울리지 않는 전처리 종류가 있습니다.
+예를 들면 `TextVectorization` 층을 사용한 텍스트 전처리입니다.
+순차 데이터라는 특징 때문에 CPU에서만 실행할 수 있습니다.
+이런 경우 **비동기 전처리**를 사용하는 것이 좋습니다.
 
-With asynchronous preprocessing, your preprocessing operations will run on CPU, and the
-preprocessed samples will be buffered into a queue while your GPU is busy with
-previous batch of data. The next batch of preprocessed samples will then be fetched
-from the queue to the GPU memory right before the GPU becomes available again
-(prefetching). This ensures that preprocessing will not be blocking and that your GPU
- can run at full utilization.
+비동기 전처리에서는 전처리 연산이 CPU에서 실행되고
+GPU가 이전 배치 데이터를 처리하는 동안 전처리된 샘플은 큐(queue)에 저장됩니다.
+다음 전처리된 샘플 배치는 GPU 작업이 끝나기 직전에 큐에서 GPU 메모리로 이동합니다(프리페칭(prefetching)).
+이런 방식을 통해 전처리에 병목 현상을 방지하고 GPU를 최대로 활용할 수 있습니다.
 
-To do asynchronous preprocessing, simply use `dataset.map` to inject a preprocessing
- operation into your data pipeline:
+비동기 전처리를 수행하려면 `dataset.map`을 사용해 전처리 연산을 데이터 파이프라인에 추가하면 됩니다:
 
 
 ```python
-# Example training data, of dtype `string`.
+# dtype이 `string`인 훈련 데이터.
 samples = np.array([["This is the 1st sample."], ["And here's the 2nd sample."]])
 labels = [[0], [1]]
 
-# Prepare a TextVectorization layer.
+# TextVectorization 층 준비.
 vectorizer = TextVectorization(output_mode="int")
 vectorizer.adapt(samples)
 
-# Asynchronous preprocessing: the text vectorization is part of the tf.data pipeline.
-# First, create a dataset
+# 비동기 전처리: TextVectorization을 tf.data 파이프라인에 넣습니다.
+# 먼저 데이터셋을 만듭니다.
 dataset = tf.data.Dataset.from_tensor_slices((samples, labels)).batch(2)
-# Apply text vectorization to the samples
+# 샘플에 TextVectorization를 적용합니다.
 dataset = dataset.map(lambda x, y: (vectorizer(x), y))
-# Prefetch with a buffer size of 2 batches
+# 2 배치 크기의 버퍼로 프리페치합니다.
 dataset = dataset.prefetch(2)
 
-# Our model should expect sequences of integers as inputs
+# 이 모델은 정수 시퀀스를 입력으로 기대합니다.
 inputs = keras.Input(shape=(None,), dtype="int64")
 x = layers.Embedding(input_dim=10, output_dim=32)(inputs)
 outputs = layers.Dense(1)(x)
@@ -852,20 +846,20 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 1ms/step - loss: 0.5207
+1/1 [==============================] - 0s 807us/step - loss: 0.4710
 
-<tensorflow.python.keras.callbacks.History at 0x7f603028f2b0>
+<tensorflow.python.keras.callbacks.History at 0x7f9a30286160>
 
 ```
 </div>
-Compare this to doing text vectorization as part of the model:
+이 모델과 TextVectorization을 모델의 일부로 수행하는 것과 비교해 보죠:
 
 
 ```python
-# Our dataset will yield samples that are strings
+# 이 데이터셋은 문자열 샘플을 반환합니다.
 dataset = tf.data.Dataset.from_tensor_slices((samples, labels)).batch(2)
 
-# Our model should expect strings as inputs
+# 이 모델은 문자열을 입력으로 기대합니다.
 inputs = keras.Input(shape=(1,), dtype="string")
 x = vectorizer(inputs)
 x = layers.Embedding(input_dim=10, output_dim=32)(x)
@@ -878,19 +872,17 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 687us/step - loss: 0.5203
+1/1 [==============================] - 0s 714us/step - loss: 0.5231
 
-<tensorflow.python.keras.callbacks.History at 0x7f602030cc18>
+<tensorflow.python.keras.callbacks.History at 0x7f9a30133c18>
 
 ```
 </div>
-When training text models on CPU, you will generally not see any performance difference
-between the two setups. When training on GPU, however, doing asynchronous buffered
-preprocessing on the host CPU while the GPU is running the model itself can result in
- a significant speedup.
+텍스트 모델을 CPU에서 훈련할 때 일반적으로 두 설정 사이에 성능 차이가 없습니다.
+하지만 GPU에서 훈련할 때 CPU에서 비동기 버퍼 전처리하고 GPU에서 모델을 수행하는 것이 크게 속도를 높입니다.
 
-After training, if you to export an end-to-end model that includes the preprocessing
- layer(s), this is easy to do, since `TextVectorization` is a layer:
+훈련이 끝난 후 전처리 층을 포함한 엔드-투-엔드 모델을 내보낼 수 있습니다.
+`TextVectorization`이 층이기 때문에 아주 간단합니다:
 
 ```python
 inputs = keras.Input(shape=(1,), dtype='string')
@@ -900,21 +892,19 @@ end_to_end_model = keras.Model(inputs, outputs)
 ```
 
 ---
-## Finding the best model configuration with hyperparameter tuning
+## 하이퍼파라미터 튜닝으로 최상의 모델 찾기
 
-Once you have a working model, you're going to want to optimize its configuration --
-architecture choices, layer sizes, etc. Human intuition can only go so far, so you'll
- want to leverage a systematic approach: hyperparameter search.
+작동하는 모델을 만들고 나면 구조, 층 크기 등의 모델 설정을 최적화합니다.
+사람의 직관은 더 이상 유효하지 않기 때문에 체계적인 하이퍼파라미터(hyperparameter) 탐색 방법을 사용해야 합니다.
 
-You can use
-[Keras Tuner](https://keras-team.github.io/keras-tuner/documentation/tuners/) to find
- the best hyperparameter for your Keras models. It's as easy as calling `fit()`.
+[케라스 튜너(Tuner)](https://keras-team.github.io/keras-tuner/documentation/tuners/)를 사용해
+케라스 모델을 위한 최상의 하이퍼파라미터를 찾을 수 있습니다.
+간단하게 `fit()` 메서드를 호출하는 것이 전부입니다.
 
-Here how it works.
+사용하는 방법은 다음과 같습니다.
 
-First, place your model definition in a function, that takes a single `hp` argument.
-Inside this function, replace any value you want to tune with a call to hyperparameter
- sampling methods, e.g. `hp.Int()` or `hp.Choice()`:
+먼저 모델 정의를 함수로 구현합니다. 이 함수는 `hp` 매개변수 하나를 가집니다.
+이 함수 안에서 튜닝하고 싶은 값을 `hp.Int()`나 `hp.Choice()`와 같은 하이퍼파라미터 샘플링 메서드로 바꿉니다:
 
 ```python
 def build_model(hp):
@@ -933,10 +923,9 @@ def build_model(hp):
     return model
 ```
 
-The function should return a compiled model.
+이 함수는 컴파일된 모델을 반환해야 합니다.
 
-Next, instantiate a tuner object specifying your optimiation objective and other search
- parameters:
+그다음 최적화 대상과 탐색할 파라미터를 지정하여 튜너 객체를 만듭니다:
 
 
 ```python
@@ -951,46 +940,39 @@ tuner = kerastuner.tuners.Hyperband(
   directory='my_dir')
 ```
 
-Finally, start the search with the `search()` method, which takes the same arguments as
- `Model.fit()`:
+마지막으로 `Model.fit()`과 같은 매개변수를 받는 `search()` 메서드로 탐색을 시작합니다:
 
 ```python
 tuner.search(dataset, validation_data=val_dataset)
 ```
 
-When search is over, you can retrieve the best model(s):
+탐색이 끝나면 최상의 모델을 얻을 수 있습니다:
 
 ```python
 models = tuner.get_best_models(num_models=2)
 ```
 
-Or print a summary of the results:
+또는 결과를 출력할 수 있습니다:
 
 ```python
 tuner.results_summary()
 ```
 
 ---
-## End-to-end examples
+## 엔드-투-엔드 예제
 
-To familiarize yourself with the concepts in this introduction, see the following
- end-to-end examples:
+이 가이드에 소개된 개념을 잘 이해하려면 다음의 엔드-투-엔드 예제를 참고하세요:
 
-- [Text classification](/examples/nlp/text_classification_from_scratch/)
-- [Image classification](/examples/vision/image_classification_from_scratch/)
-- [Credit card fraud detection](/examples/structured_data/imbalanced_classification/)
+- [텍스트 분류](/examples/nlp/text_classification_from_scratch/)
+- [이미지 분류](/examples/vision/image_classification_from_scratch/)
+- [신용 카드 부정 거래 감지](/examples/structured_data/imbalanced_classification/)
 
 ---
-## What to learn next
+## 다음에 배울 것들
 
-- Learn more about the
-[Functional API](/guides/functional_api/).
-- Learn more about the
-[features of `fit()` and `evaluate()`](/guides/training_with_built_in_methods/).
-- Learn more about
-[callbacks](/guides/writing_your_own_callbacks/).
-- Learn more about
-[creating your own custom training steps](/guides/customizing_what_happens_in_fit/).
-- Learn more about
-[multi-GPU and distributed training](/guides/distributed_training/).
-- Learn how to do [transfer learning](/guides/transfer_learning/).
+- [함수형 API](/guides/functional_api/).
+- [`fit()` 메서드와 `evaluate()` 메서드의 기능](/guides/training_with_built_in_methods/).
+- [콜백](/guides/writing_your_own_callbacks/).
+- [사용자 정의 훈련 단계 만들기](/guides/customizing_what_happens_in_fit/).
+- [다중 GPU와 분산 훈련](/guides/distributed_training/).
+- [전이 학습](/guides/transfer_learning/).
