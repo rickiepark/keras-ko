@@ -823,10 +823,10 @@ tuner.results_summary()
 """
 ## 다음에 배울 것들
 
-- [함수형 API](/guides/functional_api/).
-- [`fit()` 메서드와 `evaluate()` 메서드의 기능](/guides/training_with_built_in_methods/).
-- [콜백](/guides/writing_your_own_callbacks/).
-- [사용자 정의 훈련 단계 만들기](/guides/customizing_what_happens_in_fit/).
-- [다중 GPU와 분산 훈련](/guides/distributed_training/).
-- [전이 학습](/guides/transfer_learning/).
+- [함수형 API](/guides/functional_api/)
+- [`fit()` 메서드와 `evaluate()` 메서드의 기능](/guides/training_with_built_in_methods/)
+- [콜백](/guides/writing_your_own_callbacks/)
+- [사용자 정의 훈련 단계 만들기](/guides/customizing_what_happens_in_fit/)
+- [다중 GPU와 분산 훈련](/guides/distributed_training/)
+- [전이 학습](/guides/transfer_learning/)
 """
