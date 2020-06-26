@@ -272,7 +272,7 @@ print("평균: %.4f" % np.mean(normalized_data))
 <div class="k-default-codeblock">
 ```
 분산: 1.0000
-평균: 0.0000
+평균: -0.0000
 
 ```
 </div>
@@ -527,9 +527,9 @@ Trainable params: 118,282
 Non-trainable params: 0
 _________________________________________________________________
 넘파이 데이터에서 훈련하기
-938/938 [==============================] - 1s 870us/step - loss: 0.2615
+938/938 [==============================] - 1s 853us/step - loss: 0.2654
 데이터셋에서 훈련하기
-938/938 [==============================] - 1s 855us/step - loss: 0.1151
+938/938 [==============================] - 1s 841us/step - loss: 0.1183
 
 ```
 </div>
@@ -544,7 +544,7 @@ print(history.history)
 
 <div class="k-default-codeblock">
 ```
-{'loss': [0.11514837294816971]}
+{'loss': [0.1183030903339386]}
 
 ```
 </div>
@@ -574,7 +574,7 @@ history = model.fit(dataset, epochs=1)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 890us/step - loss: 0.0815 - acc: 0.9753
+938/938 [==============================] - 1s 905us/step - loss: 0.0811 - acc: 0.9752
 
 ```
 </div>
@@ -591,7 +591,7 @@ history = model.fit(dataset, epochs=1, validation_data=val_dataset)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 1ms/step - loss: 0.0573 - acc: 0.9826 - val_loss: 0.1295 - val_acc: 0.9614
+938/938 [==============================] - 1s 1ms/step - loss: 0.0550 - acc: 0.9832 - val_loss: 0.1134 - val_acc: 0.9659
 
 ```
 </div>
@@ -670,9 +670,9 @@ print("정확도: %.2f" % acc)
 
 <div class="k-default-codeblock">
 ```
-157/157 [==============================] - 0s 743us/step - loss: 0.1295 - acc: 0.9614
-손실: 0.13
-정확도: 0.96
+157/157 [==============================] - 0s 722us/step - loss: 0.1134 - acc: 0.9659
+손실: 0.11
+정확도: 0.97
 
 ```
 </div>
@@ -691,82 +691,79 @@ print(predictions.shape)
 ```
 </div>
 ---
-## Using `fit()` with a custom training step
+## `fit()` 메서드로 사용자 정의 훈련 단계 구현하기
 
-By default, `fit()` is configured for **supervised learning**. If you need a different
- kind of training loop (for instance, a GAN training loop), you
-can provide your own implementation of the `Model.train_step()` method. This is the
- method that is repeatedly called during `fit()`.
+기본적으로 `fit()`은 **지도 학습**을 지원합니다.
+다른 종류의 훈련 반복(예를 들면 GAN 훈련 반복)이 필요하면
+`Model.train_step()` 메서드를 구현하면 됩니다.
+이 메서드는 `fit()` 메서드가 실행되는 동안 반복적으로 호출됩니다.
 
-Metrics, callbacks, etc. will work as usual.
+측정 지표, 콜백 등은 동일하게 작동합니다.
 
-Here's a simple example that reimplements what `fit()` normally does:
+다음은 `fit()` 메서드의 기능을 간단하게 다시 구현한 예입니다.
 
 ```python
 class CustomModel(keras.Model):
   def train_step(self, data):
-    # Unpack the data. Its structure depends on your model and
-    # on what you pass to `fit()`.
+    # 데이터를 받아 옵니다.
+    # 데이터 구조는 `fit()` 메서드에 전달한 방식과 모델에 따라 다릅니다.
     x, y = data
     with tf.GradientTape() as tape:
-      y_pred = self(x, training=True)  # Forward pass
-      # Compute the loss value
-      # (the loss function is configured in `compile()`)
+      y_pred = self(x, training=True)  # 정방향 계산
+      # 손실을 계산합니다.
+      # (손실 함수는 `compile()` 메서드에서 설정합니다)
       loss = self.compiled_loss(y, y_pred,
                                 regularization_losses=self.losses)
-    # Compute gradients
+    # 그레이디언트를 계산합니다.
     trainable_vars = self.trainable_variables
     gradients = tape.gradient(loss, trainable_vars)
-    # Update weights
+    # 가중치를 업데이트합니다.
     self.optimizer.apply_gradients(zip(gradients, trainable_vars))
-    # Update metrics (includes the metric that tracks the loss)
+    # 측정 값을 업데이트합니다(손실 지표를 포함합니다).
     self.compiled_metrics.update_state(y, y_pred)
-    # Return a dict mapping metric names to current value
+    # 측정 지표 이름과 현재 값을 매핑한 딕셔너리를 반환합니다.
     return {m.name: m.result() for m in self.metrics}
 
-# Construct and compile an instance of CustomModel
+# CustomModel 객체를 만들고 컴파일합니다.
 inputs = keras.Input(shape=(32,))
 outputs = keras.layers.Dense(1)(inputs)
 model = CustomModel(inputs, outputs)
 model.compile(optimizer='adam', loss='mse', metrics=[...])
 
-# Just use `fit` as usual
+# 보통처럼 `fit()` 메서드를 사용합니다.
 model.fit(dataset, epochs=3, callbacks=...)
 ```
 
-For a detailed overview of how you customize the built-in training & evaluation loops,
- see the guide:
-["Customizing what happens in `fit()`"](/guides/customizing_what_happens_in_fit/).
+사용자 정의 훈련과 평가에 대한 자세한 내용은 다음 가이드를 참고하세요:
+["`fit()` 메서드를 커스터마이징하기"](/guides/customizing_what_happens_in_fit/).
 
 ---
-## Debugging your model with eager execution
+## 즉시 실행으로 모델 디버깅하기
 
-If you write custom training steps or custom layers, you will need to debug them. The
-debugging experience is an integral part of a framework: with Keras, the debugging
- workflow is designed with the user in mind.
+사용자 정의 훈련 단계나 층을 만들면 디버깅을 할 필요가 있습니다.
+디버깅은 프레임워크에 통합하기 위한 부분입니다.
+케라스의 디버깅 작업 흐름은 사용자에게 초점을 맞추어 설계되엇습니다.
 
-By default, your Keras models are compiled to highly-optimized computation graphs that
-deliver fast execution times. That means that the Python code you write (e.g. in a
-custom `train_step`) is not the code you are actually executing. This introduces a
- layer of indirection that can make debugging hard.
+기본적으로 케라스 모델은 빠르게 실행하기 위해 매우 최적화된 계산 그래프로 컴파일됩니다.
+다시 말해 (`train_step()` 메서드에) 사용자가 작성한 코드와 실제로 실행되는 코드가 다릅니다.
+이는 디버깅을 어렵게 만듭니다.
 
-Debugging is best done step by step. You want to be able to sprinkle your code with
-`print()` statement to see what your data looks like after every operation, you want
-to be able to use `pdb`. You can achieve this by **running your model eagerly**. With
- eager execution, the Python code you write is the code that gets executed.
+디버깅은 단계별로 수행하는 것이 좋습니다.
+코드 여기저기에 `print()` 문을 넣고 연산이 실행된 후에 데이터가 어떻게 변하는지 보고 싶어 합니다.
+또는 `pdb`를 사용하고 싶을 것입니다.
+**모델을 즉시 실행(eager execution) 모드로 사용하면** 이렇게 할 수 있습니다.
+즉시 실행에서는 사용자가 작성한 파이썬 코드가 실행되는 코드가 됩니다.
 
-Simply pass `run_eagerly=True` to `compile()`:
+간단하게 `compile()` 메서드에 `run_eagerly=True`를 전달하면 됩니다:
 
 ```python
 model.compile(optimizer='adam', loss='mse', run_eagerly=True)
 ```
 
-Of course, the downside is that it makes your model significantly slower. Make sure to
-switch it back off to get the benefits of compiled computation graphs once you are
- done debugging!
+물론 모델이 크게 느려진다는 단점이 있습니다.
+디버깅이 끝나면 컴파일된 계산 그래프의 장점을 다시 활용하도록 바꾸는 것을 잊지 마세요!
 
-In general, you will use `run_eagerly=True` every time you need to debug what's
- happening inside your `fit()` call.
+일반적으로 `fit()` 메서드를 디버깅하고 싶을 때 `run_eagerly=True`를 사용합니다.
 
 ---
 ## Speeding up training with multiple GPUs
@@ -855,9 +852,9 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 808us/step - loss: 0.4842
+1/1 [==============================] - 0s 1ms/step - loss: 0.5207
 
-<tensorflow.python.keras.callbacks.History at 0x7f08f021d588>
+<tensorflow.python.keras.callbacks.History at 0x7f603028f2b0>
 
 ```
 </div>
@@ -881,9 +878,9 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 683us/step - loss: 0.5114
+1/1 [==============================] - 0s 687us/step - loss: 0.5203
 
-<tensorflow.python.keras.callbacks.History at 0x7f08dc0e1b70>
+<tensorflow.python.keras.callbacks.History at 0x7f602030cc18>
 
 ```
 </div>
