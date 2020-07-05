@@ -272,7 +272,7 @@ print("평균: %.4f" % np.mean(normalized_data))
 <div class="k-default-codeblock">
 ```
 분산: 1.0000
-평균: -0.0000
+평균: 0.0000
 
 ```
 </div>
@@ -527,9 +527,9 @@ Trainable params: 118,282
 Non-trainable params: 0
 _________________________________________________________________
 넘파이 데이터에서 훈련하기
-938/938 [==============================] - 1s 842us/step - loss: 0.2594
+938/938 [==============================] - 1s 867us/step - loss: 0.2624
 데이터셋에서 훈련하기
-938/938 [==============================] - 1s 858us/step - loss: 0.1156
+938/938 [==============================] - 1s 853us/step - loss: 0.1186
 
 ```
 </div>
@@ -544,7 +544,7 @@ print(history.history)
 
 <div class="k-default-codeblock">
 ```
-{'loss': [0.11561845988035202]}
+{'loss': [0.1186177134513855]}
 
 ```
 </div>
@@ -574,7 +574,7 @@ history = model.fit(dataset, epochs=1)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 885us/step - loss: 0.0826 - acc: 0.9756
+938/938 [==============================] - 1s 892us/step - loss: 0.0812 - acc: 0.9757
 
 ```
 </div>
@@ -591,7 +591,7 @@ history = model.fit(dataset, epochs=1, validation_data=val_dataset)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 1ms/step - loss: 0.0562 - acc: 0.9832 - val_loss: 0.0991 - val_acc: 0.9702
+938/938 [==============================] - 1s 1ms/step - loss: 0.0566 - acc: 0.9826 - val_loss: 0.0987 - val_acc: 0.9699
 
 ```
 </div>
@@ -670,7 +670,7 @@ print("정확도: %.2f" % acc)
 
 <div class="k-default-codeblock">
 ```
-157/157 [==============================] - 0s 719us/step - loss: 0.0991 - acc: 0.9702
+157/157 [==============================] - 0s 713us/step - loss: 0.0987 - acc: 0.9699
 손실: 0.10
 정확도: 0.97
 
@@ -846,9 +846,9 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 807us/step - loss: 0.4710
+1/1 [==============================] - 0s 853us/step - loss: 0.5117
 
-<tensorflow.python.keras.callbacks.History at 0x7f9a30286160>
+<tensorflow.python.keras.callbacks.History at 0x7f628764a2b0>
 
 ```
 </div>
@@ -872,9 +872,9 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 714us/step - loss: 0.5231
+1/1 [==============================] - 0s 664us/step - loss: 0.5084
 
-<tensorflow.python.keras.callbacks.History at 0x7f9a30133c18>
+<tensorflow.python.keras.callbacks.History at 0x7f62703c1be0>
 
 ```
 </div>
@@ -970,9 +970,9 @@ tuner.results_summary()
 ---
 ## 다음에 배울 것들
 
-- [함수형 API](/guides/functional_api/).
-- [`fit()` 메서드와 `evaluate()` 메서드의 기능](/guides/training_with_built_in_methods/).
-- [콜백](/guides/writing_your_own_callbacks/).
-- [사용자 정의 훈련 단계 만들기](/guides/customizing_what_happens_in_fit/).
-- [다중 GPU와 분산 훈련](/guides/distributed_training/).
-- [전이 학습](/guides/transfer_learning/).
+- [함수형 API](/guides/functional_api/)
+- [`fit()` 메서드와 `evaluate()` 메서드의 기능](/guides/training_with_built_in_methods/)
+- [콜백](/guides/writing_your_own_callbacks/)
+- [사용자 정의 훈련 단계 만들기](/guides/customizing_what_happens_in_fit/)
+- [다중 GPU와 분산 훈련](/guides/distributed_training/)
+- [전이 학습](/guides/transfer_learning/)
