@@ -1,46 +1,45 @@
 """
-Title: Introduction to Keras for Researchers
+Title: 연구자에게 맞는 케라스 소개
 Author: [fchollet](https://twitter.com/fchollet)
 Date created: 2020/04/01
 Last modified: 2020/04/28
-Description: Everything you need to know to use Keras & TF 2.0 for deep learning research.
+Description: 케라스와 TF 2.0으로 딥러닝 연구를 하기 위해 알아야 할 모든 것.
 """
 """
-## Setup
+## 설정
 """
 
 import tensorflow as tf
 from tensorflow import keras
 
 """
-## Introduction
+## 소개
 
-Are you a machine learning researcher? Do you publish at NeurIPS and push the
-state-of-the-art in CV and NLP? This guide will serve as your first introduction to core
-Keras API concepts.
+머신러닝 연구자인가요?
+NeurIPS에 논문을 제출하고 컴퓨터 비전이나 자연어 처리 분야에서 최고의 성능을 달성하려고 하나요?
+이 가이드에서 케라스 API의 핵심 개념을 소개하겠습니다.
 
-In this guide, you will learn about:
+이 가이드에서 다음 내용을 배울 수 있습니다:
 
-- Creating layers by subclassing the `Layer` class
-- Computing gradients with a `GradientTape` and writing low-level training loops
-- Tracking losses created by layers via the `add_loss()` method
-- Tracking metrics in a low-level training loop
-- Speeding up execution with a compiled `tf.function`
-- Executing layers in training or inference mode
-- The Keras Functional API
+- `Layer` 클래스를 상속하여 층을 만듭니다.
+- `GradientTape`으로 그레이디언트(gradient)를 계산하고 저수준 훈련 반복문을 만듭니다.
+- `add_loss()` 메서드로 층에서 만든 손실을 기록합니다.
+- 저수준 훈련 반복문에서 측정 지표를 기록합니다.
+- `tf.function`으로 컴파일하여 실행 속도를 높입니다.
+- 훈련 모드나 추론 모드로 층을 실행합니다.
+- 케라스 함수형 API
 
-You will also see the Keras API in action in two end-to-end research examples:
-a Variational Autoencoder, and a Hypernetwork.
+변이형 오토인코더(Variational Autoencoder)와 하이퍼네트워크(Hypernetwork)
+두 개의 엔드-투-엔드 연구 예제 통해 실제로 케라스 API를 사용해 보겠습니다.
 """
 
 """
-## The `Layer` class
+## `Layer` 클래스
 
-The `Layer` is the fundamental abstraction in Keras.
-A `Layer` encapsulates a state (weights) and some computation
-(defined in the call method).
+`Layer`는 케라스의 기초 추상 클래스입니다.
+`Layer`는 상태(가중치)와 (`call` 메서드에서 정의한) 일부 계산을 담고 있습니다.
 
-A simple layer looks like this:
+간단한 층의 예는 다음과 같습니다:
 """
 
 
@@ -64,34 +63,34 @@ class Linear(keras.layers.Layer):
 
 
 """
-You would use a `Layer` instance much like a Python function:
+`Layer` 클래스 인스턴스를 파이썬 함수처럼 사용할 수 있습니다:
 """
 
-# Instantiate our layer.
+# 층의 객체를 만듭니다.
 linear_layer = Linear(units=4, input_dim=2)
 
-# The layer can be treated as a function.
-# Here we call it on some data.
+# 함수처럼 사용햘 수 있습니다.
+# `call` 메서드에 필요한 데이터를 전달하면서 호출합니다.
 y = linear_layer(tf.ones((2, 2)))
 assert y.shape == (2, 4)
 
 """
-The weight variables (created in `__init__`) are automatically
-tracked under the `weights` property:
+(`__init__` 메서드에서 생성한) 가중치 변수는 자동으로 `weights` 속성에 기록됩니다:
 """
 
 assert linear_layer.weights == [linear_layer.w, linear_layer.b]
 
 """
-You have many built-in layers available, from `Dense` to `Conv2D` to `LSTM` to
-fancier ones like `Conv3DTranspose` or `ConvLSTM2D`. Be smart about reusing
-built-in functionality.
+기본으로 내장된 층이 많습니다.
+`Dense` 층, `Conv2D` 층, `LSTM` 층이 있고
+`Conv3DTranspose`이나 `ConvLSTM2D`와 같은 화려한 층도 있습니다.
+가능하면 내장된 기능을 사용하는 것이 좋습니다.
 """
 
 """
-## Weight creation
+## 가중치 생성
 
-The add_weight method gives you a shortcut for creating weights:
+`add_weight` 메서드를 사용하면 손쉽게 가중치를 만들 수 있습니다:
 """
 
 
@@ -116,58 +115,57 @@ class Linear(keras.layers.Layer):
         return tf.matmul(inputs, self.w) + self.b
 
 
-# Instantiate our lazy layer.
+# 층의 객체를 만듭니다.
 linear_layer = Linear(4)
 
-# This will also call `build(input_shape)` and create the weights.
+# `build(input_shape)`을 호출하고 가중치를 만듭니다.
 y = linear_layer(tf.ones((2, 2)))
 
 """
-## Gradients
+## 그레이디언트
 
-You can automatically retrieve the gradients of the weights of a layer by
-calling it inside a `GradientTape`. Using these gradients, you can update the
-weights of the layer, either manually, or using an optimizer object. Of course,
-you can modify the gradients before using them, if you need to.
+`GradientTape` 컨택스트 안에서 층을 호출하면 자동으로 층 가중치의 그레이디언트를 계산합니다.
+이 그레이디언트를 사용해 옵티마이저 객체를 사용하거나 수동으로 층의 가중치를 업데이트할 수 있습니다.
+물론 필요하면 업데이트하기 전에 그레이디언트를 수정할 수 있습니다.
 """
 
-# Prepare a dataset.
+# 데이터셋을 준비합니다.
 (x_train, y_train), _ = tf.keras.datasets.mnist.load_data()
 dataset = tf.data.Dataset.from_tensor_slices(
     (x_train.reshape(60000, 784).astype("float32") / 255, y_train)
 )
 dataset = dataset.shuffle(buffer_size=1024).batch(64)
 
-# Instantiate our linear layer (defined above) with 10 units.
+# 10개의 유닛(unit)을 가진 (위에서 정의한) 선형 층의 객체를 만듭니다.
 linear_layer = Linear(10)
 
-# Instantiate a logistic loss function that expects integer targets.
+# 정수 타깃을 기대하는 로지스틱 손실 함수 객체를 만듭니다.
 loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 
-# Instantiate an optimizer.
+# 옵티마이저 객체를 만듭니다.
 optimizer = tf.keras.optimizers.SGD(learning_rate=1e-3)
 
-# Iterate over the batches of the dataset.
+# 데이터셋의 배치를 순회합니다.
 for step, (x, y) in enumerate(dataset):
 
-    # Open a GradientTape.
+    # GradientTape을 시작합니다.
     with tf.GradientTape() as tape:
 
-        # Forward pass.
+        # 정방향 계산을 수행합니다.
         logits = linear_layer(x)
 
-        # Loss value for this batch.
+        # 배치의 손실을 계산합니다.
         loss = loss_fn(y, logits)
 
-    # Get gradients of weights wrt the loss.
+    # 손실에 대한 가중치의 그레이디언트를 얻습니다.
     gradients = tape.gradient(loss, linear_layer.trainable_weights)
 
-    # Update the weights of our linear layer.
+    # 선형 층의 가중치를 업데이트합니다.
     optimizer.apply_gradients(zip(gradients, linear_layer.trainable_weights))
 
-    # Logging.
+    # 로깅
     if step % 100 == 0:
-        print("Step:", step, "Loss:", float(loss))
+        print("스텝:", step, "손실:", float(loss))
 
 """
 ## Trainable and non-trainable weights
