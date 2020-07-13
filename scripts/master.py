@@ -141,7 +141,7 @@ MASTER = {
                         },
                         {
                             'path': 'learning_rate_schedules/',
-                            'title': '학습률 스케줄 API',  # TODO
+                            'title': '학습률 스케줄 API',
                             'toc': True,
                             'skip_from_toc': True,
                             'children': [
@@ -226,7 +226,7 @@ MASTER = {
                             ]
                         },
                         {
-                            'path': 'segmentation_metrics',  # MeanIoU
+                            'path': 'segmentation_metrics',
                             'title': '이미지 분할 지표',
                             'generate': ['tensorflow.keras.metrics.MeanIoU']
                         },
