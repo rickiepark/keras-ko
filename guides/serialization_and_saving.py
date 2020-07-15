@@ -18,7 +18,7 @@ contain, and how they're connected.
 - A set of losses and metrics (defined by compiling the model or calling
 `add_loss()` or `add_metric()`).
 
-The Keras API makes it possible to save of these pieces to disk at once,
+The Keras API makes it possible to save all of these pieces to disk at once,
 or to only selectively save some of them:
 
 - Saving everything into a single archive in the TensorFlow SavedModel format
@@ -82,7 +82,7 @@ The recommended format is SavedModel. It is the default when you use `model.save
 
 You can switch to the H5 format by:
 
-- Passing `format='h5'` to `save()`.
+- Passing `save_format='h5'` to `save()`.
 - Passing a filename that ends in `.h5` or `.keras` to `save()`.
 """
 
