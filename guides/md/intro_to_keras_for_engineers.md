@@ -25,16 +25,16 @@ from tensorflow import keras
 
 케라스로 제품에 딥러닝을 적용하고 싶은 머신러닝 엔지니어인가요? 이 가이드에서 케라스 API의 핵심 부분을 소개하겠습니다.
 
-이 가이드에서 다음 내용을 배울 수 있습니다:
+이 가이드에서 다음 방법을 배울 수 있습니다:
 
-- 모델을 훈련하기 전에 데이터를 준비하는 방법(넘파이 배열이나 `tf.data.Dataset` 객체로 변환합니다).
-- 데이터 전처리 방법. 예를 들면 특성 정규화나 어휘 사전 구축.
-- 케라스 함수형 API로 데이터에서 예측을 만드는 모델 구축 방법.
-- 케라스의 기본 `fit()` 메서드로 체크포인팅(checkpointing), 성능 지표 모니터링, 내결함성(fault tolerance)을 고려한 모델 훈련 방법.
+- 모델을 훈련하기 전에 데이터를 준비합니다(넘파이 배열이나 `tf.data.Dataset` 객체로 변환합니다).
+- 데이터를 전처리합니다. 예를 들면 특성 정규화나 어휘 사전 구축합니다.
+- 케라스 함수형 API로 데이터에서 예측을 만드는 모델을 구축합니다.
+- 케라스의 기본 `fit()` 메서드로 체크포인팅(checkpointing), 성능 지표 모니터링, 내결함성(fault tolerance)을 고려한 모델을 훈련합니다.
 - 테스트 데이터에서 모델 평가하고 새로운 데이터에서 모델을 사용해 추론하는 방법.
-- GAN과 같은 모델을 만들기 위해 `fit()` 메서드를 커스터마이징하는 방법.
-- 여러 개의 GPU를 사용해 훈련 속도를 높이는 방법.
-- 하이퍼파라미터를 튜닝하여 모델의 성능을 높이는 방법.
+- GAN과 같은 모델을 만들기 위해 `fit()` 메서드를 커스터마이징합니다.
+- 여러 개의 GPU를 사용해 훈련 속도를 높입니다.
+- 하이퍼파라미터를 튜닝하여 모델의 성능을 높입니다.
 
 이 문서 끝에 다음 주제에 대한 엔드-투-엔드 예제 링크를 소개하겠습니다:
 
@@ -527,9 +527,9 @@ Trainable params: 118,282
 Non-trainable params: 0
 _________________________________________________________________
 넘파이 데이터에서 훈련하기
-938/938 [==============================] - 1s 867us/step - loss: 0.2624
+938/938 [==============================] - 1s 835us/step - loss: 0.2664
 데이터셋에서 훈련하기
-938/938 [==============================] - 1s 853us/step - loss: 0.1186
+938/938 [==============================] - 1s 842us/step - loss: 0.1172
 
 ```
 </div>
@@ -544,7 +544,7 @@ print(history.history)
 
 <div class="k-default-codeblock">
 ```
-{'loss': [0.1186177134513855]}
+{'loss': [0.11722308397293091]}
 
 ```
 </div>
@@ -574,7 +574,7 @@ history = model.fit(dataset, epochs=1)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 892us/step - loss: 0.0812 - acc: 0.9757
+938/938 [==============================] - 1s 894us/step - loss: 0.0827 - acc: 0.9745
 
 ```
 </div>
@@ -591,7 +591,7 @@ history = model.fit(dataset, epochs=1, validation_data=val_dataset)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 1ms/step - loss: 0.0566 - acc: 0.9826 - val_loss: 0.0987 - val_acc: 0.9699
+938/938 [==============================] - 1s 1ms/step - loss: 0.0568 - acc: 0.9827 - val_loss: 0.0846 - val_acc: 0.9748
 
 ```
 </div>
@@ -670,8 +670,8 @@ print("정확도: %.2f" % acc)
 
 <div class="k-default-codeblock">
 ```
-157/157 [==============================] - 0s 713us/step - loss: 0.0987 - acc: 0.9699
-손실: 0.10
+157/157 [==============================] - 0s 736us/step - loss: 0.0846 - acc: 0.9748
+손실: 0.08
 정확도: 0.97
 
 ```
@@ -846,9 +846,9 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 853us/step - loss: 0.5117
+1/1 [==============================] - 0s 818us/step - loss: 0.5111
 
-<tensorflow.python.keras.callbacks.History at 0x7f628764a2b0>
+<tensorflow.python.keras.callbacks.History at 0x7f679c0f3240>
 
 ```
 </div>
@@ -872,9 +872,9 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 664us/step - loss: 0.5084
+1/1 [==============================] - 0s 690us/step - loss: 0.4850
 
-<tensorflow.python.keras.callbacks.History at 0x7f62703c1be0>
+<tensorflow.python.keras.callbacks.History at 0x7f674846fc18>
 
 ```
 </div>

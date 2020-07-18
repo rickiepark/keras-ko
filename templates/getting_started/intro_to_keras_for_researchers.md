@@ -1,53 +1,51 @@
-# Introduction to Keras for Researchers
+# 연구자에게 맞는 케라스 소개
 
 **Author:** [fchollet](https://twitter.com/fchollet)<br>
 **Date created:** 2020/04/01<br>
 **Last modified:** 2020/04/28<br>
-**Description:** Everything you need to know to use Keras & TF 2.0 for deep learning research.
+**Description:** 케라스와 TF 2.0으로 딥러닝 연구를 하기 위해 알아야 할 모든 것.
 
 
-<img class="k-inline-icon" src="https://colab.research.google.com/img/colab_favicon.ico"/> [**View in Colab**](https://colab.research.google.com/github/keras-team/keras-io/blob/master/guides/ipynb/intro_to_keras_for_researchers.ipynb)  <span class="k-dot">•</span><img class="k-inline-icon" src="https://github.com/favicon.ico"/> [**GitHub source**](https://github.com/https://github.com/keras-team/keras-io/blob/master/guides/intro_to_keras_for_researchers.py)
+<img class="k-inline-icon" src="https://colab.research.google.com/img/colab_favicon.ico"/> [**코랩에서 보기**](https://colab.research.google.com/github/rickiepark/keras-ko/blob/master/guides/ipynb/intro_to_keras_for_researchers.ipynb)  <span class="k-dot">•</span><img class="k-inline-icon" src="https://github.com/favicon.ico"/> [**깃허브 소스**](https://github.com/rickiepark/keras-ko/blob/master/guides/intro_to_keras_for_researchers.py)
 
 
 
 ---
-## Setup
+## 설정
 
 
 ```python
 import tensorflow as tf
 from tensorflow import keras
-
 ```
 
 ---
-## Introduction
+## 소개
 
-Are you a machine learning researcher? Do you publish at NeurIPS and push the
-state-of-the-art in CV and NLP? This guide will serve as your first introduction to core
-Keras API concepts.
+머신러닝 연구자인가요?
+NeurIPS에 논문을 제출하고 컴퓨터 비전이나 자연어 처리 분야에서 최고의 성능을 달성하려고 하나요?
+이 가이드에서 케라스 API의 핵심 개념을 소개하겠습니다.
 
-In this guide, you will learn about:
+이 가이드에서 다음 내용을 배울 수 있습니다:
 
-- Creating layers by subclassing the `Layer` class
-- Computing gradients with a `GradientTape` and writing low-level training loops
-- Tracking losses created by layers via the `add_loss()` method
-- Tracking metrics in a low-level training loop
-- Speeding up execution with a compiled `tf.function`
-- Executing layers in training or inference mode
-- The Keras Functional API
+- `Layer` 클래스를 상속하여 층을 만듭니다.
+- `GradientTape`으로 그레이디언트(gradient)를 계산하고 저수준 훈련 반복문을 만듭니다.
+- `add_loss()` 메서드로 층에서 만든 손실을 기록합니다.
+- 저수준 훈련 반복문에서 측정 지표를 기록합니다.
+- `tf.function`으로 컴파일하여 실행 속도를 높입니다.
+- 훈련 모드나 추론 모드로 층을 실행합니다.
+- 케라스 함수형 API
 
-You will also see the Keras API in action in two end-to-end research examples:
-a Variational Autoencoder, an a Hypernetwork.
+변이형 오토인코더(Variational Autoencoder)와 하이퍼네트워크(Hypernetwork)
+두 개의 엔드-투-엔드 연구 예제 통해 실제로 케라스 API를 사용해 보겠습니다.
 
 ---
-## The `Layer` class
+## `Layer` 클래스
 
-The `Layer` is the fundamental abstraction in Keras.
-A `Layer` encapsulates a state (weights) and some computation
-(defined in the call method).
+`Layer`는 케라스의 기초 추상 클래스입니다.
+`Layer`는 상태(가중치)와 (`call` 메서드에서 정의한) 일부 계산을 담고 있습니다.
 
-A simple layer looks like this:
+간단한 층의 예는 다음과 같습니다:
 
 
 ```python
@@ -70,40 +68,37 @@ class Linear(keras.layers.Layer):
     def call(self, inputs):
         return tf.matmul(inputs, self.w) + self.b
 
-
 ```
 
-You would use a `Layer` instance much like a Python function:
+`Layer` 클래스 인스턴스를 파이썬 함수처럼 사용할 수 있습니다:
 
 
 ```python
-# Instantiate our layer.
+# 층의 객체를 만듭니다.
 linear_layer = Linear(units=4, input_dim=2)
 
-# The layer can be treated as a function.
-# Here we call it on some data.
+# 함수처럼 사용햘 수 있습니다.
+# `call` 메서드에 필요한 데이터를 전달하면서 호출합니다.
 y = linear_layer(tf.ones((2, 2)))
 assert y.shape == (2, 4)
-
 ```
 
-The weight variables (created in `__init__`) are automatically
-tracked under the `weights` property:
+(`__init__` 메서드에서 생성한) 가중치 변수는 자동으로 `weights` 속성에 기록됩니다:
 
 
 ```python
 assert linear_layer.weights == [linear_layer.w, linear_layer.b]
-
 ```
 
-You have many built-in layers available, from `Dense` to `Conv2D` to `LSTM` to
-fancier ones like `Conv3DTranspose` or `ConvLSTM2D`. Be smart about reusing
-built-in functionality.
+기본으로 내장된 층이 많습니다.
+`Dense` 층, `Conv2D` 층, `LSTM` 층이 있고
+`Conv3DTranspose`이나 `ConvLSTM2D`와 같은 화려한 층도 있습니다.
+가능하면 내장된 기능을 사용하는 것이 좋습니다.
 
 ---
-## Weight creation
+## 가중치 생성
 
-The add_weight method gives you a shortcut for creating weights:
+`add_weight` 메서드를 사용하면 손쉽게 가중치를 만들 수 있습니다:
 
 
 ```python
@@ -129,76 +124,73 @@ class Linear(keras.layers.Layer):
         return tf.matmul(inputs, self.w) + self.b
 
 
-# Instantiate our lazy layer.
+# 층의 객체를 만듭니다.
 linear_layer = Linear(4)
 
-# This will also call `build(input_shape)` and create the weights.
+# `build(input_shape)`을 호출하고 가중치를 만듭니다.
 y = linear_layer(tf.ones((2, 2)))
-
 ```
 
 ---
-## Gradients
+## 그레이디언트
 
-You can automatically retrieve the gradients of the weights of a layer by
-calling it inside a `GradientTape`. Using these gradients, you can update the
-weights of the layer, either manually, or using an optimizer object. Of course,
-you can modify the gradients before using them, if you need to.
+`GradientTape` 컨택스트 안에서 층을 호출하면 자동으로 층 가중치의 그레이디언트를 계산합니다.
+이 그레이디언트를 사용해 옵티마이저 객체를 사용하거나 수동으로 층의 가중치를 업데이트할 수 있습니다.
+물론 필요하면 업데이트하기 전에 그레이디언트를 수정할 수 있습니다.
 
 
 ```python
-# Prepare a dataset.
+# 데이터셋을 준비합니다.
 (x_train, y_train), _ = tf.keras.datasets.mnist.load_data()
 dataset = tf.data.Dataset.from_tensor_slices(
     (x_train.reshape(60000, 784).astype("float32") / 255, y_train)
 )
 dataset = dataset.shuffle(buffer_size=1024).batch(64)
 
-# Instantiate our linear layer (defined above) with 10 units.
+# 10개의 유닛(unit)을 가진 (위에서 정의한) 선형 층의 객체를 만듭니다.
 linear_layer = Linear(10)
 
-# Instantiate a logistic loss function that expects integer targets.
+# 정수 타깃을 기대하는 로지스틱 손실 함수 객체를 만듭니다.
 loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 
-# Instantiate an optimizer.
+# 옵티마이저 객체를 만듭니다.
 optimizer = tf.keras.optimizers.SGD(learning_rate=1e-3)
 
-# Iterate over the batches of the dataset.
+# 데이터셋의 배치를 순회합니다.
 for step, (x, y) in enumerate(dataset):
 
-    # Open a GradientTape.
+    # GradientTape을 시작합니다.
     with tf.GradientTape() as tape:
 
-        # Forward pass.
+        # 정방향 계산을 수행합니다.
         logits = linear_layer(x)
 
-        # Loss value for this batch.
+        # 배치의 손실을 계산합니다.
         loss = loss_fn(y, logits)
 
-    # Get gradients of weights wrt the loss.
+    # 손실에 대한 가중치의 그레이디언트를 얻습니다.
     gradients = tape.gradient(loss, linear_layer.trainable_weights)
 
-    # Update the weights of our linear layer.
+    # 선형 층의 가중치를 업데이트합니다.
     optimizer.apply_gradients(zip(gradients, linear_layer.trainable_weights))
 
-    # Logging.
+    # 로깅
     if step % 100 == 0:
-        print("Step:", step, "Loss:", float(loss))
-
+        print("스텝:", step, "손실:", float(loss))
 ```
 
 <div class="k-default-codeblock">
 ```
-Step: 0 Loss: 2.3826446533203125
-Step: 100 Loss: 2.267599582672119
-Step: 200 Loss: 2.1371021270751953
-Step: 300 Loss: 2.0780434608459473
-Step: 400 Loss: 1.9888293743133545
-Step: 500 Loss: 1.887470006942749
-Step: 600 Loss: 1.8170452117919922
-Step: 700 Loss: 1.694450855255127
-Step: 800 Loss: 1.653834581375122
-Step: 900 Loss: 1.6181517839431763
+스텝: 0 손실: 2.3950889110565186
+스텝: 100 손실: 2.1609907150268555
+스텝: 200 손실: 2.104114055633545
+스텝: 300 손실: 2.015164375305176
+스텝: 400 손실: 1.913563847541809
+스텝: 500 손실: 1.8326892852783203
+스텝: 600 손실: 1.7606213092803955
+스텝: 700 손실: 1.7660852670669556
+스텝: 800 손실: 1.824374794960022
+스텝: 900 손실: 1.6950809955596924
 
 ```
 </div>
@@ -237,7 +229,6 @@ print(y.numpy())  # [4. 4.]
 assert my_sum.weights == [my_sum.total]
 assert my_sum.non_trainable_weights == [my_sum.total]
 assert my_sum.trainable_weights == []
-
 ```
 
 <div class="k-default-codeblock">
@@ -284,7 +275,6 @@ y = mlp(tf.ones(shape=(3, 64)))
 
 # Weights are recursively tracked.
 assert len(mlp.weights) == 6
-
 ```
 
 Note that our manually-created MLP above is equivalent to the following
@@ -299,7 +289,6 @@ mlp = keras.Sequential(
         keras.layers.Dense(10),
     ]
 )
-
 ```
 
 ---
@@ -326,7 +315,6 @@ class ActivityRegularization(keras.layers.Layer):
         # that depends on the inputs.
         self.add_loss(self.rate * tf.reduce_sum(inputs))
         return inputs
-
 
 ```
 
@@ -357,12 +345,11 @@ mlp = SparseMLP()
 y = mlp(tf.ones((10, 10)))
 
 print(mlp.losses)  # List containing one float32 scalar
-
 ```
 
 <div class="k-default-codeblock">
 ```
-[<tf.Tensor: shape=(), dtype=float32, numpy=0.21055736>]
+[<tf.Tensor: shape=(), dtype=float32, numpy=0.21147315>]
 
 ```
 </div>
@@ -370,7 +357,6 @@ These losses are cleared by the top-level layer at the start of each forward
 pass -- they don't accumulate. `layer.losses` always contains only the losses
 created during the last forward pass. You would typically use these losses by
 summing them before computing your gradients when writing a training loop.
-
 
 
 ```python
@@ -418,21 +404,20 @@ for step, (x, y) in enumerate(dataset):
     # Logging.
     if step % 100 == 0:
         print("Step:", step, "Loss:", float(loss))
-
 ```
 
 <div class="k-default-codeblock">
 ```
-Step: 0 Loss: 6.011272430419922
-Step: 100 Loss: 2.6576173305511475
-Step: 200 Loss: 2.4374217987060547
-Step: 300 Loss: 2.3680849075317383
-Step: 400 Loss: 2.360743999481201
-Step: 500 Loss: 2.3423142433166504
-Step: 600 Loss: 2.313633680343628
-Step: 700 Loss: 2.3257956504821777
-Step: 800 Loss: 2.306140661239624
-Step: 900 Loss: 2.321286201477051
+Step: 0 Loss: 6.142717361450195
+Step: 100 Loss: 2.59464430809021
+Step: 200 Loss: 2.4223873615264893
+Step: 300 Loss: 2.3718209266662598
+Step: 400 Loss: 2.339050769805908
+Step: 500 Loss: 2.33695387840271
+Step: 600 Loss: 2.337519407272339
+Step: 700 Loss: 2.30609130859375
+Step: 800 Loss: 2.320883274078369
+Step: 900 Loss: 2.317542791366577
 
 ```
 </div>
@@ -491,31 +476,30 @@ for epoch in range(2):
 
     # Result the metric's state at the end of an epoch
     accuracy.reset_states()
-
 ```
 
 <div class="k-default-codeblock">
 ```
 Epoch: 0 Step: 0
-Total running accuracy so far: 0.109
+Total running accuracy so far: 0.125
 Epoch: 0 Step: 200
-Total running accuracy so far: 0.745
+Total running accuracy so far: 0.766
 Epoch: 0 Step: 400
-Total running accuracy so far: 0.819
+Total running accuracy so far: 0.836
 Epoch: 0 Step: 600
-Total running accuracy so far: 0.850
+Total running accuracy so far: 0.863
 Epoch: 0 Step: 800
-Total running accuracy so far: 0.867
+Total running accuracy so far: 0.878
 Epoch: 1 Step: 0
-Total running accuracy so far: 0.938
+Total running accuracy so far: 0.906
 Epoch: 1 Step: 200
-Total running accuracy so far: 0.936
-Epoch: 1 Step: 400
-Total running accuracy so far: 0.939
-Epoch: 1 Step: 600
 Total running accuracy so far: 0.940
-Epoch: 1 Step: 800
+Epoch: 1 Step: 400
+Total running accuracy so far: 0.940
+Epoch: 1 Step: 600
 Total running accuracy so far: 0.941
+Epoch: 1 Step: 800
+Total running accuracy so far: 0.942
 
 ```
 </div>
@@ -569,21 +553,20 @@ for step, (x, y) in enumerate(dataset):
     loss = train_on_batch(x, y)
     if step % 100 == 0:
         print("Step:", step, "Loss:", float(loss))
-
 ```
 
 <div class="k-default-codeblock">
 ```
-Step: 0 Loss: 2.372758388519287
-Step: 100 Loss: 0.6940608620643616
-Step: 200 Loss: 0.2873537838459015
-Step: 300 Loss: 0.4446139931678772
-Step: 400 Loss: 0.583051860332489
-Step: 500 Loss: 0.32000404596328735
-Step: 600 Loss: 0.265232115983963
-Step: 700 Loss: 0.12978266179561615
-Step: 800 Loss: 0.3476303219795227
-Step: 900 Loss: 0.24191027879714966
+Step: 0 Loss: 2.38633394241333
+Step: 100 Loss: 0.6040857434272766
+Step: 200 Loss: 0.25611376762390137
+Step: 300 Loss: 0.463137686252594
+Step: 400 Loss: 0.20447911322116852
+Step: 500 Loss: 0.2575087547302246
+Step: 600 Loss: 0.1412767469882965
+Step: 700 Loss: 0.27038195729255676
+Step: 800 Loss: 0.44364672899246216
+Step: 900 Loss: 0.15315598249435425
 
 ```
 </div>
@@ -630,7 +613,6 @@ class MLPWithDropout(keras.layers.Layer):
 mlp = MLPWithDropout()
 y_train = mlp(tf.ones((2, 2)), training=True)
 y_test = mlp(tf.ones((2, 2)), training=False)
-
 ```
 
 ---
@@ -671,7 +653,6 @@ assert y.shape == (2, 10)
 # You can pass a `training` argument in `__call__`
 # (it will get passed down to the Dropout layer).
 y = model(tf.ones((2, 16)), training=True)
-
 ```
 
 The Functional API tends to be more concise than subclassing, and provides a few other
@@ -748,7 +729,6 @@ class Encoder(layers.Layer):
         z = self.sampling((z_mean, z_log_var))
         return z_mean, z_log_var, z
 
-
 ```
 
 Next, we have a `Decoder` class, which maps the probabilistic latent space coordinates
@@ -768,7 +748,6 @@ class Decoder(layers.Layer):
     def call(self, inputs):
         x = self.dense_proj(inputs)
         return self.dense_output(x)
-
 
 ```
 
@@ -796,7 +775,6 @@ class VariationalAutoEncoder(layers.Layer):
         )
         self.add_loss(kl_loss)
         return reconstructed
-
 
 ```
 
@@ -846,22 +824,21 @@ for step, x in enumerate(dataset):
     # as an exercise to the reader.
     if step >= 1000:
         break
-
 ```
 
 <div class="k-default-codeblock">
 ```
-Step: 0 Loss: 0.38399988412857056
-Step: 100 Loss: 0.12813832219874505
-Step: 200 Loss: 0.10099794645214555
-Step: 300 Loss: 0.09052002512883903
-Step: 400 Loss: 0.08532035229100551
-Step: 500 Loss: 0.08204194844631615
-Step: 600 Loss: 0.07955289975478129
-Step: 700 Loss: 0.07817310818634428
-Step: 800 Loss: 0.07688544124606694
-Step: 900 Loss: 0.07589594667134486
-Step: 1000 Loss: 0.07492802400778342
+Step: 0 Loss: 0.3347511887550354
+Step: 100 Loss: 0.1275382568635563
+Step: 200 Loss: 0.10070774633789537
+Step: 300 Loss: 0.09029946264584991
+Step: 400 Loss: 0.08509199345423991
+Step: 500 Loss: 0.08188447440991145
+Step: 600 Loss: 0.07946804378448231
+Step: 700 Loss: 0.07804460771456255
+Step: 800 Loss: 0.07680668431646964
+Step: 900 Loss: 0.07582180831709527
+Step: 1000 Loss: 0.0748714953177161
 
 ```
 </div>
@@ -901,7 +878,6 @@ vae = tf.keras.Model(inputs=original_inputs, outputs=outputs, name="vae")
 # Add KL divergence regularization loss.
 kl_loss = -0.5 * tf.reduce_mean(z_log_var - tf.square(z_mean) - tf.exp(z_log_var) + 1)
 vae.add_loss(kl_loss)
-
 ```
 
 Much more concise, right?
@@ -928,14 +904,13 @@ vae.compile(optimizer, loss=loss_fn)
 
 # Actually training the model.
 vae.fit(dataset, epochs=1)
-
 ```
 
 <div class="k-default-codeblock">
 ```
-1875/1875 [==============================] - 2s 962us/step - loss: 0.0713
+1875/1875 [==============================] - 2s 1ms/step - loss: 0.0713
 
-<tensorflow.python.keras.callbacks.History at 0x15fcd8c10>
+<tensorflow.python.keras.callbacks.History at 0x7f5ef0061f28>
 
 ```
 </div>
@@ -956,7 +931,6 @@ A hypernetwork is a deep neural network whose weights are generated by another n
 
 Let's implement a really trivial hypernetwork: we'll use a small 2-layer network  to
 generate the weights of a larger 3-layer network.
-
 
 
 
@@ -987,7 +961,6 @@ inner_model = keras.Sequential(
         keras.layers.Dense(num_weights_to_generate, activation=tf.nn.sigmoid),
     ]
 )
-
 ```
 
 This is our training loop. For each batch of data:
@@ -1073,22 +1046,21 @@ for step, (x, y) in enumerate(dataset):
     # as an exercise to the reader.
     if step >= 1000:
         break
-
 ```
 
 <div class="k-default-codeblock">
 ```
-Step: 0 Loss: 1.8061305284500122
-Step: 100 Loss: 2.430531589701624
-Step: 200 Loss: 2.1146517871364727
-Step: 300 Loss: 1.9503340735858263
-Step: 400 Loss: 1.8750596672872504
-Step: 500 Loss: 1.81695979083944
-Step: 600 Loss: 1.7097562247230214
-Step: 700 Loss: 1.642795581991716
-Step: 800 Loss: 1.6287533775725223
-Step: 900 Loss: 1.6253980021383934
-Step: 1000 Loss: 1.5546919323841977
+Step: 0 Loss: 3.2773594856262207
+Step: 100 Loss: 2.2238612356834864
+Step: 200 Loss: 1.971385248747176
+Step: 300 Loss: 1.967387991948761
+Step: 400 Loss: 1.8451272687343316
+Step: 500 Loss: 1.752986090407727
+Step: 600 Loss: 1.713871390493574
+Step: 700 Loss: 1.6370984546458185
+Step: 800 Loss: 1.6191200694949028
+Step: 900 Loss: 1.5621056455968003
+Step: 1000 Loss: 1.5415855406896082
 
 ```
 </div>
