@@ -168,16 +168,16 @@ for step, (x, y) in enumerate(dataset):
         print("스텝:", step, "손실:", float(loss))
 
 """
-## Trainable and non-trainable weights
+## 훈련되는 가중치와 훈련 안되는 가중치
 
-Weights created by layers can be either trainable or non-trainable. They're
-exposed in `trainable_weights` and `non_trainable_weights` respectively.
-Here's a layer with a non-trainable weight:
+층은 훈련되는 가중치 또는 훈련 안되는 가중치를 만듭니다.
+각각 `trainable_weights`와 `non_trainable_weights` 속성으로 참조할 수 있습니다.
+다음은 훈련 안되는 가중치를 가진 층입니다.
 """
 
 
 class ComputeSum(keras.layers.Layer):
-    """Returns the sum of the inputs."""
+    """입력의 합을 반환합니다."""
 
     def __init__(self, input_dim):
         super(ComputeSum, self).__init__()
@@ -203,19 +203,18 @@ assert my_sum.non_trainable_weights == [my_sum.total]
 assert my_sum.trainable_weights == []
 
 """
-## Layers that own layers
+## 층을 가진 층
 
-Layers can be recursively nested to create bigger computation blocks.
-Each layer will track the weights of its sublayers
-(both trainable and non-trainable).
+층은 재귀적으로 중첩되어 더 큰 연산 블록을 구성할 수 있습니다.
+각 층은 하위 층의 가중치를 탐색합니다(훈련되는 가중치와 훈련 안되는 가중치 모두).
 """
 
-# Let's reuse the Linear class
-# with a `build` method that we defined above.
+# 위에서 정의한 `build` 메서드를 가진
+# Linear 클래스를 재사용해 보죠.
 
 
 class MLP(keras.layers.Layer):
-    """Simple stack of Linear layers."""
+    """Linear 층을 단순하게 쌓습니다."""
 
     def __init__(self):
         super(MLP, self).__init__()
@@ -233,15 +232,14 @@ class MLP(keras.layers.Layer):
 
 mlp = MLP()
 
-# The first call to the `mlp` object will create the weights.
+# 처음 `mlp` 객체를 호출하면 가중치를 만듭니다.
 y = mlp(tf.ones(shape=(3, 64)))
 
-# Weights are recursively tracked.
+# 재귀적으로 가중치를 탐색합니다.
 assert len(mlp.weights) == 6
 
 """
-Note that our manually-created MLP above is equivalent to the following
-built-in option:
+위에서 직접 만든 MLP 클래스는 다음처럼 내장된 클래스로 만든 것과 동일합니다:
 """
 
 mlp = keras.Sequential(
@@ -253,39 +251,41 @@ mlp = keras.Sequential(
 )
 
 """
-## Tracking losses created by layers
+## 층이 만든 손실 탐색하기
 
+층은 정방향 계산 동안 `add_loss()` 메서드로 손실를 생성할 수 있습니다.
+특히 규제 손실을 다룰 때 유용합니다.
+하위 층이 만든 손실은 부모 층이 재귀적으로 탐색합니다.
 Layers can create losses during the forward pass via the `add_loss()` method.
 This is especially useful for regularization losses.
 The losses created by sublayers are recursively tracked by the parent layers.
 
-Here's a layer that creates an activity regularization loss:
+활성화 규제 손실을 만드는 층입니다:Here's a layer that creates an activity regularization loss:
 """
 
 
 class ActivityRegularization(keras.layers.Layer):
-    """Layer that creates an activity sparsity regularization loss."""
+    """활성화 희소 규제 손실을 만드는 층입니다."""
 
     def __init__(self, rate=1e-2):
         super(ActivityRegularization, self).__init__()
         self.rate = rate
 
     def call(self, inputs):
-        # We use `add_loss` to create a regularization loss
-        # that depends on the inputs.
+        # `add_loss`를 사용해 입력에 기반한 규제 손실을 만듭니다.
         self.add_loss(self.rate * tf.reduce_sum(inputs))
         return inputs
 
 
 """
-Any model incorporating this layer will track this regularization loss:
+이 층을 사용하는 모든 모델은 이 규제 손실을 기록합니다:
 """
 
-# Let's use the loss layer in a MLP block.
+# MLP 블록에 이 손실 층을 사용해 보죠.
 
 
 class SparseMLP(keras.layers.Layer):
-    """Stack of Linear layers with a sparsity regularization loss."""
+    """희소 규제 손실을 사용하고 Linear 층을 쌓은 모델."""
 
     def __init__(self):
         super(SparseMLP, self).__init__()
@@ -303,7 +303,7 @@ class SparseMLP(keras.layers.Layer):
 mlp = SparseMLP()
 y = mlp(tf.ones((10, 10)))
 
-print(mlp.losses)  # List containing one float32 scalar
+print(mlp.losses)  # 하나의 float32 스칼라를 담은 리스트
 
 """
 These losses are cleared by the top-level layer at the start of each forward
