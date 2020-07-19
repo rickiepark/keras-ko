@@ -181,31 +181,31 @@ for step, (x, y) in enumerate(dataset):
 
 <div class="k-default-codeblock">
 ```
-스텝: 0 손실: 2.3950889110565186
-스텝: 100 손실: 2.1609907150268555
-스텝: 200 손실: 2.104114055633545
-스텝: 300 손실: 2.015164375305176
-스텝: 400 손실: 1.913563847541809
-스텝: 500 손실: 1.8326892852783203
-스텝: 600 손실: 1.7606213092803955
-스텝: 700 손실: 1.7660852670669556
-스텝: 800 손실: 1.824374794960022
-스텝: 900 손실: 1.6950809955596924
+스텝: 0 손실: 2.333273410797119
+스텝: 100 손실: 2.258254051208496
+스텝: 200 손실: 2.1624679565429688
+스텝: 300 손실: 2.0843276977539062
+스텝: 400 손실: 1.951866865158081
+스텝: 500 손실: 1.919536828994751
+스텝: 600 손실: 1.826325535774231
+스텝: 700 손실: 1.7277562618255615
+스텝: 800 손실: 1.6896092891693115
+스텝: 900 손실: 1.5980124473571777
 
 ```
 </div>
 ---
-## Trainable and non-trainable weights
+## 훈련되는 가중치와 훈련 안되는 가중치
 
-Weights created by layers can be either trainable or non-trainable. They're
-exposed in `trainable_weights` and `non_trainable_weights` respectively.
-Here's a layer with a non-trainable weight:
+층은 훈련되는 가중치 또는 훈련 안되는 가중치를 만듭니다.
+각각 `trainable_weights`와 `non_trainable_weights` 속성으로 참조할 수 있습니다.
+다음은 훈련 안되는 가중치를 가진 층입니다.
 
 
 ```python
 
 class ComputeSum(keras.layers.Layer):
-    """Returns the sum of the inputs."""
+    """입력의 합을 반환합니다."""
 
     def __init__(self, input_dim):
         super(ComputeSum, self).__init__()
@@ -239,20 +239,19 @@ assert my_sum.trainable_weights == []
 ```
 </div>
 ---
-## Layers that own layers
+## 층을 가진 층
 
-Layers can be recursively nested to create bigger computation blocks.
-Each layer will track the weights of its sublayers
-(both trainable and non-trainable).
+층은 재귀적으로 중첩되어 더 큰 연산 블록을 구성할 수 있습니다.
+각 층은 하위 층의 가중치를 탐색합니다(훈련되는 가중치와 훈련 안되는 가중치 모두).
 
 
 ```python
-# Let's reuse the Linear class
-# with a `build` method that we defined above.
+# 위에서 정의한 `build` 메서드를 가진
+# Linear 클래스를 재사용해 보죠.
 
 
 class MLP(keras.layers.Layer):
-    """Simple stack of Linear layers."""
+    """Linear 층을 단순하게 쌓습니다."""
 
     def __init__(self):
         super(MLP, self).__init__()
@@ -270,15 +269,14 @@ class MLP(keras.layers.Layer):
 
 mlp = MLP()
 
-# The first call to the `mlp` object will create the weights.
+# 처음 `mlp` 객체를 호출하면 가중치를 만듭니다.
 y = mlp(tf.ones(shape=(3, 64)))
 
-# Weights are recursively tracked.
+# 재귀적으로 가중치를 탐색합니다.
 assert len(mlp.weights) == 6
 ```
 
-Note that our manually-created MLP above is equivalent to the following
-built-in option:
+위에서 직접 만든 MLP 클래스는 다음처럼 내장된 클래스로 만든 것과 동일합니다:
 
 
 ```python
@@ -292,41 +290,43 @@ mlp = keras.Sequential(
 ```
 
 ---
-## Tracking losses created by layers
+## 층이 만든 손실 탐색하기
 
+층은 정방향 계산 동안 `add_loss()` 메서드로 손실를 생성할 수 있습니다.
+특히 규제 손실을 다룰 때 유용합니다.
+하위 층이 만든 손실은 부모 층이 재귀적으로 탐색합니다.
 Layers can create losses during the forward pass via the `add_loss()` method.
 This is especially useful for regularization losses.
 The losses created by sublayers are recursively tracked by the parent layers.
 
-Here's a layer that creates an activity regularization loss:
+활성화 규제 손실을 만드는 층입니다:Here's a layer that creates an activity regularization loss:
 
 
 ```python
 
 class ActivityRegularization(keras.layers.Layer):
-    """Layer that creates an activity sparsity regularization loss."""
+    """활성화 희소 규제 손실을 만드는 층입니다."""
 
     def __init__(self, rate=1e-2):
         super(ActivityRegularization, self).__init__()
         self.rate = rate
 
     def call(self, inputs):
-        # We use `add_loss` to create a regularization loss
-        # that depends on the inputs.
+        # `add_loss`를 사용해 입력에 기반한 규제 손실을 만듭니다.
         self.add_loss(self.rate * tf.reduce_sum(inputs))
         return inputs
 
 ```
 
-Any model incorporating this layer will track this regularization loss:
+이 층을 사용하는 모든 모델은 이 규제 손실을 기록합니다:
 
 
 ```python
-# Let's use the loss layer in a MLP block.
+# MLP 블록에 이 손실 층을 사용해 보죠.
 
 
 class SparseMLP(keras.layers.Layer):
-    """Stack of Linear layers with a sparsity regularization loss."""
+    """희소 규제 손실을 사용하고 Linear 층을 쌓은 모델."""
 
     def __init__(self):
         super(SparseMLP, self).__init__()
@@ -344,106 +344,104 @@ class SparseMLP(keras.layers.Layer):
 mlp = SparseMLP()
 y = mlp(tf.ones((10, 10)))
 
-print(mlp.losses)  # List containing one float32 scalar
+print(mlp.losses)  # 하나의 float32 스칼라를 담은 리스트
 ```
 
 <div class="k-default-codeblock">
 ```
-[<tf.Tensor: shape=(), dtype=float32, numpy=0.21147315>]
+[<tf.Tensor: shape=(), dtype=float32, numpy=0.28691256>]
 
 ```
 </div>
-These losses are cleared by the top-level layer at the start of each forward
-pass -- they don't accumulate. `layer.losses` always contains only the losses
-created during the last forward pass. You would typically use these losses by
-summing them before computing your gradients when writing a training loop.
+이 손실은 정방향 계산이 시작될 때마다 최상위 층에 의해 초기화됩니다. 즉 누적되지 않습니다.
+`layer.losses`는 항상 마지막 정방향 계산에서 만든 손실만 가지고 있습니다.
+일반적으로 훈련 반복문을 만들 때 그레이디언트를 계산하기 전에 이 손실을 더합니다.
 
 
 ```python
-# Losses correspond to the *last* forward pass.
+# *마지막* 정방향 계산의 손실이 저장됩니다.
 mlp = SparseMLP()
 mlp(tf.ones((10, 10)))
 assert len(mlp.losses) == 1
 mlp(tf.ones((10, 10)))
-assert len(mlp.losses) == 1  # No accumulation.
+assert len(mlp.losses) == 1  # 누적되지 않습니다.
 
-# Let's demonstrate how to use these losses in a training loop.
+# 훈련 반복문에서 어떻게 이 손실을 사용하는지 알아보죠.
 
-# Prepare a dataset.
+# 데이터셋을 준비합니다.
 (x_train, y_train), _ = tf.keras.datasets.mnist.load_data()
 dataset = tf.data.Dataset.from_tensor_slices(
     (x_train.reshape(60000, 784).astype("float32") / 255, y_train)
 )
 dataset = dataset.shuffle(buffer_size=1024).batch(64)
 
-# A new MLP.
+# 새로운 MLP
 mlp = SparseMLP()
 
-# Loss and optimizer.
+# 손실과 옵티마이저
 loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 optimizer = tf.keras.optimizers.SGD(learning_rate=1e-3)
 
 for step, (x, y) in enumerate(dataset):
     with tf.GradientTape() as tape:
 
-        # Forward pass.
+        # 정방향 계산
         logits = mlp(x)
 
-        # External loss value for this batch.
+        # 이 배치에 대한 외부 손실 값
         loss = loss_fn(y, logits)
 
-        # Add the losses created during the forward pass.
+        # 정방향 계산 동안 만들어진 손실을 더합니다.
         loss += sum(mlp.losses)
 
-        # Get gradients of weights wrt the loss.
+        # 손실에 대한 가중치의 그레이디언트를 구합니다.
         gradients = tape.gradient(loss, mlp.trainable_weights)
 
-    # Update the weights of our linear layer.
+    # 선형 층의 가중치를 업데이트합니다.
     optimizer.apply_gradients(zip(gradients, mlp.trainable_weights))
 
-    # Logging.
+    # 로깅.
     if step % 100 == 0:
-        print("Step:", step, "Loss:", float(loss))
+        print("스텝:", step, "손실:", float(loss))
 ```
 
 <div class="k-default-codeblock">
 ```
-Step: 0 Loss: 6.142717361450195
-Step: 100 Loss: 2.59464430809021
-Step: 200 Loss: 2.4223873615264893
-Step: 300 Loss: 2.3718209266662598
-Step: 400 Loss: 2.339050769805908
-Step: 500 Loss: 2.33695387840271
-Step: 600 Loss: 2.337519407272339
-Step: 700 Loss: 2.30609130859375
-Step: 800 Loss: 2.320883274078369
-Step: 900 Loss: 2.317542791366577
+스텝: 0 손실: 6.813752174377441
+스텝: 100 손실: 2.599653482437134
+스텝: 200 손실: 2.401869535446167
+스텝: 300 손실: 2.3940107822418213
+스텝: 400 손실: 2.3392817974090576
+스텝: 500 손실: 2.334879159927368
+스텝: 600 손실: 2.324234962463379
+스텝: 700 손실: 2.332437753677368
+스텝: 800 손실: 2.322871446609497
+스텝: 900 손실: 2.3147518634796143
 
 ```
 </div>
 ---
-## Keeping track of training metrics
+## 훈련 지표 기록하기
 
-Keras offers a broad range of built-in metrics, like `tf.keras.metrics.AUC`
-or `tf.keras.metrics.PrecisionAtRecall`. It's also easy to create your
-own metrics in a few lines of code.
+케라스는 `tf.keras.metrics.AUC`나 `tf.keras.metrics.PrecisionAtRecall` 같이
+다양한 측정 지표를 기본으로 제공합니다.
+몇 줄의 코드로 사용자 정의 지표를 쉽게 만들 수도 있습니다.
 
-To use a metric in a custom training loop, you would:
+사용자 정의 훈련 반복문에서 지표를 사용하는 방법은 다음과 같습니다:
 
-- Instantiate the metric object, e.g. `metric = tf.keras.metrics.AUC()`
-- Call its `metric.udpate_state(targets, predictions)` method for each batch of data
-- Query its result via `metric.result()`
-- Reset the metric's state at the end of an epoch or at the start of an evaluation via
-`metric.reset_states()`
+- 측정 지표 객체를 만듭니다. 예를 들면 `metric = tf.keras.metrics.AUC()`
+- 각 배치 데이터에 대해 `metric.udpate_state(targets, predictions)` 메서드를 호출합니다.
+- `metric.result()`로 결과를 얻습니다.
+- `metric.reset_states()`를 사용해 에포크 끝이나 평가를 시작할 때 지표의 상태를 초기화합니다.
 
-Here's a simple example:
+다음은 간단한 예입니다:
 
 
 ```python
-# Instantiate a metric object
+# 측정 지표 객체를 만듭니다.
 accuracy = tf.keras.metrics.SparseCategoricalAccuracy()
 
-# Prepare our layer, loss, and optimizer.
+# 층, 손실, 옵티마이저를 준비합니다.
 model = keras.Sequential(
     [
         keras.layers.Dense(32, activation="relu"),
@@ -455,70 +453,68 @@ loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
 
 for epoch in range(2):
-    # Iterate over the batches of a dataset.
+    # 데이터셋의 배치에 대해 반복합니다.
     for step, (x, y) in enumerate(dataset):
         with tf.GradientTape() as tape:
             logits = model(x)
-            # Compute the loss value for this batch.
+            # 이 배치의 손실을 계산합니다.
             loss_value = loss_fn(y, logits)
 
-        # Update the state of the `accuracy` metric.
+        # `accuracy` 지표의 상태를 업데이트합니다.
         accuracy.update_state(y, logits)
 
-        # Update the weights of the model to minimize the loss value.
+        # 손실 값을 최소화하기 위해 모델의 가중치를 업데이트합니다.
         gradients = tape.gradient(loss_value, model.trainable_weights)
         optimizer.apply_gradients(zip(gradients, model.trainable_weights))
 
-        # Logging the current accuracy value so far.
+        # 현재 정확도 값을 기록합니다.
         if step % 200 == 0:
-            print("Epoch:", epoch, "Step:", step)
-            print("Total running accuracy so far: %.3f" % accuracy.result())
+            print("에포크:", epoch, "스텝:", step)
+            print("지금까지 계산한 전체 정확도: %.3f" % accuracy.result())
 
-    # Result the metric's state at the end of an epoch
+    # 에포크 끝에서 지표의 상태를 초기화합니다.
     accuracy.reset_states()
 ```
 
 <div class="k-default-codeblock">
 ```
-Epoch: 0 Step: 0
-Total running accuracy so far: 0.125
-Epoch: 0 Step: 200
-Total running accuracy so far: 0.766
-Epoch: 0 Step: 400
-Total running accuracy so far: 0.836
-Epoch: 0 Step: 600
-Total running accuracy so far: 0.863
-Epoch: 0 Step: 800
-Total running accuracy so far: 0.878
-Epoch: 1 Step: 0
-Total running accuracy so far: 0.906
-Epoch: 1 Step: 200
-Total running accuracy so far: 0.940
-Epoch: 1 Step: 400
-Total running accuracy so far: 0.940
-Epoch: 1 Step: 600
-Total running accuracy so far: 0.941
-Epoch: 1 Step: 800
-Total running accuracy so far: 0.942
+에포크: 0 스텝: 0
+지금까지 계산한 전체 정확도: 0.125
+에포크: 0 스텝: 200
+지금까지 계산한 전체 정확도: 0.782
+에포크: 0 스텝: 400
+지금까지 계산한 전체 정확도: 0.843
+에포크: 0 스텝: 600
+지금까지 계산한 전체 정확도: 0.866
+에포크: 0 스텝: 800
+지금까지 계산한 전체 정확도: 0.880
+에포크: 1 스텝: 0
+지금까지 계산한 전체 정확도: 0.906
+에포크: 1 스텝: 200
+지금까지 계산한 전체 정확도: 0.939
+에포크: 1 스텝: 400
+지금까지 계산한 전체 정확도: 0.940
+에포크: 1 스텝: 600
+지금까지 계산한 전체 정확도: 0.940
+에포크: 1 스텝: 800
+지금까지 계산한 전체 정확도: 0.941
 
 ```
 </div>
-In addition to this, similarly to the `self.add_loss()` method, you have access
-to an `self.add_metric()` method on layers. It tracks the average of
-whatever quantity you pass to it. You can reset the value of these metrics
-by calling `layer.reset_metrics()` on any layer or model.
+또한 `self.add_loss()` 메서드와 비슷하게 층에서 `self.add_metric()` 메서드를 사용할 수 있습니다.
+이 메서드는 전달한 값의 평균을 계산합니다.
+층이나 모델의 `layer.reset_metrics()` 메서드를 호출하여 초기화할 수 있습니다.
 
 ---
-## Compiled functions
+## 컴파일된 함수
 
-Running eagerly is great for debugging, but you will get better performance by
-compiling your computation into static graphs. Static graphs are a researcher's
-best friends. You can compile any function by wrapping it in a `tf.function`
-decorator.
+즉시 실행은 디버깅에 좋지만 정적 그래프로 컴파일하면 더 높은 성능을 얻을 수 있습니다.
+정적 그래프는 연구자에게 안성맞춤입니다.
+`tf.function` 데코레이터로 감싸면 어떤 함수도 컴파일할 수 있습니다.
 
 
 ```python
-# Prepare our layer, loss, and optimizer.
+# 층, 손실, 옵티마이저를 준비합니다.
 model = keras.Sequential(
     [
         keras.layers.Dense(32, activation="relu"),
@@ -529,10 +525,10 @@ model = keras.Sequential(
 loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
 
-# Create a training step function.
+# 훈련 스텝 함수를 만듭니다.
 
 
-@tf.function  # Make it fast.
+@tf.function  # 속도를 높입니다.
 def train_on_batch(x, y):
     with tf.GradientTape() as tape:
         logits = model(x)
@@ -542,7 +538,7 @@ def train_on_batch(x, y):
     return loss
 
 
-# Prepare a dataset.
+# 데이터셋을 준비합니다.
 (x_train, y_train), _ = tf.keras.datasets.mnist.load_data()
 dataset = tf.data.Dataset.from_tensor_slices(
     (x_train.reshape(60000, 784).astype("float32") / 255, y_train)
@@ -557,30 +553,28 @@ for step, (x, y) in enumerate(dataset):
 
 <div class="k-default-codeblock">
 ```
-Step: 0 Loss: 2.38633394241333
-Step: 100 Loss: 0.6040857434272766
-Step: 200 Loss: 0.25611376762390137
-Step: 300 Loss: 0.463137686252594
-Step: 400 Loss: 0.20447911322116852
-Step: 500 Loss: 0.2575087547302246
-Step: 600 Loss: 0.1412767469882965
-Step: 700 Loss: 0.27038195729255676
-Step: 800 Loss: 0.44364672899246216
-Step: 900 Loss: 0.15315598249435425
+Step: 0 Loss: 2.311769485473633
+Step: 100 Loss: 0.5376338958740234
+Step: 200 Loss: 0.35061606764793396
+Step: 300 Loss: 0.4132015109062195
+Step: 400 Loss: 0.18599508702754974
+Step: 500 Loss: 0.23163354396820068
+Step: 600 Loss: 0.3003774881362915
+Step: 700 Loss: 0.4551308751106262
+Step: 800 Loss: 0.22711651027202606
+Step: 900 Loss: 0.15214291214942932
 
 ```
 </div>
 ---
-## Training mode & inference mode
+## 훈련 모드 & 추론 모드
 
-Some layers, in particular the `BatchNormalization` layer and the `Dropout`
-layer, have different behaviors during training and inference. For such layers,
-it is standard practice to expose a `training` (boolean) argument in the `call`
-method.
+`BatchNormalization`과 `Dropout` 같은 일부 층은 훈련과 추론 시에 행동이 다릅니다.
+이런 층을 사용할 때는 `call` 메서드에 `training` (불리언) 매개변수를 지정하는 것이 좋습니다.
 
-By exposing this argument in `call`, you enable the built-in training and
-evaluation loops (e.g. fit) to correctly use the layer in training and
-inference modes.
+`call` 메서드에 이 매개변수를 지정하면 케라스가 기본으로 제공하는
+훈련과 평가 반복을 사용할 수 있고(예를 들어 `fit` 메서드),
+훈련과 추론 모드로 층을 사용할 때 오류를 줄일 수 있습니다.
 
 
 ```python
@@ -616,85 +610,81 @@ y_test = mlp(tf.ones((2, 2)), training=False)
 ```
 
 ---
-## The Functional API for model-building
+## 함수형 API를 사용한 모델 구성
 
-To build deep learning models, you don't have to use object-oriented programming all the
-time. All layers we've seen so far can also be composed functionally, like this (we call
-it the "Functional API"):
+딥러닝 모델을 만들기 위해 항상 객체지향 프로그래밍을 사용할 필요는 없습니다.
+지금까지 소개한 모든 층은 다음과 같은 함수 스타일로 사용할 수
+있습니다(이를 "함수형(Functional) API"라고 부릅니다):
 
 
 ```python
-# We use an `Input` object to describe the shape and dtype of the inputs.
-# This is the deep learning equivalent of *declaring a type*.
-# The shape argument is per-sample; it does not include the batch size.
-# The functional API focused on defining per-sample transformations.
-# The model we create will automatically batch the per-sample transformations,
-# so that it can be called on batches of data.
+# `Input` 객체를 사용해 입력의 크기와 데이터 타입을 기술합니다.
+# 딥러닝에서 하나의 "타입"을 정의하는 것과 같습니다.
+# shape 매개변수는 샘플 단위입니다. 즉 배치 크기는 포함하지 않습니다.
+# 함수형 API는 샘플 단위의 변환을 정의하는데 초점을 맞춥니다.
+# 만들어진 모델은 자동으로 샘플 단위의 변환을 배치로 수행하기 때문에
+# 배치 데이터에서 사용할 수 있습니다.
 inputs = tf.keras.Input(shape=(16,), dtype="float32")
 
-# We call layers on these "type" objects
-# and they return updated types (new shapes/dtypes).
-x = Linear(32)(inputs)  # We are reusing the Linear layer we defined earlier.
-x = Dropout(0.5)(x)  # We are reusing the Dropout layer we defined earlier.
+# 이 "타입" 객체로 층을 호출하면
+# 업데이트된 타입이 반환됩니다(새로운 크기와 데이터 타입).
+x = Linear(32)(inputs)  # 앞서 정의한 Linear 층을 재사용합니다.
+x = Dropout(0.5)(x)  # 앞서 정의한 Linear 층을 재사용합니다.
 outputs = Linear(10)(x)
 
-# A functional `Model` can be defined by specifying inputs and outputs.
-# A model is itself a layer like any other.
+# 입력과 출력을 지정하여 함수형 `Model`을 정의합니다.
+# 모델 자체는 다른 것과 같은 층입니다.
 model = tf.keras.Model(inputs, outputs)
 
-# A functional model already has weights, before being called on any data.
-# That's because we defined its input shape in advance (in `Input`).
+# 함수형 모델은 데이터에 호출하기 전에 이미 가중치를 가지고 있습니다.
+# 미리 입력 크기를 (`Input`에) 지정했기 때문입니다.
 assert len(model.weights) == 4
 
-# Let's call our model on some data, for fun.
+# 시험 삼아 샘플 데이터에 모델을 호출해 보죠.
 y = model(tf.ones((2, 16)))
 assert y.shape == (2, 10)
 
-# You can pass a `training` argument in `__call__`
-# (it will get passed down to the Dropout layer).
+# `__call__` 메서드의 `training` 매개변수를 사용할 수 있습니다
+# (`Dropout` 층으로 매개변수가 전달됩니다).
 y = model(tf.ones((2, 16)), training=True)
 ```
 
-The Functional API tends to be more concise than subclassing, and provides a few other
-advantages (generally the same advantages that functional, typed languages provide over
-untyped OO development). However, it can only be used to define DAGs of layers --
-recursive networks should be defined as Layer subclasses instead.
+함수형 API는 서브클래싱보다 간결하고 몇가지 다른 장점을 제공합니다(일반적으로
+타입이 없는 객체지향 개발에 비해 타입이 있는 함수형 언어의 장점과 동일합니다).
+하지만 유향 비순환 그래프(directed acyclic graph, DAG)로 정의하는 층에만 사용할 수 있습니다.
+순환 신경망은 서브클래싱 층으로 정의해야 합니다.
 
-Learn more about the Functional API [here](/guides/functional_api/).
+함수형 API에 대한 더 자세한 내용은 [여기를](/guides/functional_api/) 참고하세요.
 
-In your research workflows, you may often find yourself mix-and-matching OO models and
-Functional models.
+연구의 작업 흐름에 따라 객체지향 모델과 함수형 모델을 입맛에 맞게 섞어 쓸 수 있습니다.
 
-Note that the `Model` class also features built-in training & evaluation loops
-(`fit()` and `evaluate()`). You can always subclass the `Model` class
-(it works exactly like subclassing `Layer`) if you want to leverage these loops
-for your OO models.
+`Model` 클래스는 기본적으로 훈련과 평가 기능을 제공합니다(`fit()`과 `evaluate()`).
+객체지향 모델에서 이 기능을 사용하고 싶다면 언제든지 `Model` 클래스를 상속할 수 있습니다(`Layer`를
+서브클래싱하는 것과 동일하게 작동합니다).
 
 ---
-## End-to-end experiment example 1: variational autoencoders.
+## 엔드-투-엔드 예제 1: 변이형 오토인코더
 
-Here are some of things you've learned so far:
+지금까지 배운 내용은 다음과 같습니다:
 
-- A `Layer` encapsulate a state (created in `__init__` or `build`) and some computation
-(defined in `call`).
-- Layers can be recursively nested to create new, bigger computation blocks.
-- You can easily write highly hackable training loops by opening a
-`GradientTape`, calling your model inside the tape's scope, then retrieving
-gradients and applying them via an optimizer.
-- You can speed up your training loops using the `@tf.function` decorator.
-- Layers can create and track losses (typically regularization losses) via
-`self.add_loss()`.
+- `Layer`는 (`__init__`나 `build`에서 만든) 상태와 (`call`에서 정의한) 계산을 캡슐화합니다.
+- 층을 재귀적으로 중첩하여 더 큰 새로운 블록을 만들 수 있습니다.
+- `GradientTape`의 `with` 블록 안에서 모델을 호출하여 훈련 반복 과정을 마음껏 해킹할 수 있습니다.
+그다음 옵티마이저를 사용해 추출한 그레이디언트를 적용합니다.
+- `@tf.function` 데코레이터를 사용해 훈련 반복의 속도를 높일 수 있습니다.
+- 층은 `self.add_loss()`를 사용해 손실(일반적으로 규제 손실)을 만들고 기록할 수 있습니다.
 
-Let's put all of these things together into an end-to-end example: we're going to
-implement a Variational AutoEncoder (VAE). We'll train it on MNIST digits.
+이를 사용해 엔드-투-엔드 예제를 만들어 보겠습니다:
+변이형 오토인코더(Variational AutoEncoder, VAE)를 만들고 MNIST 데이터셋에서 훈련해 보죠.
 
-Our VAE will be a subclass of `Layer`, built as a nested composition of layers that
-subclass `Layer`. It will feature a regularization loss (KL divergence).
+이 VAE는 `Layer`의 서브클래스입니다.
+또한 `Layer`를 서브클래싱한 층을 조합하여 구성합니다.
+규제 손실(KL 발산)도 사용하겠습니다.
 
-Below is our model definition.
+모델을 정의합니다.
 
-First, we have an `Encoder` class, which uses a `Sampling` layer to map a MNIST digit to
-a latent-space triplet `(z_mean, z_log_var, z)`.
+먼저, `Sampling` 층을 사용해 MNIST 숫자 이미지를
+잠재 공간의 세 값 `(z_mean, z_log_var, z)`에 매핑하는 `Encoder` 클래스를 정의합니다.
 
 
 ```python
@@ -702,7 +692,7 @@ from tensorflow.keras import layers
 
 
 class Sampling(layers.Layer):
-    """Uses (z_mean, z_log_var) to sample z, the vector encoding a digit."""
+    """(z_mean, z_log_var)를 사용해 숫자 인코딩 벡터 z를 샘플링합니다."""
 
     def call(self, inputs):
         z_mean, z_log_var = inputs
@@ -713,7 +703,7 @@ class Sampling(layers.Layer):
 
 
 class Encoder(layers.Layer):
-    """Maps MNIST digits to a triplet (z_mean, z_log_var, z)."""
+    """MNIST 숫자 이미지를 (z_mean, z_log_var, z) 세 값으로 매핑합니다."""
 
     def __init__(self, latent_dim=32, intermediate_dim=64, **kwargs):
         super(Encoder, self).__init__(**kwargs)
@@ -731,14 +721,13 @@ class Encoder(layers.Layer):
 
 ```
 
-Next, we have a `Decoder` class, which maps the probabilistic latent space coordinates
-back to a MNIST digit.
+그다음 확률적 잠재 공간의 좌표를 MNIST 숫자 이미지로 매핑하는 `Decoder` 클래스를 정의합니다.
 
 
 ```python
 
 class Decoder(layers.Layer):
-    """Converts z, the encoded digit vector, back into a readable digit."""
+    """인코딩된 벡터 z를 숫자 이미지로 되돌립니다."""
 
     def __init__(self, original_dim, intermediate_dim=64, **kwargs):
         super(Decoder, self).__init__(**kwargs)
@@ -751,14 +740,14 @@ class Decoder(layers.Layer):
 
 ```
 
-Finally, our `VariationalAutoEncoder` composes together an encoder and a decoder, and
-creates a KL divergence regularization loss via `add_loss()`.
+마지막으로 `VariationalAutoEncoder`는 인코더와 디코더를 연결하고
+`add_loss()` 메서드를 사용해 KL 발산 규제를 추가합니다.
 
 
 ```python
 
 class VariationalAutoEncoder(layers.Layer):
-    """Combines the encoder and decoder into an end-to-end model for training."""
+    """인코더와 디코더를 연결하여 엔드-투-엔드 모델을 만듭니다."""
 
     def __init__(self, original_dim, intermediate_dim=64, latent_dim=32, **kwargs):
         super(VariationalAutoEncoder, self).__init__(**kwargs)
@@ -769,7 +758,7 @@ class VariationalAutoEncoder(layers.Layer):
     def call(self, inputs):
         z_mean, z_log_var, z = self.encoder(inputs)
         reconstructed = self.decoder(z)
-        # Add KL divergence regularization loss.
+        # KL 발산 규제 손실을 추가합니다.
         kl_loss = -0.5 * tf.reduce_mean(
             z_log_var - tf.square(z_mean) - tf.exp(z_log_var) + 1
         )
@@ -778,19 +767,19 @@ class VariationalAutoEncoder(layers.Layer):
 
 ```
 
-Now, let's write a training loop. Our training step is decorated with a `@tf.function` to
-compile into a super fast graph function.
+이제 훈련 반복문을 만듭니다.
+속도를 높이기 위해 훈련 스텝을 `@tf.function`으로 감싸서 그래프로 컴파일합니다.
 
 
 ```python
-# Our model.
+# 변이형 오토인코더 모델
 vae = VariationalAutoEncoder(original_dim=784, intermediate_dim=64, latent_dim=32)
 
-# Loss and optimizer.
+# 손실과 옵티마이저
 loss_fn = tf.keras.losses.MeanSquaredError()
 optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
 
-# Prepare a dataset.
+# 데이터셋을 준비합니다.
 (x_train, _), _ = tf.keras.datasets.mnist.load_data()
 dataset = tf.data.Dataset.from_tensor_slices(
     x_train.reshape(60000, 784).astype("float32") / 255
@@ -801,55 +790,52 @@ dataset = dataset.shuffle(buffer_size=1024).batch(32)
 @tf.function
 def training_step(x):
     with tf.GradientTape() as tape:
-        reconstructed = vae(x)  # Compute input reconstruction.
-        # Compute loss.
+        reconstructed = vae(x)  # 입력의 재구성을 만듭니다.
+        # 손실을 계산합니다.
         loss = loss_fn(x, reconstructed)
-        loss += sum(vae.losses)  # Add KLD term.
-    # Update the weights of the VAE.
+        loss += sum(vae.losses)  # KL 발산을 추가합니다.
+    # VAE의 가중치를 업데이트합니다.
     grads = tape.gradient(loss, vae.trainable_weights)
     optimizer.apply_gradients(zip(grads, vae.trainable_weights))
     return loss
 
 
-losses = []  # Keep track of the losses over time.
+losses = []  # 손실을 기록합니다.
 for step, x in enumerate(dataset):
     loss = training_step(x)
-    # Logging.
+    # 로깅
     losses.append(float(loss))
     if step % 100 == 0:
-        print("Step:", step, "Loss:", sum(losses) / len(losses))
+        print("스텝:", step, "손실:", sum(losses) / len(losses))
 
-    # Stop after 1000 steps.
-    # Training the model to convergence is left
-    # as an exercise to the reader.
+    # 1,000번 스텝 후에 멈춥니다.
+    # 수렴할 때까지 모델을 훈련하는 것은 독자들에게 숙제로 남겨 놓겠습니다.
     if step >= 1000:
         break
 ```
 
 <div class="k-default-codeblock">
 ```
-Step: 0 Loss: 0.3347511887550354
-Step: 100 Loss: 0.1275382568635563
-Step: 200 Loss: 0.10070774633789537
-Step: 300 Loss: 0.09029946264584991
-Step: 400 Loss: 0.08509199345423991
-Step: 500 Loss: 0.08188447440991145
-Step: 600 Loss: 0.07946804378448231
-Step: 700 Loss: 0.07804460771456255
-Step: 800 Loss: 0.07680668431646964
-Step: 900 Loss: 0.07582180831709527
-Step: 1000 Loss: 0.0748714953177161
+스텝: 0 손실: 0.3305237591266632
+스텝: 100 손실: 0.1259826598043489
+스텝: 200 손실: 0.09973363756243862
+스텝: 300 손실: 0.08969635382740204
+스텝: 400 손실: 0.08472337082325669
+스텝: 500 손실: 0.08154881409482803
+스텝: 600 손실: 0.07919551383164679
+스텝: 700 손실: 0.07779695814775672
+스텝: 800 손실: 0.0766082824894998
+스텝: 900 손실: 0.07564366062261685
+스텝: 1000 손실: 0.07469884266371613
 
 ```
 </div>
-As you can see, building and training this type of model in Keras
-is quick and painless.
+여기서 볼 수 있듯이 케라스에서는 이런 종류의 모델을 빠르고 간단하게 만들고 훈련할 수 있습니다.
 
-Now, you may find that the code above is somewhat verbose: we handle every little detail
-on our own, by hand. This gives the most flexibility, but it's also a bit of work.
+어쩌면 위 코드가 조금 장황하다고 생각할 수 있습니다.
+상세 사항을 모두 직접 만들었습니다. 이렇게 하면 유연성이 극대화되지만 작업을 조금 해야 합니다.
 
-Let's take a look at what the Functional API version of
-our VAE looks like:
+함수형 API 버전의 VAE를 살펴 보죠:
 
 
 ```python
@@ -857,7 +843,7 @@ original_dim = 784
 intermediate_dim = 64
 latent_dim = 32
 
-# Define encoder model.
+# 인코더 모델을 정의합니다.
 original_inputs = tf.keras.Input(shape=(original_dim,), name="encoder_input")
 x = layers.Dense(intermediate_dim, activation="relu")(original_inputs)
 z_mean = layers.Dense(latent_dim, name="z_mean")(x)
@@ -865,72 +851,69 @@ z_log_var = layers.Dense(latent_dim, name="z_log_var")(x)
 z = Sampling()((z_mean, z_log_var))
 encoder = tf.keras.Model(inputs=original_inputs, outputs=z, name="encoder")
 
-# Define decoder model.
+# 디코더 모델을 정의합니다.
 latent_inputs = tf.keras.Input(shape=(latent_dim,), name="z_sampling")
 x = layers.Dense(intermediate_dim, activation="relu")(latent_inputs)
 outputs = layers.Dense(original_dim, activation="sigmoid")(x)
 decoder = tf.keras.Model(inputs=latent_inputs, outputs=outputs, name="decoder")
 
-# Define VAE model.
+# VAE 모델을 정의합니다.
 outputs = decoder(z)
 vae = tf.keras.Model(inputs=original_inputs, outputs=outputs, name="vae")
 
-# Add KL divergence regularization loss.
+# KL 발산 규제 손실을 추가합니다.
 kl_loss = -0.5 * tf.reduce_mean(z_log_var - tf.square(z_mean) - tf.exp(z_log_var) + 1)
 vae.add_loss(kl_loss)
 ```
 
-Much more concise, right?
+훨씬 간소하지 않나요?
 
-By the way, Keras also features built-in training & evaluation loops on its `Model` class
-(`fit()` and `evaluate()`). Check it out:
+이 경우에도 케라스는 `Model` 클래스에 기본적으로 훈련 & 평가 반복을 제공합니다(`fit()`과 `evaluate()`).
+확인해 보죠:
 
 
 ```python
-# Loss and optimizer.
+# 손실과 옵티마이저
 loss_fn = tf.keras.losses.MeanSquaredError()
 optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
 
-# Prepare a dataset.
+# 데이터셋을 준비합니다.
 (x_train, _), _ = tf.keras.datasets.mnist.load_data()
 dataset = tf.data.Dataset.from_tensor_slices(
     x_train.reshape(60000, 784).astype("float32") / 255
 )
-dataset = dataset.map(lambda x: (x, x))  # Use x_train as both inputs & targets
+dataset = dataset.map(lambda x: (x, x))  # 입력과 타깃으로 x_train을 사용합니다.
 dataset = dataset.shuffle(buffer_size=1024).batch(32)
 
-# Configure the model for training.
+# 훈련을 위해 모델을 설정합니다.
 vae.compile(optimizer, loss=loss_fn)
 
-# Actually training the model.
+# 모델을 훈련합니다.
 vae.fit(dataset, epochs=1)
 ```
 
 <div class="k-default-codeblock">
 ```
-1875/1875 [==============================] - 2s 1ms/step - loss: 0.0713
+1875/1875 [==============================] - 2s 1ms/step - loss: 0.0712
 
-<tensorflow.python.keras.callbacks.History at 0x7f5ef0061f28>
+<tensorflow.python.keras.callbacks.History at 0x7f6d1037cc88>
 
 ```
 </div>
-The use of the Functional API and `fit` reduces our example from 65 lines to 25 lines
-(including model definition & training). The Keras philosophy is to offer you
-productivity-boosting features like
-these, while simultaneously empowering you to write everything yourself to gain absolute
-control over every little detail. Like we did in the low-level training loop two
-paragraphs earlier.
+함수형 API와 `fit` 메서드를 사용하여 65줄의 코드를 25줄로 줄였습니다(모델 정의와 훈련을 포함했습니다).
+케라스의 철학은 이렇게 생산성을 높일 수 있는 기능을 제공하는 것입니다.
+동시에 모든 것을 직접 만들어 상세 내용을 완벽히 제어할 수 있습니다.
+두 문단 앞에서 만들었던 저수준 훈련 반복문을 참고하세요.
 
 ---
-## End-to-end experiment example 2: hypernetworks.
+## 엔드-투-엔드 예제 2: 하이퍼네트워크
 
-Let's take a look at another kind of research experiment: hypernetworks.
+다른 종류의 에제인 하이퍼네트워크(hypernetwork)를 살펴 보겠습니다.
 
-A hypernetwork is a deep neural network whose weights are generated by another network
-(usually smaller).
+하이퍼네트워크는 가중치가 (일반적으로 더 작은) 다른 신경망에 의해 생성되는 심층 신경망입니다.
 
-Let's implement a really trivial hypernetwork: we'll use a small 2-layer network  to
-generate the weights of a larger 3-layer network.
+아주 작은 하이퍼네트워크를 만들어 보죠.
+2개의 층을 가진 신경망을 사용해 3개의 층을 가진 신경망의 가중치를 생성하겠습니다.
 
 
 
@@ -940,21 +923,21 @@ import numpy as np
 input_dim = 784
 classes = 10
 
-# This is the model we'll actually use to predict labels (the hypernetwork).
+# 레이블을 예측하기 위해 사용할 모델입니다(하이퍼네트워크).
 outer_model = keras.Sequential(
     [keras.layers.Dense(64, activation=tf.nn.relu), keras.layers.Dense(classes),]
 )
 
-# It doesn't need to create its own weights, so let's mark its layers
-# as already built. That way, calling `outer_model` won't create new variables.
+# 가중치를 만들 필요가 없으므로 미리 만들어졌다고 층을 설정하겠습니다.
+# 이렇게 하면 `outer_model`이 새로운 변수를 만들지 않습니다.
 for layer in outer_model.layers:
     layer.built = True
 
-# This is the number of weight coefficients to generate. Each layer in the
-# hypernetwork requires output_dim * input_dim + output_dim coefficients.
+# 생성할 가중치 개수입니다.
+# 하이퍼네트워크에 있는 층마다 output_dim * input_dim + output_dim개의 가중치가 필요합니다.
 num_weights_to_generate = (classes * 64 + classes) + (64 * input_dim + 64)
 
-# This is the model that generates the weights of the `outer_model` above.
+# `outer_model` 모델의 가중치를 생성하는 모델입니다.
 inner_model = keras.Sequential(
     [
         keras.layers.Dense(16, activation=tf.nn.relu),
@@ -963,112 +946,109 @@ inner_model = keras.Sequential(
 )
 ```
 
-This is our training loop. For each batch of data:
+훈련 반복을 구현합니다. 배치 데이터에 대해 다음을 수행합니다:
 
-- We use `inner_model` to generate an array of weight coefficients, `weights_pred`
-- We reshape these coefficients into kernel & bias tensors for the `outer_model`
-- We run the forward pass of the `outer_model` to compute the actual MNIST predictions
-- We run backprop through the weights of the `inner_model` to minimize the
-final classification loss
+- `inner_model`을 사용해 `weights_pred` 가중치 배열을 생성합니다.
+- 이 가중치를 `outer_model`의 커널과 편향 텐서로 바꿉니다.
+- `outer_model`의 정방향 계산을 실행하여 MNIST 데이터에 대한 예측을 계산합니다.
+- `inner_model`의 가중치로 역전파하여 최종 분류 손실을 최소화합니다.
 
 
 ```python
-# Loss and optimizer.
+# 손실과 옵티마이저
 loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4)
 
-# Prepare a dataset.
+# 데이터셋을 준비합니다.
 (x_train, y_train), _ = tf.keras.datasets.mnist.load_data()
 dataset = tf.data.Dataset.from_tensor_slices(
     (x_train.reshape(60000, 784).astype("float32") / 255, y_train)
 )
 
-# We'll use a batch size of 1 for this experiment.
+# 실험을 위해 배치 크기 1을 사용하겠습니다.
 dataset = dataset.shuffle(buffer_size=1024).batch(1)
 
 
 @tf.function
 def train_step(x, y):
     with tf.GradientTape() as tape:
-        # Predict weights for the outer model.
+        # outer_model의 가중치를 예측합니다.
         weights_pred = inner_model(x)
 
-        # Reshape them to the expected shapes for w and b for the outer model.
-        # Layer 0 kernel.
+        # outer_model의 w와 b의 크기에 맞게 바꿉니다.
+        # 첫 번째 층의 커널
         start_index = 0
         w0_shape = (input_dim, 64)
         w0_coeffs = weights_pred[:, start_index : start_index + np.prod(w0_shape)]
         w0 = tf.reshape(w0_coeffs, w0_shape)
         start_index += np.prod(w0_shape)
-        # Layer 0 bias.
+        # 첫 번째 층의 편향
         b0_shape = (64,)
         b0_coeffs = weights_pred[:, start_index : start_index + np.prod(b0_shape)]
         b0 = tf.reshape(b0_coeffs, b0_shape)
         start_index += np.prod(b0_shape)
-        # Layer 1 kernel.
+        # 두 번째 층의 커널
         w1_shape = (64, classes)
         w1_coeffs = weights_pred[:, start_index : start_index + np.prod(w1_shape)]
         w1 = tf.reshape(w1_coeffs, w1_shape)
         start_index += np.prod(w1_shape)
-        # Layer 1 bias.
+        # 첫 번째 층의 편향
         b1_shape = (classes,)
         b1_coeffs = weights_pred[:, start_index : start_index + np.prod(b1_shape)]
         b1 = tf.reshape(b1_coeffs, b1_shape)
         start_index += np.prod(b1_shape)
 
-        # Set the weight predictions as the weight variables on the outer model.
+        # outer_model의 가중치 변수로 설정합니다.
         outer_model.layers[0].kernel = w0
         outer_model.layers[0].bias = b0
         outer_model.layers[1].kernel = w1
         outer_model.layers[1].bias = b1
 
-        # Inference on the outer model.
+        # outer_model의 추론을 수행합니다.
         preds = outer_model(x)
         loss = loss_fn(y, preds)
 
-    # Train only inner model.
+    # inner_model만 훈련합니다.
     grads = tape.gradient(loss, inner_model.trainable_weights)
     optimizer.apply_gradients(zip(grads, inner_model.trainable_weights))
     return loss
 
 
-losses = []  # Keep track of the losses over time.
+losses = []  # 손실을 기록합니다.
 for step, (x, y) in enumerate(dataset):
     loss = train_step(x, y)
 
-    # Logging.
+    # 로깅
     losses.append(float(loss))
     if step % 100 == 0:
-        print("Step:", step, "Loss:", sum(losses) / len(losses))
+        print("스텝:", step, "손실:", sum(losses) / len(losses))
 
-    # Stop after 1000 steps.
-    # Training the model to convergence is left
-    # as an exercise to the reader.
+    # 1,000번 스텝 후에 멈춥니다.
+    # 수렴할 때까지 모델을 훈련하는 것은 독자들에게 숙제로 남겨 놓겠습니다.
     if step >= 1000:
         break
 ```
 
 <div class="k-default-codeblock">
 ```
-Step: 0 Loss: 3.2773594856262207
-Step: 100 Loss: 2.2238612356834864
-Step: 200 Loss: 1.971385248747176
-Step: 300 Loss: 1.967387991948761
-Step: 400 Loss: 1.8451272687343316
-Step: 500 Loss: 1.752986090407727
-Step: 600 Loss: 1.713871390493574
-Step: 700 Loss: 1.6370984546458185
-Step: 800 Loss: 1.6191200694949028
-Step: 900 Loss: 1.5621056455968003
-Step: 1000 Loss: 1.5415855406896082
+스텝: 0 손실: 2.67714262008667
+스텝: 100 손실: 2.2445193710598614
+스텝: 200 손실: 2.0487731538379372
+스텝: 300 손실: 1.9727423242587236
+스텝: 400 손실: 1.863683907714605
+스텝: 500 손실: 1.7882707601203072
+스텝: 600 손실: 1.7198451086716013
+스텝: 700 손실: 1.6620276075925302
+스텝: 800 손실: 1.6370855900843098
+스텝: 900 손실: 1.5464831831084713
+스텝: 1000 손실: 1.4798112565694723
 
 ```
 </div>
-Implementing arbitrary research ideas with Keras is straightforward and highly
-productive. Imagine trying out 25 ideas per day (20 minutes per experiment on average)!
+케라스로 어떤 연구 아이디어를 구현하더라도 쉽고 매우 생산적입니다.
+하루에 25개의 아이디어를 실험해 보세요(평균적으로 실험당 20분입니다)!
 
-Keras has been designed to go from idea to results as fast as possible, because we
-believe this is
-the key to doing great research.
+케라스는 가능한 빠르게 아이디어에서 결과를 만들 수 있도록 설계되었습니다.
+이것이 위대한 연구를 수행하는 핵심 열쇠라고 믿기 때문입니다.
 
-We hope you enjoyed this quick introduction. Let us know what you build with Keras!
+이 가이드가 도움이 되었기를 바랍니다. 케라스로 무언가 만들었다면 알려주세요!
