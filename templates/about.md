@@ -14,7 +14,7 @@
 - 여러 장치로 계산을 확장할 수 있습니다(예를 들면, Oak Ridge National Lab의 [Summit 수퍼컴퓨터](https://www.olcf.ornl.gov/summit/)는 GPU 27,000개를 가지고 있습니다).
 - 프로그램("그래프")를 서버, 브라우저, 모바일, 임베디드 장치와 같은 외부 런타임으로 내보낼 수 있습니다.
 
-케라스는 텐서플로 2.0의 고수준 API입니다. 머신러닝 문제, 특히 최신 딥러닝에 초점을 맞춘 사용하기 쉽고 생산성이 높은 인터페이스입니다. 
+케라스는 텐서플로 2.0의 고수준 API입니다. 머신러닝 문제, 특히 최신 딥러닝에 초점을 맞춘 사용하기 쉽고 생산성이 높은 인터페이스입니다.
 빠른 속도로 반복하여 머신러닝 솔루션을 개발하고 배포하기 위해 꼭 필요한 기능을 추상화한 기초 구성 요소를 제공합니다.
 
 케라스를 사용하면 엔지니어와 연구자들이 텐서플로 2.0의 확장성과 크로스-플랫폼 능력을 모두 활용할 수 있습니다.
@@ -84,9 +84,9 @@ classes = model.predict(x_test, batch_size=128)
 하지만 케라스는 매우 유연한 프레임워크로 최신 연구를 수행하는데 적합합니다.
 케라스는 **단계적인 복잡성 노출** 원칙을 따릅니다.
 처음 시작할 때는 간단하지만 필요하면 어떤 고급 방식도 다룰 수 있습니다.
-단계마다 추가로 필요한 내용을 학습하면 됩니다. 
+단계마다 추가로 필요한 내용을 학습하면 됩니다.
 
-위에서 몇 줄의 코드로 간단한 신경망을 훈련하고 평가하는 것과 비슷하게 
+위에서 몇 줄의 코드로 간단한 신경망을 훈련하고 평가하는 것과 비슷하게
 케라스를 사용해 새로운 훈련 방식이나 특이한 모델 구조를 빠르게 개발할 수 있습니다.
 다음은 텐서플로의 `GradientTape`과 케라스를 연결하여 저수준에서 훈련을 반복하는 예입니다:
 
@@ -161,6 +161,4 @@ for inputs, targets in dataset:
 >_"Oneiroi are beyond our unravelling - who can be sure what tale they tell? Not all that men look for comes to pass. Two gates there are that give passage to fleeting Oneiroi; one is made of horn, one of ivory. The Oneiroi that pass through sawn ivory are deceitful, bearing a message that will not be fulfilled; those that come out through polished horn have truth behind them, to be accomplished for men who see them."_ Homer, Odyssey 19. 562 ff (Shewring translation).
 
 ---
-
->**옮긴이** keras-ko.kr은 [keras.io](https://keras.io)의 비공식 한국어 번역입니다. keras-ko.kr은 최신 버전을 유지하지 않으며 keras.io의 내용과 다를 수 있습니다. 이 사이트에 포함된 코드와 문서에 대한 어떠한 책임도 지지않습니다. 문서 번역에 참여하시려면 [keras-ko](https://github.com/rickiepark/keras-ko) 깃허브를 참고하세요.
 

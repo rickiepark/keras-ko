@@ -13,7 +13,7 @@
 - [핸즈온 머신러닝 2: 사이킷런, 케라스, 텐서플로 2를 활용한 머신러닝, 딥러닝 완벽 실무](http://www.yes24.com/Product/Goods/89959711), 오레리랑 제롱(Aurélien Géron) 저 / 박해선 역
 - [케라스 창시자에게 배우는 딥러닝](http://www.yes24.com/Product/Goods/65050162), 프랑소와 숄레(François Chollet) 저 / 박해선 역
 - [머신러닝 교과서 with 파이썬, 사이킷런, 텐서플로](http://www.yes24.com/Product/Goods/73270768), 세바스찬 라시카(Sebastian Raschka), 비히드 미자리리(Vahid Mirjalili) 저 / 박해선 역
-- [Do it! 딥러닝 입문](http://www.yes24.com/Product/Goods/78896574), 박해선 저, 동영상: [유튜브](https://www.youtube.com/playlist?list=PLJN246lAkhQgbBx2Kag0wIZedn-P9KcH9), [구름 에듀](https://edu.goorm.io/lecture/21177/%EC%A0%80%EC%9E%90-%EC%A7%81%EA%B0%95-do-it-%EB%94%A5%EB%9F%AC%EB%8B%9D-%EC%9E%85%EB%AC%B8)
+- [Do it! 딥러닝 입문](http://www.yes24.com/Product/Goods/78896574), 박해선 저
 
 ---
 
