@@ -69,7 +69,7 @@ import tempfile
 from pathlib import Path
 
 TIMEOUT = 60 * 60
-MAX_LOC = 500
+MAX_LOC = 300
 
 
 def nb_to_py(nb_path, py_path):
@@ -320,8 +320,9 @@ def validate(py):
         if line.endswith(" "):
             raise ValueError("Found trailing space on line %d; line: `%s`" % (i, line))
     # Validate style with black
+
     tmp = tempfile.gettempdir()
-    fpath = os.path.join(tmp,  str(random.randint(1e6, 1e7)) + ".py")
+    fpath = os.path.join(tmp, str(random.randint(1e6, 1e7)) + ".py")
     f = open(fpath, "w")
     pre_formatting = "\n".join(lines)
     f.write(pre_formatting)
