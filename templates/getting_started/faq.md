@@ -1,10 +1,10 @@
-# Keras FAQ
+# 케라스 FAQ
 
-A list of frequently Asked Keras Questions.
+자주 묻는 케라스 질문 목록입니다.
 
-## General questions
+## 일반적인 질문
 
-- [How can I train a Keras model on multiple GPUs (on a single machine)?](#how-can-i-train-a-keras-model-on-multiple-gpus-on-a-single-machine)
+- [(한 대의 컴퓨터에 있는) 여러 GPU에서 어떻게 케라스 모델을 훈련할 수 있나요?](#한-대의-컴퓨터에-있는-여러-GPU에서-어떻게-케라스-모델을-훈련할-수-있나요)
 - [How can I distribute training across multiple machines?](#how-can-i-distribute-training-across-multiple-machines)
 - [How can I train a Keras model on TPU?](#how-can-i-train-a-keras-model-on-tpu)
 - [Where is the Keras configuration file stored?](#where-is-the-keras-configuration-file-stored)
@@ -14,7 +14,7 @@ A list of frequently Asked Keras Questions.
 - [How can I install HDF5 or h5py to save my models?](#how-can-i-install-hdf5-or-h5py-to-save-my-models)
 - [How should I cite Keras?](#how-should-i-cite-keras)
 
-## Training-related questions
+## 훈련과 관련된 질문
 
 - [What do "sample", "batch", and "epoch" mean?](#what-do-sample-batch-epoch-mean)
 - [Why is my training loss much higher than my testing loss?](#why-is-my-training-loss-much-higher-than-my-testing-loss)
@@ -29,7 +29,7 @@ A list of frequently Asked Keras Questions.
 - [What if I need to customize what `fit()` does?](#what-if-i-need-to-customize-what-fit-does)
 - [How can I train models in mixed precision?](#how-can-i-train-models-in-mixed-precision)
 
-## Modeling-related questions
+## 모델링과 관련된 질문
 
 - [How can I obtain the output of an intermediate layer (feature extraction)?](#how-can-i-obtain-the-output-of-an-intermediate-layer-feature-extraction)
 - [How can I use pre-trained models in Keras?](#how-can-i-use-pre-trained-models-in-keras)
@@ -38,34 +38,35 @@ A list of frequently Asked Keras Questions.
 
 ---
 
-## General questions
+## 일반적인 질문
 
 
-### How can I train a Keras model on multiple GPUs (on a single machine)?
+### (한 대의 컴퓨터에 있는) 여러 GPU에서 어떻게 케라스 모델을 훈련할 수 있나요?
 
-There are two ways to run a single model on multiple GPUs: **data parallelism** and **device parallelism**.
-In most cases, what you need is most likely data parallelism.
+하나의 모델을 여러 GPU에서 실행하는 방법은 **데이터 병렬화** 와 **장치 병렬화** 두가지 입니다.
+대부분의 경우 데이터 병렬화가 필요할 것입니다.
 
 
-**1) Data parallelism**
+**1) 데이터 병렬화**
 
-Data parallelism consists in replicating the target model once on each device, and using each replica to process a different fraction of the input data.
+데이터 병렬화는 타깃 모델을 각 장치에 복사하고 이 복사본을 사용해 입력 데이터의 일부분을 처리합니다.
 
-The best way to do data parallelism with Keras models is to use the `tf.distribute` API. Make sure to read our [guide about using `tf.distribute` with Keras](/guides/distributed_training/).
+케라스 모델로 데이터 병렬화를 구현하는 가장 좋은 방법은 `tf.distribute` API를 사용하는 것입니다.
+The best way to do data parallelism with Keras models is to use the `tf.distribute` API. [케라스와 `tf.distribute`에 대한 가이드](/guides/distributed_training/)를 읽어 보세요.
 
-The gist of it is the following:
+핵심 내용은 다음과 같습니다:
 
-a) instantiate a "distribution strategy" object, e.g. `MirroredStrategy` (which replicates your model on each available device and keeps the state of each model in sync):
+a) "분산 전략" 객체를 만듭니다. 예를 들면 (모델을 가능한 장치에 복제하고 모델의 상태를 동기화하는) `MirroredStrategy`가 있습니다:
 
 ```python
 strategy = tf.distribute.MirroredStrategy()
 ```
 
-b) Create your model and compile it under the strategy's scope:
+b) 이 전략의 범위(scope) 안에서 모델을 만들고 컴파일합니다:
 
 ```python
 with strategy.scope():
-    # This could be any kind of model -- Functional, subclass...
+    # 어떤 종류의 모델도 가능합니다. -- 함수형, 서브클래싱 등등
     model = tf.keras.Sequential([
         tf.keras.layers.Conv2D(32, 3, activation='relu', input_shape=(28, 28, 1)),
         tf.keras.layers.GlobalMaxPooling2D(),
@@ -76,38 +77,40 @@ with strategy.scope():
                   metrics=[tf.keras.metrics.SparseCategoricalAccuracy()])
 ```
 
-Note that it's important that all state variable creation should happen under the scope.
-So in case you create any additional variables, do that under the scope.
+중요한 것은 모든 상태 변수는 이 범위 안에서 생성되어야 합니다.
+따라서 어떤 변수를 추가로 만들려면 이 범주 안에서 만드세요.
 
-c) Call `fit()` with a `tf.data.Dataset` object as input. Distribution is broadly compatible with all callbacks, including custom callbacks.
-Note that this call does not need to be under the strategy scope, since it doesn't create new variables.
+c) `tf.data.Dataset` 객체를 입력으로 `fit()` 메서드를 호출합니다.
+분산 전략은 대체적으로 사용자 정의 콜백을 포함하여 모든 콜백과 호환됩니다.
+이 메서드는 전략 범위 안에서 호출할 필요가 없습니다. 따라서 새로운 변수를 만들지 않습니다.
 
 ```python
 model.fit(train_dataset, epochs=12, callbacks=callbacks)
 ```
 
 
-**2) Model parallelism**
+**2) 모델 병렬화**
 
-Model parallelism consists in running different parts of a same model on different devices. It works best for models that have a parallel architecture, e.g. a model with two branches.
+모델 병렬화는 여러 장치에서 한 모델의 다른 부분을 실행하는 것입니다.
+이 전략은 병렬 구조를 갖는 모델에 잘 맞습니다. 예를 들면 두 개의 브랜치가 있는 모델입니다.
 
-This can be achieved by using TensorFlow device scopes. Here is a quick example:
+이를 위해 텐서플로의 장치 범위를 사용합니다. 간단한 예는 다음과 같습니다:
 
 ```python
-# Model where a shared LSTM is used to encode two different sequences in parallel
+# 공유 LSTM을 사용해 두 개의 다른 시퀀스를 병렬로 인코딩하는 모델
 input_a = keras.Input(shape=(140, 256))
 input_b = keras.Input(shape=(140, 256))
 
 shared_lstm = keras.layers.LSTM(64)
 
-# Process the first sequence on one GPU
+# 한 GPU에서 첫 번째 시퀀스를 처리합니다.
 with tf.device_scope('/gpu:0'):
     encoded_a = shared_lstm(input_a)
-# Process the next sequence on another GPU
+# 다른 GPU에서 다음 시퀀스를 처리합니다.
 with tf.device_scope('/gpu:1'):
     encoded_b = shared_lstm(input_b)
 
-# Concatenate results on CPU
+# CPU에서 결과를 합칩니다.
 with tf.device_scope('/cpu:0'):
     merged_vector = keras.layers.concatenate(
         [encoded_a, encoded_b], axis=-1)
@@ -139,6 +142,8 @@ Importantly, you should:
 TPUs are a fast & efficient hardware accelerator for deep learning that is publicly available on Google Cloud.
 You can use TPUs via Colab, AI Platform (ML Engine), and Deep Learning VMs (provided the `TPU_NAME` environment variable is set on the VM).
 
+Make sure to read the [TPU usage guide](https://www.tensorflow.org/guide/tpu) first. Here's a quick summary:
+
 After connecting to a TPU runtime (e.g. by selecting the TPU runtime in Colab), you will need to detect your TPU using a `TPUClusterResolver`, which automatically detects a linked TPU on all supported platforms:
 
 ```python
@@ -162,7 +167,7 @@ Importantly, you should:
 
 - Make sure your dataset yields batches with a fixed static shape. A TPU graph can only process inputs with a constant shape.
 - Make sure you are able to read your data fast enough to keep the TPU utilized. Using the [TFRecord format](https://www.tensorflow.org/tutorials/load_data/tfrecord) to store your data may be a good idea.
-
+- Consider running multiple steps of gradient descent per graph execution in order to keep the TPU utilized. You can do this via the `experimental_steps_per_execution` argument `compile()`. It will yield a significant speed up for small models.
 
 ---
 
@@ -373,8 +378,8 @@ model = model_from_json(json_string)
 
 **4) Handling custom layers (or other custom objects) in saved models**
 
-If the model you want to load includes custom layers or other custom classes or functions, 
-you can pass them to the loading mechanism via the `custom_objects` argument: 
+If the model you want to load includes custom layers or other custom classes or functions,
+you can pass them to the loading mechanism via the `custom_objects` argument:
 
 ```python
 from tensorflow.keras.models import load_model
@@ -441,7 +446,7 @@ Please cite Keras in your publications if it helps your research. Here is an exa
 
 ---
 
-## Training-related questions
+## 훈련과 관련된 질문
 
 
 ### What do "sample", "batch", and "epoch" mean?
@@ -708,7 +713,7 @@ Because the `trainable` attribute and the `training` call argument are independe
 ```python
 layer = AutoScaleDropout(0.5)
 
-# Applies dropout at training time *and* inference time  
+# Applies dropout at training time *and* inference time
 # *and* learns the scaling factor during training
 y = layer(x, training=True)
 
@@ -716,7 +721,7 @@ assert len(layer.trainable_weights) == 1
 ```
 
 ```python
-# Applies dropout at training time *and* inference time  
+# Applies dropout at training time *and* inference time
 # with a *frozen* scaling factor
 
 layer = AutoScaleDropout(0.5)
@@ -939,11 +944,11 @@ class MyCustomModel(keras.Model):
 ### How can I train models in mixed precision?
 
 Keras has built-in support for mixed precision training on GPU and TPU.
-See [this extensive guide](https://www.tensorflow.org/guide/keras/mixed_precision). 
+See [this extensive guide](https://www.tensorflow.org/guide/keras/mixed_precision).
 
 ---
 
-## Modeling-related questions
+## 모델링과 관련된 질문
 
 
 ### How can I obtain the output of an intermediate layer (feature extraction)?
