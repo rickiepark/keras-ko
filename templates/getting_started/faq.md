@@ -4,8 +4,8 @@
 
 ## 일반적인 질문
 
-- [(한 대의 컴퓨터에 있는) 여러 GPU에서 어떻게 케라스 모델을 훈련할 수 있나요?](#한-대의-컴퓨터에-있는-여러-GPU에서-어떻게-케라스-모델을-훈련할-수-있나요)
-- [How can I distribute training across multiple machines?](#how-can-i-distribute-training-across-multiple-machines)
+- [(한 대의 컴퓨터에 있는) 여러 GPU에서 어떻게 케라스 모델을 훈련할 수 있나요?](#한-대의-컴퓨터에-있는-여러-gpu에서-어떻게-케라스-모델을-훈련할-수-있나요)
+- [여러 대의 머신으로 어떻게 훈련을 분산할 수 있나요?](#여러-대의-머신으로-어떻게-훈련을-분산할-수-있나요)
 - [How can I train a Keras model on TPU?](#how-can-i-train-a-keras-model-on-tpu)
 - [Where is the Keras configuration file stored?](#where-is-the-keras-configuration-file-stored)
 - [How to do hyperparameter tuning with Keras?](#how-to-do-hyperparameter-tuning-with-keras)
@@ -118,7 +118,7 @@ with tf.device_scope('/cpu:0'):
 
 ---
 
-### How can I distribute training across multiple machines?
+### 여러 대의 머신으로 어떻게 훈련을 분산할 수 있나요?
 
 Like for single-machine parallelism, the best way to do distributed training with Keras is to use
 the `tf.distribute` API, in particular [`MultiWorkerMirroredStrategy`](https://www.tensorflow.org/api_docs/python/tf/distribute/experimental/MultiWorkerMirroredStrategy).

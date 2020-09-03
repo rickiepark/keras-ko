@@ -82,7 +82,7 @@ class KerasIO:
                     name = fname[:-3]
                     example_path = name.split("/")[-1]
                     if example_path not in preexisting:
-                        f = open(path / fname)
+                        f = open(path / fname, encoding="utf-8")
                         f.readline()
                         title_line = f.readline()
                         f.close()
@@ -134,13 +134,13 @@ class KerasIO:
             '<img class="k-inline-icon" src="https://colab.research.google.com/img/colab_favicon.ico"/> '
             "[**코랩에서 보기**](https://colab.research.google.com/github/"
             + github_repo_dir
-            + "ipynb/"
+            + "/ipynb/"
             + name
             + ".ipynb"
             + ")  "
             '<span class="k-dot">•</span>'
             '<img class="k-inline-icon" src="https://github.com/favicon.ico"/> '
-            "[**깃허브 소스**](https://github.com/" + github_repo_dir + fname + ")",
+            "[**깃허브 소스**](https://github.com/" + github_repo_dir + "/" + fname + ")",
             "\n",
         ]
         md_content_lines = md_content_lines[:6] + button_lines + md_content_lines[6:]
@@ -243,7 +243,6 @@ class KerasIO:
         """e.g. add_guide('functional_api')"""
         if name.endswith(".py"):
             name = name[:-3]
-
         ipynb_dir = Path(self.guides_dir) / "ipynb"
         if not os.path.exists(ipynb_dir):
             os.makedirs(ipynb_dir)
@@ -555,7 +554,7 @@ class KerasIO:
                         self.site_dir, "/"
                     )
 
-                md_file = open(src_dir / fname)
+                md_file = open(src_dir / fname, encoding="utf-8")
                 md_content = md_file.read()
                 md_file.close()
                 md_content = replace_links(md_content)

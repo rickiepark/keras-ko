@@ -23,9 +23,9 @@ end-to-end: models that accept raw images or raw structured data as input; model
 handle feature normalization or feature value indexing on their own.
 
 ---
-## Available preprocesssing layers
+## Available preprocessing layers
 
-### Core preprocesssing layers
+### Core preprocessing layers
 
 - `TextVectorization` layer: turns raw strings into an encoded representation that can be
 read by an `Embedding` layer or `Dense` layer.
@@ -43,7 +43,7 @@ trick".
 features.
 - `StringLookup` layer: turns string categorical values into integers indices.
 - `IntegerLookup` layer: turns integer categorical values into integers indices.
-- `CategoryCrossing` layer: combines categorical features into co-occurence features.
+- `CategoryCrossing` layer: combines categorical features into co-occurrence features.
 E.g. if you have feature values "a" and "b", it can provide with the combination feature
 "a and b are present at the same time".
 
@@ -303,9 +303,9 @@ model.fit(x_train, y_train)
 
 <div class="k-default-codeblock">
 ```
-1563/1563 [==============================] - 1s 626us/step - loss: 2.1207
+1563/1563 [==============================] - 1s 687us/step - loss: 2.1805
 
-<tensorflow.python.keras.callbacks.History at 0x1622bc410>
+<tensorflow.python.keras.callbacks.History at 0x154d5c490>
 
 ```
 </div>

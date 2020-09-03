@@ -3,15 +3,6 @@
 This is a constantly-updated list of code examples that we're currently interested in.
 
 
-## Timeseries forecasting with LSTM for weather prediction
-
-Recommendations:
-
-- Use `timeseries_dataset_from_array` for data processing
-- Single LSTM layer + classification layer, trained with `fit()`
-- Add nice visualizations
-
-
 ## Transformer model for MIDI music generation
 
 [Reference TF/Keras implementation](https://github.com/jason9693/MusicTransformer-tensorflow2.0)
@@ -22,7 +13,7 @@ Recommendations:
 [Reference paper 1](https://arxiv.org/abs/1812.04948) [2](https://arxiv.org/abs/1912.04958)
 [Reference TF implementation](https://github.com/NVlabs/stylegan2)
 
-
+ - Currently being worked on by @parthivc and @Korusuke as of 07/14/20. See [issue #144](https://github.com/keras-team/keras-io/issues/144)
 
 ## Improve next-frame prediction with ConvLSTM
 
@@ -62,6 +53,7 @@ The dataset should have at least 50k samples and there should be at least a doze
 ## DETR: End-to-End Object Detection with Transformers
 
 [Reference implementation](https://github.com/facebookresearch/detr)
+[TF/Keras implementation](https://github.com/auvisusAI/detr-tensorflow)
 
 
 ## 3D image classification
@@ -70,6 +62,12 @@ Using a dataset of CT scans (a few are available on Kaggle).
 
 The model should use `Conv3D` layers.
 
+
+## Image similarity search engine using triplet loss
+
+A convnet trained with a triplet loss to estimate image similarity.
+It could be trained on something like [this dataset](https://sites.google.com/view/totally-looks-like-dataset)
+(other datasets are also possible).
 
 
 
