@@ -16,7 +16,7 @@
 
 ## 훈련과 관련된 질문
 
-- [What do "sample", "batch", and "epoch" mean?](#what-do-sample-batch-epoch-mean)
+- [What do "sample", "batch", and "epoch" mean?](#what-do-sample-batch-and-epoch-mean)
 - [Why is my training loss much higher than my testing loss?](#why-is-my-training-loss-much-higher-than-my-testing-loss)
 - [How can I use Keras with datasets that don't fit in memory?](#how-can-i-use-keras-with-datasets-that-dont-fit-in-memory)
 - [How can I regularly save Keras models during training?](#how-can-i-regularly-save-keras-models-during-training)
@@ -51,8 +51,7 @@
 
 데이터 병렬화는 타깃 모델을 각 장치에 복사하고 이 복사본을 사용해 입력 데이터의 일부분을 처리합니다.
 
-케라스 모델로 데이터 병렬화를 구현하는 가장 좋은 방법은 `tf.distribute` API를 사용하는 것입니다.
-The best way to do data parallelism with Keras models is to use the `tf.distribute` API. [케라스와 `tf.distribute`에 대한 가이드](/guides/distributed_training/)를 읽어 보세요.
+케라스 모델로 데이터 병렬화를 구현하려면 `tf.distribute` API를 사용하는 것이 가장 좋습니다. [케라스와 `tf.distribute`에 대한 가이드](/guides/distributed_training/)를 읽어 보세요.
 
 핵심 내용은 다음과 같습니다:
 
@@ -120,20 +119,14 @@ with tf.device_scope('/cpu:0'):
 
 ### 여러 대의 머신으로 어떻게 훈련을 분산할 수 있나요?
 
-Like for single-machine parallelism, the best way to do distributed training with Keras is to use
-the `tf.distribute` API, in particular [`MultiWorkerMirroredStrategy`](https://www.tensorflow.org/api_docs/python/tf/distribute/experimental/MultiWorkerMirroredStrategy).
-Make sure to read our [guide about using `tf.distribute` with Keras](/guides/distributed_training/).
+한 대의 머신에서 병렬화하는 것과 마찬가지로 케라스로 분산 훈련을 하려면 `tf.distribute` API인 [`MultiWorkerMirroredStrategy`](https://www.tensorflow.org/api_docs/python/tf/distribute/experimental/MultiWorkerMirroredStrategy)를 사용하는 것이 가장 좋습니다. [케라스와 `tf.distribute`에 대한 가이드](/guides/distributed_training/)를 읽어 보세요.
 
-Distributed training is somewhat more involved than single-machine multi-device training. Roughly, you will need
-to launch a remote cluster of machines, then run your code on a "chief" machine that holds a `TF_CONFIG` environment variable
-that specifies how to communicate with the other machines in the cluster. From there, the workflow is similar to using single-machine
-multi-GPU training, with the main difference being that you will use `MultiWorkerMirroredStrategy` as your distribution strategy.
+분산 훈련은 단일 머신에서 단일 장치를 사용해 훈련하는 것보다 조금 더 많은 수고가 듭니다. 원격 서버 클러스터를 구성하고 "치프(chief)" 머신에서 코드를 실행해야 합니다. 치프 머신은 `TF_CONFIG` 환경 변수에 클러스터 내 다른 머신과 통신하는 방법을 지정합니다. 그다음부터는 단일 머신 다중 GPU를 사용한 훈련과 비슷합니다. 주요 차이점은 분산 전략으로 `MultiWorkerMirroredStrategy`를 사용하는 것입니다.
 
-Importantly, you should:
+다음 작업은 필수적이며 중요합니다:
 
-- Make sure your dataset is so configured that all workers in the cluster are able to efficiently pull data from it (e.g. if your custer in on GCP, it's a good idea to host your data on GCS).
-- Make sure your training is fault-tolerant (e.g. by configuring a `ModelCheckpoint` callback).
-
+- 클러스터에 있는 모든 워커(worker)에서 데이터를 효율적으로 가져올 수 있도록 데이터셋이 준비되어야 합니다(예를 들어 GCP에서 클러스터를 구성했다면 GCS에 데이터를 놓는 것이 좋습니다).
+- 훈련 과정에서 발생할 수 있는 장애에 대비해야 합니다(예를 들어, `ModelCheckpoint` 콜백을 사용합니다).
 
 ---
 
