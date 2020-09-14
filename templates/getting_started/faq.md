@@ -6,7 +6,7 @@
 
 - [(한 대의 컴퓨터에 있는) 여러 GPU에서 어떻게 케라스 모델을 훈련할 수 있나요?](#한-대의-컴퓨터에-있는-여러-gpu에서-어떻게-케라스-모델을-훈련할-수-있나요)
 - [여러 대의 머신으로 어떻게 훈련을 분산할 수 있나요?](#여러-대의-머신으로-어떻게-훈련을-분산할-수-있나요)
-- [How can I train a Keras model on TPU?](#how-can-i-train-a-keras-model-on-tpu)
+- [어떻게 TPU로 케라스 모델을 훈련할 수 있나요?](#어떻게-TPU로-케라스-모델을-훈련할-수-있나요)
 - [Where is the Keras configuration file stored?](#where-is-the-keras-configuration-file-stored)
 - [How to do hyperparameter tuning with Keras?](#how-to-do-hyperparameter-tuning-with-keras)
 - [How can I obtain reproducible results using Keras during development?](#how-can-i-obtain-reproducible-results-using-keras-during-development)
@@ -130,37 +130,37 @@ with tf.device_scope('/cpu:0'):
 
 ---
 
-### How can I train a Keras model on TPU?
+### 어떻게 TPU로 케라스 모델을 훈련할 수 있나요?
 
-TPUs are a fast & efficient hardware accelerator for deep learning that is publicly available on Google Cloud.
-You can use TPUs via Colab, AI Platform (ML Engine), and Deep Learning VMs (provided the `TPU_NAME` environment variable is set on the VM).
+TPU는 딥러닝을 위한 고속 & 고효율의 하드웨어 가속기로 구글 클라우드 플랫폼에서 사용할 수 있습니다.
+코랩(Colab), AI 플랫폼(ML 엔진), 딥러닝 VM(VM에서 `TPU_NAME` 환경 변수를 설정해야 합니다)에서 TPU를 사용할 수 있습니다.
 
-Make sure to read the [TPU usage guide](https://www.tensorflow.org/guide/tpu) first. Here's a quick summary:
+먼저 [TPU 사용 가이드](https://www.tensorflow.org/guide/tpu)를 읽어 보세요. 간단히 요약하면 다음과 같습니다:
 
-After connecting to a TPU runtime (e.g. by selecting the TPU runtime in Colab), you will need to detect your TPU using a `TPUClusterResolver`, which automatically detects a linked TPU on all supported platforms:
+TPU 런타임에 연결한 후(예를 들어, 코랩에서 TPU 런타임을 선택한 다음), `TPUClusterResolver`를 사용해 TPU를 감지해야 합니다.
+이렇게 하면 지원하는 모든 플랫폼에서 TPU를 자동으로 감지합니다:
 
 ```python
-tpu = tf.distribute.cluster_resolver.TPUClusterResolver()  # TPU detection
-print('Running on TPU: ', tpu.cluster_spec().as_dict()['worker'])
+tpu = tf.distribute.cluster_resolver.TPUClusterResolver()  # TPU 감지
+print('TPU 워커: ', tpu.cluster_spec().as_dict()['worker'])
 
 tf.config.experimental_connect_to_cluster(tpu)
 tf.tpu.experimental.initialize_tpu_system(tpu)
 strategy = tf.distribute.experimental.TPUStrategy(tpu)
-print('Replicas: ', strategy.num_replicas_in_sync)
+print('레플리카: ', strategy.num_replicas_in_sync)
 
 with strategy.scope():
-    # Create your model here.
+    # 여기에서 모델을 만듭니다.
     ...
 ```
 
-After the initial setup, the workflow is similar to using single-machine
-multi-GPU training, with the main difference being that you will use `TPUStrategy` as your distribution strategy.
+초기 설정 이후 작업 절차는 단일 머신 다중 GPU 훈련과 비슷합니다. 분산 전략으로 `TPUStrategy`를 사용하는 것이 주요 차이점입니다.
 
-Importantly, you should:
+다음 작업은 필수적이며 중요합니다:
 
-- Make sure your dataset yields batches with a fixed static shape. A TPU graph can only process inputs with a constant shape.
-- Make sure you are able to read your data fast enough to keep the TPU utilized. Using the [TFRecord format](https://www.tensorflow.org/tutorials/load_data/tfrecord) to store your data may be a good idea.
-- Consider running multiple steps of gradient descent per graph execution in order to keep the TPU utilized. You can do this via the `experimental_steps_per_execution` argument `compile()`. It will yield a significant speed up for small models.
+- 데이터셋이 고정된 크기의 배치를 생성해야 합니다. TPU 그래프는 고정 크기의 입력만 처리할 수 있습니다.
+- TPU를 최대한 활용하기 위해 가능한 빠르게 데이터를 읽을 수 있어야 합니다. 이를 위해 [TFRecord 포맷](https://www.tensorflow.org/tutorials/load_data/tfrecord)으로 데이터를 저장하는 것이 좋습니다.
+- TPU를 최대한 활용하기 위해 그래프 실행마다 여러 번 경사 하강법 단계를 실행하세요. `compile()` 메서드의 `experimental_steps_per_execution` 매개변수로 지정할 수 있습니다. 모델이 작은 경우 속도가 크게 향상됩니다.
 
 ---
 
