@@ -7,8 +7,8 @@
 - [(한 대의 컴퓨터에 있는) 여러 GPU에서 어떻게 케라스 모델을 훈련할 수 있나요?](#한-대의-컴퓨터에-있는-여러-gpu에서-어떻게-케라스-모델을-훈련할-수-있나요)
 - [여러 대의 머신으로 어떻게 훈련을 분산할 수 있나요?](#여러-대의-머신으로-어떻게-훈련을-분산할-수-있나요)
 - [어떻게 TPU로 케라스 모델을 훈련할 수 있나요?](#어떻게-TPU로-케라스-모델을-훈련할-수-있나요)
-- [Where is the Keras configuration file stored?](#where-is-the-keras-configuration-file-stored)
-- [How to do hyperparameter tuning with Keras?](#how-to-do-hyperparameter-tuning-with-keras)
+- [케라스 설정 파일은 어디에 저장되나요?](#케라스-설정-파일은-어디에-저장되나요)
+- [케라스에서 하이퍼파라미터 튜닝을 어떻게 하나요?](#케라스에서-하이퍼파라미터-튜닝을-어떻게-하나요)
 - [How can I obtain reproducible results using Keras during development?](#how-can-i-obtain-reproducible-results-using-keras-during-development)
 - [What are my options for saving models?](#what-are-my-options-for-saving-models)
 - [How can I install HDF5 or h5py to save my models?](#how-can-i-install-hdf5-or-h5py-to-save-my-models)
@@ -164,19 +164,19 @@ with strategy.scope():
 
 ---
 
-### Where is the Keras configuration file stored?
+### 케라스 설정 파일은 어디에 저장되나요?
 
-The default directory where all Keras data is stored is:
+모든 케라스 데이터가 저장되는 기본 디렉토리는 다음과 같습니다:
 
 `$HOME/.keras/`
 
-For instance, for me, on a MacBook Pro, it's `/Users/fchollet/.keras/`.
+예를 들어 macOS의 경우 `/Users/fchollet/.keras/`에 저장됩니다.
 
-Note that Windows users should replace `$HOME` with `%USERPROFILE%`.
+윈도우 사용자는 `$HOME` 대신 `%USERPROFILE%`이 됩니다.
 
-In case Keras cannot create the above directory (e.g. due to permission issues), `/tmp/.keras/` is used as a backup.
+케라스가 (권한 이슈 등으로) 디렉토리를 만들 수 없는 경우에는 `/tmp/.keras/`가 사용됩니다.
 
-The Keras configuration file is a JSON file stored at `$HOME/.keras/keras.json`. The default configuration file looks like this:
+케라스 설정은 `$HOME/.keras/keras.json`에 JSON 파일로 저장됩니다. 기본 설정 내용은 다음과 같습니다:
 
 ```
 {
@@ -187,23 +187,20 @@ The Keras configuration file is a JSON file stored at `$HOME/.keras/keras.json`.
 }
 ```
 
-It contains the following fields:
+포함된 필드는 다음과 같습니다:
 
-- The image data format to be used as default by image processing layers and utilities (either `channels_last` or `channels_first`).
-- The `epsilon` numerical fuzz factor to be used to prevent division by zero in some operations.
-- The default float data type.
-- The default backend. This is legacy; nowadays there is only TensorFlow.
+- 이미지 처리 층과 유틸리티에서 기본으로 사용되는 이미지 데이터 포맷(`channels_last` 또는 `channels_first`).
+- 일부 연산에서 0 나눗셈을 방지하기 위해 사용되는 작은 양수 값인 `epsilon`.
+- 기본 부동 소수 데이터 타입.
+- 기본 백엔드(backend). 호환성을 위해 남아 있습니다. 지금은 텐서플로만 지원합니다.
 
-Likewise, cached dataset files, such as those downloaded with [`get_file()`](/utils/#get_file), are stored by default in `$HOME/.keras/datasets/`,
-and cached model weights files from Keras Applications are stored by default in `$HOME/.keras/models/`.
-
+[`get_file()`](/utils/#get_file)으로 다운로드한 데이터셋 파일은 기본으로 `$HOME/.keras/datasets/`에 저장됩니다. 케라스 애플리케이션에서 다운로드된 모델 가중치는 기본으로 `$HOME/.keras/models/`에 저장됩니다.
 
 ---
 
-### How to do hyperparameter tuning with Keras?
+### 케라스에서 하이퍼파라미터 튜닝을 어떻게 하나요?
 
-
-We recommend using [Keras Tuner](https://keras-team.github.io/keras-tuner/).
+[케라스 튜너(Tuner)](https://keras-team.github.io/keras-tuner/)를 사용하세요.
 
 ---
 
