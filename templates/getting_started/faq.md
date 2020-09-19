@@ -9,7 +9,7 @@
 - [어떻게 TPU로 케라스 모델을 훈련할 수 있나요?](#어떻게-TPU로-케라스-모델을-훈련할-수-있나요)
 - [케라스 설정 파일은 어디에 저장되나요?](#케라스-설정-파일은-어디에-저장되나요)
 - [케라스에서 하이퍼파라미터 튜닝을 어떻게 하나요?](#케라스에서-하이퍼파라미터-튜닝을-어떻게-하나요)
-- [How can I obtain reproducible results using Keras during development?](#how-can-i-obtain-reproducible-results-using-keras-during-development)
+- [케라스에서 개발 결과를 어떻게 재현할 수 있나요?](#케라스에서-개발-결과를-어떻게-재현할-수-있나요)
 - [What are my options for saving models?](#what-are-my-options-for-saving-models)
 - [How can I install HDF5 or h5py to save my models?](#how-can-i-install-hdf5-or-h5py-to-save-my-models)
 - [How should I cite Keras?](#how-should-i-cite-keras)
@@ -204,59 +204,55 @@ with strategy.scope():
 
 ---
 
-### How can I obtain reproducible results using Keras during development?
+### 케라스에서 개발 결과를 어떻게 재현할 수 있나요?
 
-During development of a model, sometimes it is useful to be able to obtain reproducible results from run to run in order to determine if a change in performance is due to an actual model or data modification, or merely a result of a new random seed.
+모델을 개발하는 동안 성능 변화가 모델이나 데이터 변경 때문인지 단순히 랜덤 초깃값 때문인지 구분하기 위해 이따금 실행 간에 얻은 결과를 재현하는 것이 필요합니다.
 
-First, you need to set the `PYTHONHASHSEED` environment variable to `0` before the program starts (not within the program itself). This is necessary in Python 3.2.3 onwards to have reproducible behavior for certain hash-based operations (e.g., the item order in a set or a dict, see [Python's documentation](https://docs.python.org/3.7/using/cmdline.html#envvar-PYTHONHASHSEED) or [issue #2280](https://github.com/keras-team/keras/issues/2280#issuecomment-306959926) for further details). One way to set the environment variable is when starting python like this:
+먼저 (프로그램 자체내에서 하는 것이 아니라) 프로그램을 시작하기 전에 `PYTHONHASHSEED` 환경 변수를 `0`으로 지정해야 합니다.
+파이썬 3.2.3 이상에서는 일부 해시 기반 연산때문에 재현을 위해서 필수적입니다(예를 들면 셋(set)이나 딕셔너리의 아이템 순서. 자세한 내용은 [파이썬 문서](https://docs.python.org/3.7/using/cmdline.html#envvar-PYTHONHASHSEED)나 [이슈 #2280](https://github.com/keras-team/keras/issues/2280#issuecomment-306959926)를 참고하세요). 다음처럼 파이썬을 실행하기 전에 환경 변수를 지정할 수 있습니다:
 
 ```shell
 $ cat test_hash.py
 print(hash("keras"))
-$ python3 test_hash.py                  # non-reproducible hash (Python 3.2.3+)
+$ python3 test_hash.py                  # 해시 재현 불가능 (파이썬 3.2.3+)
 8127205062320133199
-$ python3 test_hash.py                  # non-reproducible hash (Python 3.2.3+)
+$ python3 test_hash.py                  # 해시 재현 불가능 (Python 3.2.3+)
 3204480642156461591
-$ PYTHONHASHSEED=0 python3 test_hash.py # reproducible hash
+$ PYTHONHASHSEED=0 python3 test_hash.py # 해시 재현 가능
 4883664951434749476
-$ PYTHONHASHSEED=0 python3 test_hash.py # reproducible hash
+$ PYTHONHASHSEED=0 python3 test_hash.py # 해시 재현 가능
 4883664951434749476
 ```endshell
 
-Moreover, whenrunning on a GPU, some operations have non-deterministic outputs, in particular `tf.reduce_sum()`. This is due to the fact that GPUs run many operations in parallel, so the order of execution is not always guaranteed. Due to the limited precision of floats, even adding several numbers together may give slightly different results depending on the order in which you add them. You can try to avoid the non-deterministic operations, but some may be created automatically by TensorFlow to compute the gradients, so it is much simpler to just run the code on the CPU. For this, you can set the `CUDA_VISIBLE_DEVICES` environment variable to an empty string, for example:
+또한 GPU에서 실행할 때 `tf.reduce_sum()`과 같은 어떤 연산들의 출력은 결정적이지 않습다. 이는 GPU가 여러 연산을 병렬로 실행하기 때문입니다. 따라서 실행 순서가 항상 보장되지 않습니다. 부동 소수 정밀도가 제한적이기 때문에 몇 개의 실수라도 더하는 순서에 따라 결과가 조금 달라질 수 있습니다. 결정적이지 않은 연산을 의도적으로 피할 수 있지만 텐서플로가 그레이디언트를 계산하기 위해 자동으로 만드는 연산도 있습니다. 따라서 간단한 방법은 CPU에서 실행하는 것입니다. 이렇게 하려면 `CUDA_VISIBLE_DEVICES` 환경 변수를 빈 문자열로 설정합니다. 예를 들면 다음과 같습니다:
 
 ```shell
 $ CUDA_VISIBLE_DEVICES="" PYTHONHASHSEED=0 python your_program.py
 ```endshell
 
-The below snippet of code provides an example of how to obtain reproducible results:
+다음은 재현 가능한 결과를 얻기 위한 예시 코드입니다:
 
 ```python
 import numpy as np
 import tensorflow as tf
 import random as python_random
 
-# The below is necessary for starting Numpy generated random numbers
-# in a well-defined initial state.
+# 넘파이 랜덤 시드 값을 위해 필요합니다.
 np.random.seed(123)
 
-# The below is necessary for starting core Python generated random numbers
-# in a well-defined state.
+# 파이썬 랜덤 시드 값을 위해 필요합니다.
 python_random.seed(123)
 
-# The below set_seed() will make random number generation
-# in the TensorFlow backend have a well-defined initial state.
-# For further details, see:
+# set_seed() 함수는 텐서플로의 랜덤 숫자 생성을 위해 필요합니다.
+# 자세한 내용은 다음을 참조하세요:
 # https://www.tensorflow.org/api_docs/python/tf/random/set_seed
 tf.random.set_seed(1234)
 
-# Rest of code follows ...
+# 나머지 코드가 이어집니다 ...
 ```
 
-Note that you don't have to set seeds for individual initializers
-in your code if you do the steps above, because their seeds are determined
-by the combination of the seeds set above.
-
+위 과정을 수행하면 코드에서 개별적인 초기화 메서드를 위해 시드를 설정할 필요가 없습니다.
+이런 시드는 위에서 지정한 시드를 조합하여 결정되기 때문입니다.
 
 ---
 
