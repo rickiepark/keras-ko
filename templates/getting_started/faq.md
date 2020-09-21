@@ -10,9 +10,9 @@
 - [케라스 설정 파일은 어디에 저장되나요?](#케라스-설정-파일은-어디에-저장되나요)
 - [케라스에서 하이퍼파라미터 튜닝을 어떻게 하나요?](#케라스에서-하이퍼파라미터-튜닝을-어떻게-하나요)
 - [케라스에서 개발 결과를 어떻게 재현할 수 있나요?](#케라스에서-개발-결과를-어떻게-재현할-수-있나요)
-- [What are my options for saving models?](#what-are-my-options-for-saving-models)
-- [How can I install HDF5 or h5py to save my models?](#how-can-i-install-hdf5-or-h5py-to-save-my-models)
-- [How should I cite Keras?](#how-should-i-cite-keras)
+- [모델 저장 방법에는 어떤 것이 있나요?](#모델-저장-방법에는-어떤-것이-있나요)
+- [모델 저장을 위해 어떻게 HDF5나 h5py를 설치할 수 있나요?](#모델-저장을-위해-어떻게-HDF5나-h5py를-설치할-수-있나요)
+- [케라스를 인용해야 하나요?](#케라스를-인용해야-하나요)
 
 ## 훈련과 관련된 질문
 
@@ -256,71 +256,69 @@ tf.random.set_seed(1234)
 
 ---
 
-### What are my options for saving models?
+### 모델 저장 방법에는 어떤 것이 있나요?
 
-*Note: it is not recommended to use pickle or cPickle to save a Keras model.*
+*노트: pickle이나 cPickle을 사용해 케라스 모델을 저장하는 것은 권장되지 않습니다.*
 
-**1) Whole-model saving (configuration + weights)**
+**1) 전체 모델 저장 (설정 + 가중치)**
 
-Whole-model saving means creating a file that will contain:
+전체 모델을 저장하면 파일에 다음과 같은 것들이 포함됩니다:
 
-- the architecture of the model, allowing to re-create the model
-- the weights of the model
-- the training configuration (loss, optimizer)
-- the state of the optimizer, allowing to resume training exactly where you left off.
+- 모델을 재생성할 수 있는 모델 구조
+- 모델의 가중치
+- 훈련 설정 (손실, 옵티마이저)
+- 중지한 곳부터 훈련을 다시 시작할 수 있는 옵티마이저 상태
 
-The default and recommend format to use is the TensorFlow [SavedModel format](https://www.tensorflow.org/guide/saved_model).
-In TensorFlow 2.0 and higher, you can just do: `model.save(your_file_path)`.
+텐서플로의 [SavedModel](https://www.tensorflow.org/guide/saved_model) 포맷이 기본값이며 권장됩니다.
+텐서플로 2.0 이상에서는 `model.save(your_file_path)`로 저장할 수 있습니다.
 
-For explicitness, you can also use `model.save(your_file_path, save_format='tf')`.
+명확하게 표현하려면 `model.save(your_file_path, save_format='tf')`와 같이 사용할 수 있습니다.
 
-Keras still supports its original HDF5-based saving format. To save a model in HDF5 format,
-use `model.save(your_file_path, save_format='h5')`. Note that this option is automatically used
-if `your_file_path` ends in `.h5` or `.keras`.
-Please also see [How can I install HDF5 or h5py to save my models?](#how-can-i-install-hdf5-or-h5py-to-save-my-models) for instructions on how to install `h5py`.
+케라스는 아직 원래 HDF5 저장 포맷을 지원합니다. HDF5 포맷으로 모델을 저장하려면 `model.save(your_file_path, save_format='h5')`을 사용하세요.
+`your_file_path`가 `.h5`나 `.keras`로 끝나면 자동으로 이 옵션이 선택됩니다.
+`h5py`를 설치하는 방법은 [모델 저장을 위해 어떻게 HDF5나 h5py를 설치할 수 있나요?](#모델-저장을-위해-어떻게-HDF5나-h5py를-설치할-수-있나요) 항목을 참고하세요.
 
-After saving a model in either format, you can reinstantiate it via `model = keras.models.load_model(your_file_path)`.
+어느 포맷이든지 모델을 저장한 후에 `model = keras.models.load_model(your_file_path)`로 모델 객체를 다시 만들 수 있습니다.
 
-**Example:**
+**예제:**
 
 ```python
 from tensorflow.keras.models import load_model
 
-model.save('my_model')  # creates a HDF5 file 'my_model.h5'
-del model  # deletes the existing model
+model.save('my_model')  # HDF5 파일 'my_model.h5'을 만듭니다
+del model  # 기존 모델을 삭제합니다
 
-# returns a compiled model
-# identical to the previous one
+# 이전과 동일한 컴파일된 모델을 반환합니다
 model = load_model('my_model')
 ```
 
 
-**2) Weights-only saving**
+**2) 가중치만 저장**
 
 
-If you need to save the **weights of a model**, you can do so in HDF5 with the code below:
+**모델의 가중치**를 저장하고 싶을 때에도 다음 코드와 같이 HDF5 파일로 저장할 수 있습니다:
 
 ```python
 model.save_weights('my_model_weights.h5')
 ```
 
-Assuming you have code for instantiating your model, you can then load the weights you saved into a model with the *same* architecture:
+모델 객체를 만들었다고 가정하고 저장된 가중치를 *동일한* 구조의 모델로 로드할 수 있습니다:
 
 ```python
 model.load_weights('my_model_weights.h5')
 ```
 
-If you need to load the weights into a *different* architecture (with some layers in common), for instance for fine-tuning or transfer-learning, you can load them by *layer name*:
+미세 조정이나 전이 학습을 위해 가중치를 (일부 층만 같은) *다른* 모델 구조에 로드하려면 *층 이름*으로 로드할 수 있습니다:
 
 ```python
 model.load_weights('my_model_weights.h5', by_name=True)
 ```
 
-Example:
+예제:
 
 ```python
 """
-Assuming the original model looks like this:
+원래 모델이 다음과 같다고 가정합니다:
 
 model = Sequential()
 model.add(Dense(2, input_dim=3, name='dense_1'))
@@ -329,51 +327,50 @@ model.add(Dense(3, name='dense_2'))
 model.save_weights(fname)
 """
 
-# new model
+# 새로운 모델
 model = Sequential()
-model.add(Dense(2, input_dim=3, name='dense_1'))  # will be loaded
-model.add(Dense(10, name='new_dense'))  # will not be loaded
+model.add(Dense(2, input_dim=3, name='dense_1'))  # 가중치 적재 가능
+model.add(Dense(10, name='new_dense'))  # 가중치 적재 불가능
 
-# load weights from first model; will only affect the first layer, dense_1.
+# 원래 모델에서 로드한 가중치는 첫 번째 층인 dense_1에만 영향을 미칩니다.
 model.load_weights(fname, by_name=True)
 ```
 
-Please also see [How can I install HDF5 or h5py to save my models?](#how-can-i-install-hdf5-or-h5py-to-save-my-models) for instructions on how to install `h5py`.
+`h5py`를 설치하는 방법은 [모델 저장을 위해 어떻게 HDF5나 h5py를 설치할 수 있나요?](#모델-저장을-위해-어떻게-HDF5나-h5py를-설치할-수-있나요) 항목을 참고하세요.
 
 
-**3) Configuration-only saving (serialization)**
+**3) 설정만 저장 (직렬화)**
 
 
-If you only need to save the **architecture of a model**, and not its weights or its training configuration, you can do:
+가중치나 훈련 설정은 제외하고 **모델의 구조**만 저장하려면 다음과 같이 합니다:
 
 ```python
-# save as JSON
+# JSON으로 저장합니다.
 json_string = model.to_json()
 ```
 
-The generated JSON file is human-readable and can be manually edited if needed.
+생성된 JSON은 사람이 읽을 수 있고 필요하면 수동으로 고칠 수 있습니다.
 
-You can then build a fresh model from this data:
+이 파일에서 새로운 모델을 만들 수 있습니다:
 
 ```python
-# model reconstruction from JSON:
+# JSON에서 모델 재생성:
 from tensorflow.keras.models import model_from_json
 model = model_from_json(json_string)
 ```
 
 
-**4) Handling custom layers (or other custom objects) in saved models**
+**4) 사용자 정의 층 (또는 사용자 정의 객체) 다루기**
 
-If the model you want to load includes custom layers or other custom classes or functions,
-you can pass them to the loading mechanism via the `custom_objects` argument:
+로드하려는 모델에 사용자 정의 층 또는 사용자 정의 클래스나 함수가 포함되어 있다면 `custom_objects` 매개변수를 통해 로딩 메카니즘을 전달할 수 있습니다:
 
 ```python
 from tensorflow.keras.models import load_model
-# Assuming your model includes instance of an "AttentionLayer" class
+# "AttentionLayer" 클래스의 객체를 포함한 모델이라고 가정합니다.
 model = load_model('my_model.h5', custom_objects={'AttentionLayer': AttentionLayer})
 ```
 
-Alternatively, you can use a [custom object scope](https://keras.io/utils/#customobjectscope):
+또는 [CustomObjectScope](https://keras.io/utils/#customobjectscope)를 사용할 수 있습니다:
 
 ```python
 from tensorflow.keras.utils import CustomObjectScope
@@ -382,7 +379,7 @@ with CustomObjectScope({'AttentionLayer': AttentionLayer}):
     model = load_model('my_model.h5')
 ```
 
-Custom objects handling works the same way for `load_model` & `model_from_json`:
+사용자 정의 객체를 다루는 것은 `load_model`이나 `model_from_json`과 같습니다:
 
 ```python
 from tensorflow.keras.models import model_from_json
@@ -391,11 +388,11 @@ model = model_from_json(json_string, custom_objects={'AttentionLayer': Attention
 
 ---
 
-### How can I install HDF5 or h5py to save my models?
+### 모델 저장을 위해 어떻게 HDF5나 h5py를 설치할 수 있나요?
 
-In order to save your Keras models as HDF5 files, Keras uses the h5py Python package. It is
-a dependency of Keras and should be installed by default. On Debian-based
-distributions, you will have to additionally install `libhdf5`:
+케라스 모델을 HDF5 파일로 저장하기 위해 케라스는 h5py 파이썬 패키지를 사용합니다.
+따라서 미리 설치되어 있어야 합니다.
+데비안 기반의 배포판에서는 `libhdf5`도 설치해야 합니다:
 
 <div class="k-default-code-block">
 ```
@@ -403,23 +400,22 @@ sudo apt-get install libhdf5-serial-dev
 ```
 </div>
 
-If you are unsure if h5py is installed you can open a Python shell and load the
-module via
+h5py가 설치되었는지 확인하려면 파이썬 셸을 열고 다음처럼 모듈을 임포트합니다.
 
 ```
 import h5py
 ```
 
-If it imports without error it is installed, otherwise you can find
-[detailed installation instructions here](http://docs.h5py.org/en/latest/build.html).
+에러 없이 임포트되면 정상적으로 설치된 것입니다.
+그렇지 않으면 자세한 [설치 가이드](http://docs.h5py.org/en/latest/build.html)를 참고하세요.
 
 
 
 ---
 
-### How should I cite Keras?
+### 케라스를 인용해야 하나요?
 
-Please cite Keras in your publications if it helps your research. Here is an example BibTeX entry:
+케라스가 연구에 도움이 되었다면 논문에 케라스를 인용해 주세요. 다음은 BibTeX에 등록하는 예입니다:
 
 <code style="color: gray;">
 @misc{chollet2015keras,<br>
