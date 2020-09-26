@@ -35,8 +35,8 @@ import tutobooks
 import generate_tf_guides
 
 
-EXAMPLES_GH_LOCATION = Path("rickiepark") / "keras-ko" / "blob" / "master" / "examples"
-GUIDES_GH_LOCATION = Path("rickiepark") / "keras-ko" / "blob" / "master" / "guides"
+EXAMPLES_GH_LOCATION = Path("adsidelab") / "keras-ko" / "blob" / "master" / "examples"
+GUIDES_GH_LOCATION = Path("adsidelab") / "keras-ko" / "blob" / "master" / "guides"
 
 
 class KerasIO:
