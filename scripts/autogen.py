@@ -543,7 +543,6 @@ class KerasIO:
                     # Render as index.html
                     target_path = Path(target_dir) / "index.html"
                     relative_url = (str(target_dir) + "/").replace(self.site_dir, "/")
-                    relative_url = relative_url.replace("//", "/")
                 else:
                     # Render as fname_no_ext/index.tml
                     fname_no_ext = ".".join(fname.split(".")[:-1])
@@ -553,6 +552,7 @@ class KerasIO:
                     relative_url = (str(full_target_dir) + "/").replace(
                         self.site_dir, "/"
                     )
+                relative_url = relative_url.replace("//", "/")
 
                 md_file = open(src_dir / fname, encoding="utf-8")
                 md_content = md_file.read()
