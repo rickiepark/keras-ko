@@ -8,6 +8,7 @@ black==19.10b0
 pathlib
 tensorflow
 tensorflow_datasets
+PyYAML
 jupyter
 matplotlib
 scikit-learn

@@ -269,7 +269,7 @@ model.compile(optimizer="adam", loss="sparse_categorical_crossentropy")
 model.fit(x_train, y_train)
 
 """
-## Encoding string categorical features via one-hot encoding
+### Encoding string categorical features via one-hot encoding
 """
 
 # Define some toy data
@@ -329,7 +329,7 @@ You can see the `IntegerLookup` and `CategoryEncoding` layers in action in the e
 """
 
 """
-## Applying the hashing trick to an integer categorical feature
+### Applying the hashing trick to an integer categorical feature
 
 If you have a categorical feature that can take many different values (on the order of
 10e3 or higher), where each value only appears a few times in the data,
@@ -351,7 +351,7 @@ encoded_data = encoder(hasher(data))
 print(encoded_data.shape)
 
 """
-## Encoding text as a sequence of token indices
+### Encoding text as a sequence of token indices
 
 This is how you should preprocess text to be passed to an `Embedding` layer.
 """
@@ -396,7 +396,7 @@ do in the text classification example above).
 """
 
 """
-## Encoding text as a dense matrix of ngrams with multi-hot encoding
+### Encoding text as a dense matrix of ngrams with multi-hot encoding
 
 This is how you should preprocess text to be passed to a `Dense` layer.
 """
@@ -416,6 +416,12 @@ text_vectorizer = preprocessing.TextVectorization(output_mode="binary", ngrams=2
 # Index the bigrams via `adapt()`
 text_vectorizer.adapt(data)
 
+print(
+    "Encoded text:\n",
+    text_vectorizer(["The Brain is deeper than the sea"]).numpy(),
+    "\n",
+)
+
 # Create a Dense model
 inputs = keras.Input(shape=(1,), dtype="string")
 x = text_vectorizer(inputs)
@@ -426,8 +432,10 @@ model = keras.Model(inputs, outputs)
 test_data = tf.constant(["The Brain is deeper than the sea"])
 test_output = model(test_data)
 
+print("Model output:", test_output)
+
 """
-## Encoding text as a dense matrix of ngrams with TF-IDF weighting
+### Encoding text as a dense matrix of ngrams with TF-IDF weighting
 
 This is an alternative way of preprocessing text before passing it to a `Dense` layer.
 """
@@ -447,6 +455,12 @@ text_vectorizer = preprocessing.TextVectorization(output_mode="tf-idf", ngrams=2
 # Index the bigrams and learn the TF-IDF weights via `adapt()`
 text_vectorizer.adapt(data)
 
+print(
+    "Encoded text:\n",
+    text_vectorizer(["The Brain is deeper than the sea"]).numpy(),
+    "\n",
+)
+
 # Create a Dense model
 inputs = keras.Input(shape=(1,), dtype="string")
 x = text_vectorizer(inputs)
@@ -456,3 +470,4 @@ model = keras.Model(inputs, outputs)
 # Call the model on test data (which includes unknown tokens)
 test_data = tf.constant(["The Brain is deeper than the sea"])
 test_output = model(test_data)
+print("Model output:", test_output)
