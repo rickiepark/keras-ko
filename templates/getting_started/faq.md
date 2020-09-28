@@ -16,8 +16,8 @@
 
 ## 훈련과 관련된 질문
 
-- [What do "sample", "batch", and "epoch" mean?](#what-do-sample-batch-and-epoch-mean)
-- [Why is my training loss much higher than my testing loss?](#why-is-my-training-loss-much-higher-than-my-testing-loss)
+- ['샘플', '배치', '에포크'가 무슨 뜻인가요?](#샘플-배치-에포크가-무슨-뜻인가요)
+- [훈련 손실이 왜 테스트 손실보다 훨씬 높나요?](#훈련-손실이-왜-테스트-손실보다-훨씬-높나요)
 - [How can I use Keras with datasets that don't fit in memory?](#how-can-i-use-keras-with-datasets-that-dont-fit-in-memory)
 - [How can I regularly save Keras models during training?](#how-can-i-regularly-save-keras-models-during-training)
 - [How can I interrupt training when the validation loss isn't decreasing anymore?](#how-can-i-interrupt-training-when-the-validation-loss-isnt-decreasing-anymore)
@@ -431,28 +431,25 @@ import h5py
 ## 훈련과 관련된 질문
 
 
-### What do "sample", "batch", and "epoch" mean?
+### '샘플', '배치', '에포크'가 무슨 뜻인가요?
 
 
-Below are some common definitions that are necessary to know and understand to correctly utilize Keras `fit()`:
+다음 정의는 케라스의 `fit()` 메서드를 올바르게 사용하기 위해 꼭 알아야 합니다:
 
-- **Sample**: one element of a dataset. For instance, one image is a **sample** in a convolutional network. One audio snippet is a **sample** for a speech recognition model.
+- **샘플(sample)**: 데이터셋의 한 원소. 예를 들어 하나의 이미지는 합성곱 신경망에서 하나의 **샘플**입니다. 하나의 오디오 클립은 음성 인식 모델을 위한 하나의 **샘플**입니다.
 
-- **Batch**: a set of *N* samples. The samples in a **batch** are processed independently, in parallel. If training, a batch results in only one update to the model. A **batch** generally approximates the distribution of the input data better than a single input. The larger the batch, the better the approximation; however, it is also true that the batch will take longer to process and will still result in only one update. For inference (evaluate/predict), it is recommended to pick a batch size that is as large as you can afford without going out of memory (since larger batches will usually result in faster evaluation/prediction).
+- **배치(batch)**: *N* 개의 샘플 집합. **배치**에 있는 샘플은 독립적이며 병렬로 처리됩니다. 훈련에서 하나의 배치는 모델을 한 번만 업데이트합니다. **배치**는 일반적으로 하나의 샘플보다 입력 데이터의 분포를 더 잘 근사합니다. 배치가 클수록 더 잘 근사합니다. 하지만 이런 배치는 처리 시간이 오래 걸릴 수 있고 여전히 한 번만 모델을 업데이트합니다. 추론(평가나 예측)에서는 메모리가 허락하는한 큰 배치를 만드는 것이 권장됩니다(배치가 클수록 평가나 예측 속도가 빨라지기 때문입니다).
 
-- **Epoch**: an arbitrary cutoff, generally defined as "one pass over the entire dataset", used to separate training into distinct phases, which is useful for logging and periodic evaluation.
-When using `validation_data` or `validation_split` with the `fit` method of Keras models, evaluation will be run at the end of every **epoch**.
-Within Keras, there is the ability to add [callbacks](/api/callbacks/) specifically designed to be run at the end of an **epoch**. Examples of these are learning rate changes and model checkpointing (saving).
+- **에포크(epoch)**: 일반적으로 "전체 데이터셋을 한 번 처리하는 것"으로 정의하는 임의의 기준. 훈련을 여러 단계로 나누기 위해 사용합니다. 로깅과 반복적인 평가에 도움이 됩니다. 케라스 모델의 `fit` 메서드에 `validation_data`나 `validation_split` 매개변수를 사용할 때 매 **에포크** 종료 후에 평가가 수행됩니다. 케라스에서는 **에포크** 종료 시에 실행할 수 있도록 특별히 설계된 [콜백(callback)](/api/callbacks/)을 추가할 수 있습니다. 예를 들어 학습률을 바꾸고 모델을 저장합니다.
 
 ---
 
-### Why is my training loss much higher than my testing loss?
+### 훈련 손실이 왜 테스트 손실보다 훨씬 높나요?
 
 
-A Keras model has two modes: training and testing. Regularization mechanisms, such as Dropout and L1/L2 weight regularization, are turned off at testing time.
-They are reflected in the training time loss but not in the test time loss.
+케라스 모델은 훈련과 테스트 두 개의 모드(mode)를 가집니다. 드롭아웃(dropout)이나 L1/L2 가중치 규제는 테스트에서 작동하지 않습니다. 훈련 손실에는 반영되지만 테스트 손실에는 반영되지 않습니다(역주-드롭아웃이 손실 함수 계산에 직접 포함되지 않지만 훈련하는 동안 일부 뉴런을 무작위로 제거하기 때문에 일반적으로 성능이 낮아집니다).
 
-Besides, the training loss is the average of the losses over each batch of training data. Because your model is changing over time, the loss over the first batches of an epoch is generally higher than over the last batches. On the other hand, the testing loss for an epoch is computed using the model as it is at the end of the epoch, resulting in a lower loss.
+또한 훈련 손실은 훈련 데이터의 각 배치에 대한 손실의 평균입니다. 시간이 지남에 따라 모델이 바뀌므로 일반적으로 에포크의 첫 번째 배치 손실이 마지막 배치 손실보다 높습니다. 반면에 한 에포크의 테스트 손실은 에포크가 완료된 모델을 사용해 계산하기 때문에 손실이 더 낮습니다.
 
 
 ---
