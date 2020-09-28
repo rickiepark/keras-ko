@@ -6,7 +6,7 @@
 **Description:** 케라스로 실전 머신러닝 솔루션을 만들기 위해 알아야 할 모든 것.
 
 
-<img class="k-inline-icon" src="https://colab.research.google.com/img/colab_favicon.ico"/> [**코랩에서 보기**](https://colab.research.google.com/github/rickiepark/keras-ko/blob/master/guides/ipynb/intro_to_keras_for_engineers.ipynb)  <span class="k-dot">•</span><img class="k-inline-icon" src="https://github.com/favicon.ico"/> [**깃허브 소스**](https://github.com/rickiepark/keras-ko/blob/master/guides/intro_to_keras_for_engineers.py)
+<img class="k-inline-icon" src="https://colab.research.google.com/img/colab_favicon.ico"/> [**코랩에서 보기**](https://colab.research.google.com/github/adsidelab/keras-ko/blob/master/guides/ipynb/intro_to_keras_for_engineers.ipynb)  <span class="k-dot">•</span><img class="k-inline-icon" src="https://github.com/favicon.ico"/> [**깃허브 소스**](https://github.com/adsidelab/keras-ko/blob/master/guides/intro_to_keras_for_engineers.py)
 
 
 
@@ -527,9 +527,9 @@ Trainable params: 118,282
 Non-trainable params: 0
 _________________________________________________________________
 넘파이 데이터에서 훈련하기
-938/938 [==============================] - 1s 835us/step - loss: 0.2664
+938/938 [==============================] - 1s 838us/step - loss: 0.2675
 데이터셋에서 훈련하기
-938/938 [==============================] - 1s 842us/step - loss: 0.1172
+938/938 [==============================] - 1s 875us/step - loss: 0.1197
 
 ```
 </div>
@@ -544,7 +544,7 @@ print(history.history)
 
 <div class="k-default-codeblock">
 ```
-{'loss': [0.11722308397293091]}
+{'loss': [0.11972887814044952]}
 
 ```
 </div>
@@ -574,7 +574,7 @@ history = model.fit(dataset, epochs=1)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 894us/step - loss: 0.0827 - acc: 0.9745
+938/938 [==============================] - 1s 898us/step - loss: 0.0831 - acc: 0.9747
 
 ```
 </div>
@@ -591,7 +591,7 @@ history = model.fit(dataset, epochs=1, validation_data=val_dataset)
 
 <div class="k-default-codeblock">
 ```
-938/938 [==============================] - 1s 1ms/step - loss: 0.0568 - acc: 0.9827 - val_loss: 0.0846 - val_acc: 0.9748
+938/938 [==============================] - 1s 1ms/step - loss: 0.0566 - acc: 0.9829 - val_loss: 0.1092 - val_acc: 0.9671
 
 ```
 </div>
@@ -670,8 +670,8 @@ print("정확도: %.2f" % acc)
 
 <div class="k-default-codeblock">
 ```
-157/157 [==============================] - 0s 736us/step - loss: 0.0846 - acc: 0.9748
-손실: 0.08
+157/157 [==============================] - 0s 741us/step - loss: 0.1092 - acc: 0.9671
+손실: 0.11
 정확도: 0.97
 
 ```
@@ -846,9 +846,9 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 818us/step - loss: 0.5111
+1/1 [==============================] - 0s 913us/step - loss: 0.5295
 
-<tensorflow.python.keras.callbacks.History at 0x7f679c0f3240>
+<tensorflow.python.keras.callbacks.History at 0x7fd92008c6d8>
 
 ```
 </div>
@@ -872,9 +872,9 @@ model.fit(dataset)
 
 <div class="k-default-codeblock">
 ```
-1/1 [==============================] - 0s 690us/step - loss: 0.4850
+1/1 [==============================] - 0s 701us/step - loss: 0.5017
 
-<tensorflow.python.keras.callbacks.History at 0x7f674846fc18>
+<tensorflow.python.keras.callbacks.History at 0x7fd920052b70>
 
 ```
 </div>
