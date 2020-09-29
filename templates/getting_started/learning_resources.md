@@ -10,10 +10,25 @@
 
 ## 책
 
-- [핸즈온 머신러닝 2: 사이킷런, 케라스, 텐서플로 2를 활용한 머신러닝, 딥러닝 완벽 실무](http://www.yes24.com/Product/Goods/89959711), 오레리랑 제롱(Aurélien Géron) 저 / 박해선 역
+- [핸즈온 머신러닝 2: 사이킷런, 케라스, 텐서플로 2를 활용한 머신러닝, 딥러닝 완벽 실무](http://www.yes24.com/Product/Goods/89959711), 오렐리앙 제롱(Aurélien Géron) 저 / 박해선 역
+
+    <img src="https://tensorflowkorea.files.wordpress.com/2020/04/e18492e185a2e186abe1848ce185b3e1848be185a9e186abe18486e185a5e18489e185b5e186abe18485e185a5e18482e185b5e186bc_2e18491e185a1e186ab__cover-2.png" width="150" border="1"/>
+    -
+
 - [케라스 창시자에게 배우는 딥러닝](http://www.yes24.com/Product/Goods/65050162), 프랑소와 숄레(François Chollet) 저 / 박해선 역
+
+    <img src="https://tensorflowkorea.files.wordpress.com/2018/10/keras_dl_b.jpg" width="150"/>
+    -
+
 - [머신러닝 교과서 with 파이썬, 사이킷런, 텐서플로](http://www.yes24.com/Product/Goods/73270768), 세바스찬 라시카(Sebastian Raschka), 비히드 미자리리(Vahid Mirjalili) 저 / 박해선 역
+
+    <img src="https://tensorflowkorea.files.wordpress.com/2019/03/x9791160507966.jpg" width="150" border="1"/>
+    -
+
 - [Do it! 딥러닝 입문](http://www.yes24.com/Product/Goods/78896574), 박해선 저
+
+    <img src="https://tensorflowkorea.files.wordpress.com/2019/08/x9791163031093.jpg" width="150" border="1">
+    -
 
 ---
 
