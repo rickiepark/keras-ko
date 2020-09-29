@@ -18,8 +18,8 @@
 
 - ['샘플', '배치', '에포크'가 무슨 뜻인가요?](#샘플-배치-에포크가-무슨-뜻인가요)
 - [훈련 손실이 왜 테스트 손실보다 훨씬 높나요?](#훈련-손실이-왜-테스트-손실보다-훨씬-높나요)
-- [How can I use Keras with datasets that don't fit in memory?](#how-can-i-use-keras-with-datasets-that-dont-fit-in-memory)
-- [How can I regularly save Keras models during training?](#how-can-i-regularly-save-keras-models-during-training)
+- [케라스에서는 메모리 용량보다 큰 데이터셋을 어떻게 사용하나요?](#케라스에서는-메모리-용량보다-큰-데이터셋을-어떻게-사용하나요)
+- [훈련 도중에 주기적으로 케라스 모델을 저장하는 방법은 무엇인가요?](#훈련-도중에-주기적으로-케라스-모델을-저장하는-방법은-무엇인가요)
 - [How can I interrupt training when the validation loss isn't decreasing anymore?](#how-can-i-interrupt-training-when-the-validation-loss-isnt-decreasing-anymore)
 - [How can I freeze layers and do fine-tuning?](#how-can-i-freeze-layers-and-do-fine-tuning)
 - [What's the difference between the `training` argument in `call()` and the `trainable` attribute?](#whats-the-difference-between-the-training-argument-in-call-and-the-trainable-attribute)
@@ -447,21 +447,20 @@ import h5py
 ### 훈련 손실이 왜 테스트 손실보다 훨씬 높나요?
 
 
-케라스 모델은 훈련과 테스트 두 개의 모드(mode)를 가집니다. 드롭아웃(dropout)이나 L1/L2 가중치 규제는 테스트에서 작동하지 않습니다. 훈련 손실에는 반영되지만 테스트 손실에는 반영되지 않습니다(역주-드롭아웃이 손실 함수 계산에 직접 포함되지 않지만 훈련하는 동안 일부 뉴런을 무작위로 제거하기 때문에 일반적으로 성능이 낮아집니다).
+케라스 모델은 훈련과 테스트 두 개의 모드(mode)를 가집니다. 드롭아웃(dropout)이나 L1/L2 가중치 규제는 테스트에서 작동하지 않습니다. 훈련 손실에는 반영되지만 테스트 손실에는 반영되지 않습니다(**역주**-드롭아웃이 손실 함수 계산에 직접 포함되지 않지만 훈련하는 동안 일부 뉴런을 무작위로 제거하기 때문에 일반적으로 성능이 낮아집니다).
 
 또한 훈련 손실은 훈련 데이터의 각 배치에 대한 손실의 평균입니다. 시간이 지남에 따라 모델이 바뀌므로 일반적으로 에포크의 첫 번째 배치 손실이 마지막 배치 손실보다 높습니다. 반면에 한 에포크의 테스트 손실은 에포크가 완료된 모델을 사용해 계산하기 때문에 손실이 더 낮습니다.
 
 
 ---
 
-### How can I use Keras with datasets that don't fit in memory?
+### 케라스에서는 메모리 용량보다 큰 데이터셋을 어떻게 사용하나요?
 
-You should use the [`tf.data` API](https://www.tensorflow.org/guide/data) to create `tf.data.Dataset` objects -- an abstraction over a data pipeline
-that can pull data from local disk, from a distribtued filesystem, from GCS, etc., as well as efficiently apply various data transformations.
+[`tf.data` API](https://www.tensorflow.org/guide/data)를 사용해 `tf.data.Dataset` 객체를 만들어야 합니다. 이 객체는 일종의 데이터 파이프라인 추상화이며 로컬 디스크, 분산 파일 시스템, GCS(Google Cloud Storage) 등에서 데이터를 읽을 수 있습니다. 또한 다양한 데이터 변환 작업을 효율적으로 수행할 수 있습니다.
 
-For instance, the utility `tf.keras.preprocessing.image_dataset_from_directory` will create a dataset that reads image data from a local directory.
+예를 들어 `tf.keras.preprocessing.image_dataset_from_directory` 유틸리티는 로컬 디렉토리에서 이미지 데이터를 읽는 데이터셋을 만듭니다.
 
-Dataset objects can be directly passed to `fit()`, or can be iterated over in a custom low-level training loop.
+데이터셋 객체는 `fit()` 메서드에 직접 전달하거나 사용자가 정의한 저수준 훈련 반복문에서 사용할 수 있습니다.
 
 ```python
 model.fit(dataset, epochs=10)
@@ -469,46 +468,43 @@ model.fit(dataset, epochs=10)
 
 ---
 
-### How can I regularly save Keras models during training?
+### 훈련 도중에 주기적으로 케라스 모델을 저장하는 방법은 무엇인가요?
 
-To ensure the ability to recover from an interrupted training run at any time (fault tolerance),
-you should use a callback that regularly saves your model to disk. You should also set up
-your code to optionally reload that model at startup. Here's a simple example.
+언제든지 예상치 못한 훈련 중단으로부터 복구(장애 허용 능력(fault tolerance))할 수 있으려면 콜백을 사용해 모델을 주기적으로 디스크에 저장해야 합니다. 훈련을 시작할 때 모델을 다시 적재할 수 있도록 코드를 만들어야 합니다. 간단한 예는 다음과 같습니다.
 
 ```python
 import os
 from tensorflow import keras
 
-# Prepare a directory to store all the checkpoints.
+# 체크포인트를 저장할 디렉토리를 준비합니다.
 checkpoint_dir = './ckpt'
 if not os.path.exists(checkpoint_dir):
     os.makedirs(checkpoint_dir)
 
 
 def make_model():
-    # Create a new linear regression model.
+    # 새로운 선형 회귀 모델을 만듭니다.
     model = keras.Sequential([keras.layers.Dense(1)])
     model.compile(optimizer='adam', loss='mse')
     return model
 
 
 def make_or_restore_model():
-    # Either restore the latest model, or create a fresh one
-    # if there is no checkpoint available.
+    # 최신 모델을 복원하거나 체크포인트가 없으면 새로운 모델을 만듭니다.
     checkpoints = [checkpoint_dir + '/' + name
                    for name in os.listdir(checkpoint_dir)]
     if checkpoints:
         latest_checkpoint = max(checkpoints, key=os.path.getctime)
-        print('Restoring from', latest_checkpoint)
+        print('복원한 체크포인트:', latest_checkpoint)
         return keras.models.load_model(latest_checkpoint)
-    print('Creating a new model')
+    print('새로운 모델 생성')
     return make_model()
 
 
 model = make_or_restore_model()
 callbacks = [
-    # This callback saves a SavedModel every 100 batches.
-    # We include the training loss in the folder name.
+    # 이 콜백은 100번의 배치마다 SavedModel 파일을 저장합니다.
+    # 파일 이름에 훈련 손실이 포함되었습니다.
     keras.callbacks.ModelCheckpoint(
         filepath=checkpoint_dir + '/ckpt-loss={loss:.2f}',
         save_freq=100)
@@ -516,7 +512,7 @@ callbacks = [
 model.fit(train_data, epochs=10, callbacks=callbacks)
 ```
 
-Find out more in the [callbacks documentation](/api/callbacks/).
+더 자세한 내용은 [콜백 문서](/api/callbacks/)를 참고하세요.
 
 
 ---
