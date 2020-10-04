@@ -20,8 +20,8 @@
 - [훈련 손실이 왜 테스트 손실보다 훨씬 높나요?](#훈련-손실이-왜-테스트-손실보다-훨씬-높나요)
 - [케라스에서는 메모리 용량보다 큰 데이터셋을 어떻게 사용하나요?](#케라스에서는-메모리-용량보다-큰-데이터셋을-어떻게-사용하나요)
 - [훈련 도중에 주기적으로 케라스 모델을 저장하는 방법은 무엇인가요?](#훈련-도중에-주기적으로-케라스-모델을-저장하는-방법은-무엇인가요)
-- [How can I interrupt training when the validation loss isn't decreasing anymore?](#how-can-i-interrupt-training-when-the-validation-loss-isnt-decreasing-anymore)
-- [How can I freeze layers and do fine-tuning?](#how-can-i-freeze-layers-and-do-fine-tuning)
+- [검증 손실이 더 이상 감소하지 않을 때 어떻게 훈련을 중단할 수 있나요?](#검증-손실이-더-이상-감소하지-않을-때-어떻게-훈련을-중단할-수-있나요)
+- [어떻게 층을 동결하고 미세 조정할 수 있나요?](#어떻게-층을-동결하고-미세-조정할-수-있나요)
 - [What's the difference between the `training` argument in `call()` and the `trainable` attribute?](#whats-the-difference-between-the-training-argument-in-call-and-the-trainable-attribute)
 - [In `fit()`, how is the validation split computed?](#in-fit-how-is-the-validation-split-computed)
 - [In `fit()`, is the data shuffled during training?](#in-fit-is-the-data-shuffled-during-training)
@@ -517,10 +517,10 @@ model.fit(train_data, epochs=10, callbacks=callbacks)
 
 ---
 
-### How can I interrupt training when the validation loss isn't decreasing anymore?
+### 검증 손실이 더 이상 감소하지 않을 때 어떻게 훈련을 중단할 수 있나요?
 
 
-You can use an `EarlyStopping` callback:
+`EarlyStopping` 콜백을 사용할 수 있습니다:
 
 ```python
 from tensorflow.keras.callbacks import EarlyStopping
@@ -529,15 +529,15 @@ early_stopping = EarlyStopping(monitor='val_loss', patience=2)
 model.fit(x, y, validation_split=0.2, callbacks=[early_stopping])
 ```
 
-Find out more in the [callbacks documentation](/api/callbacks/).
+더 자세한 내용은 [콜백 문서](/api/callbacks/)를 참고하세요.
 
 ---
 
-### How can I freeze layers and do fine-tuning?
+### 어떻게 층을 동결하고 미세 조정할 수 있나요?
 
-**Setting the `trainable` attribute**
+**`trainable` 속성을 설정합니다.**
 
-All layers & models have a `layer.trainable` boolean attribute:
+모든 층과 모델은 `layer.trainable` 불리언 속성을 가지고 있습니다:
 
 ```shell
 >>> layer = Dense(3)
@@ -545,12 +545,12 @@ All layers & models have a `layer.trainable` boolean attribute:
 True
 ```endshell
 
-On all layers & models, the `trainable` attribute can be set (to True or False).
-When set to `False`, the `layer.trainable_weights` attribute is empty:
+모든 층과 모델에서 `trainable` 속성을 설정할 수 있습니다(`True` 또는 `False`).
+`False`로 설정하면 `layer.trainable_weights` 속성이 비워집니다:
 
 ```python
 >>> layer = Dense(3)
->>> layer.build(input_shape=(3, 3)) # Create the weights of the layer
+>>> layer.build(input_shape=(3, 3)) # 층의 가중치가 만들어 집니다.
 >>> layer.trainable
 True
 >>> layer.trainable_weights
@@ -561,87 +561,85 @@ array([[...]], dtype=float32)>, <tf.Variable 'bias:0' shape=(3,) dtype=float32, 
 []
 ```
 
-Setting the `trainable` attribute on a layer recursively sets it on all children layers (contents of `self.layers`).
+한 층의 `trainable` 속성을 설정하면 재귀적으로 (`self.layers`에 담긴) 모든 하위 층을 설정합니다.
 
 
-**1) When training with `fit()`:**
+**1) `fit()` 메서드로 훈련할 때:**
 
-To do fine-tuning with `fit()`, you would:
+`fit()` 메서드로 미세 조정(fine-tuning)을 수행하려면 다음 과정을 따릅니다:
 
-- Instantiate a base model and load pre-trained weights
-- Freeze that base model
-- Add trainable layers on top
-- Call `compile()` and `fit()`
+- 기반 모델(base model)의 객체를 만들고 사전 훈련된 가중치를 적재합니다.
+- 기반 모델을 동결합니다.
+- 맨 위에 훈련 가능한 층을 추가합니다.
+- `compile()` 메서드와 `fit()` 메서드를 호출합니다.
 
-Like this:
+다음과 같습니다:
 
 ```python
 model = Sequential([
     ResNet50Base(input_shape=(32, 32, 3), weights='pretrained'),
     Dense(10),
 ])
-model.layers[0].trainable = False  # Freeze ResNet50Base.
+model.layers[0].trainable = False  # ResNet50Base 동결
 
-assert model.layers[0].trainable_weights == []  # ResNet50Base has no trainable weights.
-assert len(model.trainable_weights) == 2  # Just the bias & kernel of the Dense layer.
+assert model.layers[0].trainable_weights == []  # ResNet50Base는 훈련 가능한 가중치가 없습니다.
+assert len(model.trainable_weights) == 2  # Dense 층의 커널과 절편만 있습니다.
 
 model.compile(...)
-model.fit(...)  # Train Dense while excluding ResNet50Base.
+model.fit(...)  # ResNet50Base를 제외하고 Dense 층만 훈련합니다.
 ```
 
-You can follow a similar workflow with the Functional API or the model subclassing API.
-Make sure to call `compile()` *after* changing the value of `trainable` in order for your
-changes to be taken into account. Calling `compile()` will freeze the state of the training step of the model.
+함수형 API나 모델 서브클래싱 API에서 비슷한 작업 흐름을 따를 수 있습니다.
+`trainable` 속성 값을 바꾼 *후에* 반드시 `compile()` 메서드를 호출해야 변경 사항이 반영됩니다.
+`compile()` 메서드가 모델의 훈련 단계 상태를 바꿉니다.
 
 
-**2) When using a custom training loop:**
+**2) 사용자 정의 반복을 사용할 때:**
 
-When writing a training loop, make sure to only update
-weights that are part of `model.trainable_weights` (and not all `model.weights`).
+훈련 반복을 만들 때는 `model.trainable_weights` 가중치만 업데이트해야 합니다(`model.weights` 전체가 아닙니다).
 
 ```python
 model = Sequential([
     ResNet50Base(input_shape=(32, 32, 3), weights='pretrained'),
     Dense(10),
 ])
-model.layers[0].trainable = False  # Freeze ResNet50Base.
+model.layers[0].trainable = False  # ResNet50Base 동결
 
-# Iterate over the batches of a dataset.
+# 데이터셋의 배치를 반복합니다.
 for inputs, targets in dataset:
-    # Open a GradientTape.
+    # Open a GradientTape을 시작합니다.
     with tf.GradientTape() as tape:
-        # Forward pass.
+        # 정방향 계산을 수행합니다.
         predictions = model(inputs)
-        # Compute the loss value for this batch.
+        # 배치에 대한 손실 값을 계산합니다.
         loss_value = loss_fn(targets, predictions)
 
-    # Get gradients of loss wrt the *trainable* weights.
+    # *훈련 가능한* 가중치에 대한 손실의 그레이디언트를 계산합니다.
     gradients = tape.gradient(loss_value, model.trainable_weights)
-    # Update the weights of the model.
+    # 모델의 가중치를 업데이트합니다.
     optimizer.apply_gradients(zip(gradients, model.trainable_weights))
 ```
 
 
-**Interaction between `trainable` and `compile()`**
+**`trainable` 속성과 `compile()` 메서드 간의 상호작용**
 
-Calling `compile()` on a model is meant to "freeze" the behavior of that model. This implies that the `trainable`
-attribute values at the time the model is compiled should be preserved throughout the lifetime of that model,
-until `compile` is called again. Hence, if you change `trainable`, make sure to call `compile()` again on your
-model for your changes to be taken into account.
+모델의 `compile()` 메서드를 호출하면 모델의 행동을 "동결"한다는 의미입니다.
+모델을 컴파일할 당시 `trainable` 속성의 값이 다시 `compile()` 메서드를 호출하기 전까지 모델의 전체 생명주기 동안 보존된다는 뜻입니다.
+따라서 `trainable` 속성을 바꾸려면 모델의 `compile()` 메서드를 다시 호출해서 변경 사항을 반영해야 합니다.
 
-For instance, if two models A & B share some layers, and:
+예를 들어, 두 모델 A와 B가 어떤 층을 공유할 때:
 
-- Model A gets compiled
-- The `trainable` attribute value on the shared layers is changed
-- Model B is compiled
+- 모델 A를 컴파일합니다.
+- 공유 층의 `trainable` 속성 값이 바뀝니다.
+- 모델 B를 컴파일합니다.
 
-Then model A and B are using different `trainable` values for the shared layers. This mechanism is
-critical for most existing GAN implementations, which do:
+이 경우 모델 A와 B는 공유 층에 대해 다른 `trainable` 값을 사용합니다.
+이런 메카니즘은 GAN을 구현할 때 아주 중요합니다:
 
 ```python
-discriminator.compile(...)  # the weights of `discriminator` should be updated when `discriminator` is trained
+discriminator.compile(...)  # `discriminator`의 가중치는 `discriminator`가 훈련될 때 업데이트됩니다.
 discriminator.trainable = False
-gan.compile(...)  # `discriminator` is a submodel of `gan`, which should not be updated when `gan` is trained
+gan.compile(...)  # `discriminator`는 `gan`의 서브 모델이지만 `gan`이 훈련될 때 업데이트되지 않습니다.
 ```
 
 
