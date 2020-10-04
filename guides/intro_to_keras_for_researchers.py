@@ -2,8 +2,8 @@
 Title: 연구자에게 맞는 케라스 소개
 Author: [fchollet](https://twitter.com/fchollet)
 Date created: 2020/04/01
-Last modified: 2020/04/28
-Description: 케라스와 TF 2.0으로 딥러닝 연구를 하기 위해 알아야 할 모든 것.
+Last modified: 2020/10/02
+Description: 케라스와 텐서플로로 딥러닝 연구를 하기 위해 알아야 할 모든 것.
 """
 """
 ## 설정
@@ -17,12 +17,13 @@ from tensorflow import keras
 
 머신러닝 연구자인가요?
 NeurIPS에 논문을 제출하고 컴퓨터 비전이나 자연어 처리 분야에서 최고의 성능을 달성하려고 하나요?
-이 가이드에서 케라스 API의 핵심 개념을 소개하겠습니다.
+이 가이드에서 케라스와 텐서플로 API의 핵심 개념을 소개하겠습니다.
 
 이 가이드에서 다음 내용을 배울 수 있습니다:
 
+- 텐서플로의 텐서, 변수, 그레이디언트
 - `Layer` 클래스를 상속하여 층을 만듭니다.
-- `GradientTape`으로 그레이디언트(gradient)를 계산하고 저수준 훈련 반복문을 만듭니다.
+- 저수준 훈련 반복문을 만듭니다.
 - `add_loss()` 메서드로 층에서 만든 손실을 기록합니다.
 - 저수준 훈련 반복문에서 측정 지표를 기록합니다.
 - `tf.function`으로 컴파일하여 실행 속도를 높입니다.
@@ -34,7 +35,147 @@ NeurIPS에 논문을 제출하고 컴퓨터 비전이나 자연어 처리 분야
 """
 
 """
-## `Layer` 클래스
+## 텐서
+
+텐서플로는 미분 가능 프로그래밍의 기반 레이어입니다.
+그 핵심은 넘파이(NumPy)와 비슷하게 N-차원 배열(텐서)를 위한 프레임워크입니다.
+
+하지만 넘파이와 텐서플로 사이에는 3가지 주요 차이점이 있습니다:
+
+- 텐서플로는 GPU와 TPU 같은 하드웨어 가속기를 사용할 수 있습니다.
+- 텐서플로는 임의의 미분 가능 텐서 표현의 그레이디언트를 자동으로 계산합니다.
+- 텐서플로 계산은 단일 머신에 있는 여러 개의 장치나 (여러 개의 장치를 가질 수 있는) 여러 대의 머신에 분산할 수 있습니다.
+
+텐서플로의 핵심 객체인 텐서를 살펴 보죠.
+
+다음은 상수 텐서입니다:
+"""
+
+x = tf.constant([[5, 2], [1, 3]])
+print(x)
+
+"""
+`.numpy()` 메서드를 호출하여 넘파이 배열을 얻을 수 있습니다:
+"""
+
+x.numpy()
+
+"""
+넘파이 배열과 비슷하게 `dtype`과 `shape` 속성을 제공합니다:
+"""
+
+print("dtype:", x.dtype)
+print("shape:", x.shape)
+
+"""
+상수 텐서를 만드는 일반적인 방법은 `tf.ones`과 `tf.zeros`입니다(`np.ones`과 `np.zeros`와 비슷합니다):
+"""
+
+print(tf.ones(shape=(2, 1)))
+print(tf.zeros(shape=(2, 1)))
+
+"""
+랜덤한 상수 텐서를 만들 수도 있습니다:
+"""
+
+x = tf.random.normal(shape=(2, 2), mean=0.0, stddev=1.0)
+
+x = tf.random.uniform(shape=(2, 2), minval=0, maxval=10, dtype="int32")
+
+
+"""
+## 변수
+
+변수는 변경 가능한 상태를 저장하는데 사용하는 특별한 텐서입니다(예를 들면 신경망의 가중치).
+초깃값을 사용해 `Variable`를 만들 수 있습니다:
+"""
+
+initial_value = tf.random.normal(shape=(2, 2))
+a = tf.Variable(initial_value)
+print(a)
+
+
+"""
+`.assign(value)`, `.assign_add(increment)`, `.assign_sub(decrement)`을 사용해 `Variable`의 값을 업데이트합니다:
+"""
+
+new_value = tf.random.normal(shape=(2, 2))
+a.assign(new_value)
+for i in range(2):
+    for j in range(2):
+        assert a[i, j] == new_value[i, j]
+
+added_value = tf.random.normal(shape=(2, 2))
+a.assign_add(added_value)
+for i in range(2):
+    for j in range(2):
+        assert a[i, j] == new_value[i, j] + added_value[i, j]
+
+"""
+## 텐서플로의 수학 연산
+
+넘파이를 사용해봤다면 텐서플로 수학 연산이 친숙해 보일 것입니다.
+주요한 차이점은 텐서플로 코드를 GPU와 TPU에서 실행할 수 있다는 것입니다.
+"""
+
+a = tf.random.normal(shape=(2, 2))
+b = tf.random.normal(shape=(2, 2))
+
+c = a + b
+d = tf.square(c)
+e = tf.exp(d)
+
+"""
+## 그레이디언트
+
+넘파이와 또 다른 큰 차이점은 어떤 미분 가능한 표현이더라도 그레이디언트를 자동을 얻을 수 있다는 것입니다.
+
+`GradientTape`을 만들고 `tape.watch()`로 텐서를 감시합니다.
+그다음 이 텐서를 입력으로 사용하는 미분 가능한 표현을 만들면 됩니다:
+"""
+
+a = tf.random.normal(shape=(2, 2))
+b = tf.random.normal(shape=(2, 2))
+
+with tf.GradientTape() as tape:
+    tape.watch(a)  # `a`에 적용된 연산을 기록하기 시작합니다.
+    c = tf.sqrt(tf.square(a) + tf.square(b))  # `a`를 사용해 계산을 수행합니다.
+    # `a`에 대한 `c`의 그레이디언트는 무엇인가요?
+    dc_da = tape.gradient(c, a)
+    print(dc_da)
+
+
+"""
+기본적으로 변수는 자동으로 감시됩니다. 따라서 수동으로 `watch` 메서드를 호출할 필요가 없습니다:
+"""
+
+a = tf.Variable(a)
+
+with tf.GradientTape() as tape:
+    c = tf.sqrt(tf.square(a) + tf.square(b))
+    dc_da = tape.gradient(c, a)
+    print(dc_da)
+
+"""
+테이프를 중첩하여 고차 도함수를 계산할 수 있습니다:
+"""
+
+with tf.GradientTape() as outer_tape:
+    with tf.GradientTape() as tape:
+        c = tf.sqrt(tf.square(a) + tf.square(b))
+        dc_da = tape.gradient(c, a)
+    d2c_da2 = outer_tape.gradient(dc_da, a)
+    print(d2c_da2)
+
+
+"""
+## 케라스 층
+
+텐서플로가 텐서, 변수, 그레이디언트를 다루는 **미분 가능 프로그래밍의 기반 레이어**라면
+케라스는 층, 모델, 옵티마이저, 손실 함수, 측정 지표 등을 다루는 **딥러닝 사용자 인터페이스**입니다.
+
+케라스는 텐서플로의 고수준 API로 제공됩니다:
+케라스는 텐서플로를 쉽고 생산성있게 만듭니다.
 
 `Layer`는 케라스의 기초 추상 클래스입니다.
 `Layer`는 상태(가중치)와 (`call` 메서드에서 정의한) 일부 계산을 담고 있습니다.
@@ -90,7 +231,7 @@ assert linear_layer.weights == [linear_layer.w, linear_layer.b]
 """
 ## 가중치 생성
 
-`add_weight` 메서드를 사용하면 손쉽게 가중치를 만들 수 있습니다:
+`self.add_weight()` 메서드를 사용하면 손쉽게 가중치를 만들 수 있습니다:
 """
 
 
@@ -122,7 +263,7 @@ linear_layer = Linear(4)
 y = linear_layer(tf.ones((2, 2)))
 
 """
-## 그레이디언트
+## 층 그레이디언트
 
 `GradientTape` 컨택스트 안에서 층을 호출하면 자동으로 층 가중치의 그레이디언트를 계산합니다.
 이 그레이디언트를 사용해 옵티마이저 객체를 사용하거나 수동으로 층의 가중치를 업데이트할 수 있습니다.

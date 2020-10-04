@@ -449,7 +449,7 @@ import h5py
 
 케라스 모델은 훈련과 테스트 두 개의 모드(mode)를 가집니다. 드롭아웃(dropout)이나 L1/L2 가중치 규제는 테스트에서 작동하지 않습니다. 훈련 손실에는 반영되지만 테스트 손실에는 반영되지 않습니다(**역주**-드롭아웃이 손실 함수 계산에 직접 포함되지 않지만 훈련하는 동안 일부 뉴런을 무작위로 제거하기 때문에 일반적으로 성능이 낮아집니다).
 
-또한 훈련 손실은 훈련 데이터의 각 배치에 대한 손실의 평균입니다. 시간이 지남에 따라 모델이 바뀌므로 일반적으로 에포크의 첫 번째 배치 손실이 마지막 배치 손실보다 높습니다. 반면에 한 에포크의 테스트 손실은 에포크가 완료된 모델을 사용해 계산하기 때문에 손실이 더 낮습니다.
+또한 케라스가 출력하는 훈련 손실은 **현재 에포크에서** 훈련 데이터의 각 배치에 대한 손실의 평균입니다. 시간이 지남에 따라 모델이 바뀌므로 일반적으로 에포크의 첫 번째 배치 손실이 마지막 배치 손실보다 높습니다. 이는 에포크별 평균을 낮출 수 있습니다. 반면에 한 에포크의 테스트 손실은 에포크가 완료된 모델을 사용해 계산하기 때문에 손실이 더 낮습니다.
 
 
 ---
@@ -458,12 +458,13 @@ import h5py
 
 [`tf.data` API](https://www.tensorflow.org/guide/data)를 사용해 `tf.data.Dataset` 객체를 만들어야 합니다. 이 객체는 일종의 데이터 파이프라인 추상화이며 로컬 디스크, 분산 파일 시스템, GCS(Google Cloud Storage) 등에서 데이터를 읽을 수 있습니다. 또한 다양한 데이터 변환 작업을 효율적으로 수행할 수 있습니다.
 
-예를 들어 `tf.keras.preprocessing.image_dataset_from_directory` 유틸리티는 로컬 디렉토리에서 이미지 데이터를 읽는 데이터셋을 만듭니다.
+예를 들어 [`tf.keras.preprocessing.image_dataset_from_directory`](https://keras.io/api/preprocessing/image/#imagedatasetfromdirectory-function) 유틸리티는 로컬 디렉토리에서 이미지 데이터를 읽는 데이터셋을 만듭니다.
+비슷하게 [`tf.keras.preprocessing.text_dataset_from_directory`](https://keras.io/api/preprocessing/text/#textdatasetfromdirectory-function) 유틸리티는 로컬 디렉토리에서 텍스트 파일을 읽는 데이터셋을 만듭니다.
 
 데이터셋 객체는 `fit()` 메서드에 직접 전달하거나 사용자가 정의한 저수준 훈련 반복문에서 사용할 수 있습니다.
 
 ```python
-model.fit(dataset, epochs=10)
+model.fit(dataset, epochs=10, validation_data=val_dataset)
 ```
 
 ---
