@@ -22,10 +22,10 @@
 - [훈련 도중에 주기적으로 케라스 모델을 저장하는 방법은 무엇인가요?](#훈련-도중에-주기적으로-케라스-모델을-저장하는-방법은-무엇인가요)
 - [검증 손실이 더 이상 감소하지 않을 때 어떻게 훈련을 중단할 수 있나요?](#검증-손실이-더-이상-감소하지-않을-때-어떻게-훈련을-중단할-수-있나요)
 - [어떻게 층을 동결하고 미세 조정할 수 있나요?](#어떻게-층을-동결하고-미세-조정할-수-있나요)
-- [What's the difference between the `training` argument in `call()` and the `trainable` attribute?](#whats-the-difference-between-the-training-argument-in-call-and-the-trainable-attribute)
-- [In `fit()`, how is the validation split computed?](#in-fit-how-is-the-validation-split-computed)
-- [In `fit()`, is the data shuffled during training?](#in-fit-is-the-data-shuffled-during-training)
-- [What's the recommended way to monitor my metrics when training with `fit()`?](#whats-the-recommended-way-to-monitor-my-metrics-when-training-with-fit)
+- [`call()` 메서드의 `training` 매개변수와 `trainable` 속성의 차이점은 무엇인가요?](#call-메서드의-training-매개변수와-trainable-속성의-차이점은-무엇인가요)
+- [`fit()` 메서드에서 검증 세트는 어떻게 계산하나요?](#fit-메서드에서-검증-세트는-어떻게-계산하나요)
+- [`fit()` 메서드에서 훈련하는 동안 데이터를 섞나요?](#fit-메서드에서-훈련하는-동안-데이터를-섞나요)
+- [`fit()`으로 훈련할 때 측정 값을 어떻게 모니터링하는 것이 좋을까요?](#fit으로-훈련할-때-측정-값을-어떻게-모니터링하는-것이-좋을까요)
 - [What if I need to customize what `fit()` does?](#what-if-i-need-to-customize-what-fit-does)
 - [How can I train models in mixed precision?](#how-can-i-train-models-in-mixed-precision)
 
@@ -447,7 +447,7 @@ import h5py
 ### 훈련 손실이 왜 테스트 손실보다 훨씬 높나요?
 
 
-케라스 모델은 훈련과 테스트 두 개의 모드(mode)를 가집니다. 드롭아웃(dropout)이나 L1/L2 가중치 규제는 테스트에서 작동하지 않습니다. 훈련 손실에는 반영되지만 테스트 손실에는 반영되지 않습니다(**역주**-드롭아웃이 손실 함수 계산에 직접 포함되지 않지만 훈련하는 동안 일부 뉴런을 무작위로 제거하기 때문에 일반적으로 성능이 낮아집니다).
+케라스 모델은 훈련과 테스트 두 개의 모드(mode)를 가집니다. 드롭아웃(dropout)이나 L1/L2 가중치 규제는 테스트에서 작동하지 않습니다. 훈련 손실에는 반영되지만 테스트 손실에는 반영되지 않습니다(**옮긴이**-드롭아웃이 손실 함수 계산에 직접 포함되지 않지만 훈련하는 동안 일부 뉴런을 무작위로 제거하기 때문에 일반적으로 성능이 낮아집니다).
 
 또한 케라스가 출력하는 훈련 손실은 **현재 에포크에서** 훈련 데이터의 각 배치에 대한 손실의 평균입니다. 시간이 지남에 따라 모델이 바뀌므로 일반적으로 에포크의 첫 번째 배치 손실이 마지막 배치 손실보다 높습니다. 이는 에포크별 평균을 낮출 수 있습니다. 반면에 한 에포크의 테스트 손실은 에포크가 완료된 모델을 사용해 계산하기 때문에 손실이 더 낮습니다.
 
@@ -647,56 +647,51 @@ gan.compile(...)  # `discriminator`는 `gan`의 서브 모델이지만 `gan`이 
 
 ---
 
-### What's the difference between the `training` argument in `call()` and the `trainable` attribute?
+### `call()` 메서드의 `training` 매개변수와 `trainable` 속성의 차이점은 무엇인가요?
 
 
-`training` is a boolean argument in `call` that determines whether the call
-should be run in inference mode or training mode. For example, in training mode,
-a `Dropout` layer applies random dropout and rescales the output. In inference mode, the same
-layer does nothing. Example:
+`training`은 `call()` 메서드이 불리언 매개변수로 이 메서드 호출을 추론 모드로 실행할지 훈련 모드로 실행할지 결정합니다. 예를 들어 훈련 모드에서 `Dropout` 층은 랜덤한 드롭아웃을 적용하고 출력의 스케일을 조정합니다. 추론 모드에서는 이 층은 아무런 역할을 수행하지 않습니다. 예를 들어:
 
 ```python
-y = Dropout(0.5)(x, training=True)  # Applies dropout at training time *and* inference time
+y = Dropout(0.5)(x, training=True)  # 훈련 *그리고* 추론 시에 드롭아웃을 적용합니다.
 ```
 
-`trainable` is a boolean layer attribute that determines the trainable weights
-of the layer should be updated to minimize the loss during training. If `layer.trainable` is set to `False`,
-then `layer.trainable_weights` will always be an empty list. Example:
+층의 `trainable` 불리언 속성은 훈련하는 동안 손실을 최소화하기 위해 층의 훈련 가능한 가중치를 업데이트할지 결정합니다. `layer.trainable`을 `False`로 지정하면 `layer.trainable_weights`는 항상 빈 리스트가 됩니다. 예를 들어:
 
 ```python
 model = Sequential([
     ResNet50Base(input_shape=(32, 32, 3), weights='pretrained'),
     Dense(10),
 ])
-model.layers[0].trainable = False  # Freeze ResNet50Base.
+model.layers[0].trainable = False  # ResNet50Base 동결
 
-assert model.layers[0].trainable_weights == []  # ResNet50Base has no trainable weights.
-assert len(model.trainable_weights) == 2  # Just the bias & kernel of the Dense layer.
+assert model.layers[0].trainable_weights == []  # ResNet50Base는 훈련 가능한 가중치가 없습니다.
+assert len(model.trainable_weights) == 2  # Dense 층의 커널과 절편만 있습니다.
 
 model.compile(...)
-model.fit(...)  # Train Dense while excluding ResNet50Base.
+model.fit(...)  # ResNet50Base을 제외한 Dense 층만 훈련합니다.
 ```
 
-As you can see, "inference mode vs training mode" and "layer weight trainability" are two very different concepts.
+여기서 볼 수 있듯이 "추론 모드 vs 훈련 모드"와 "층의 가중치 훈련 여부"는 다른 개념입니다.
 
-You could imagine the following: a dropout layer where the scaling factor is learned during training, via
-backpropagation. Let's name it `AutoScaleDropout`.
-This layer would have simultaneously a trainable state, and a different behavior in inference and training.
-Because the `trainable` attribute and the `training` call argument are independent, you can do the following:
+훈련하는 동안 역전파를 통해 스케일링 비율을 학습하는 드롭아웃 층이 있다고 가정해 보죠.
+이 층의 이름을 `AutoScaleDropout`이라 하겠습니다.
+이 층은 추론과 훈련 모드에서 동작이 다르고 훈련 가능한 변수도 가지고 있습니다.
+`trainable` 속성과 `training` 매개변수는 독립적이기 때문에 다음처럼 사용할 수 있습니다:
 
 ```python
 layer = AutoScaleDropout(0.5)
 
-# Applies dropout at training time *and* inference time
-# *and* learns the scaling factor during training
+# 훈련 모드와 추론 모드에 드롭아웃을 적용합니다.
+# 또한 훈련하는 동안 스케일링 비율을 학습니다.
 y = layer(x, training=True)
 
 assert len(layer.trainable_weights) == 1
 ```
 
 ```python
-# Applies dropout at training time *and* inference time
-# with a *frozen* scaling factor
+# 훈련 모드와 추론 모드에 드롭아웃을 적용합니다.
+# 스케일링 비율을 동결합니다.
 
 layer = AutoScaleDropout(0.5)
 layer.trainable = False
@@ -704,57 +699,53 @@ y = layer(x, training=True)
 ```
 
 
-***Special case of the `BatchNormalization` layer***
+***특별한 `BatchNormalization` 층의 경우***
 
+모델을 미세 조정할 때 동결 부분에 있는 `BatchNormalization` 층을 생각해 보죠.
 Consider a `BatchNormalization` layer in the frozen part of a model that's used for fine-tuning.
 
-It has long been debated whether the moving statistics of the `BatchNormalization` layer should
-stay frozen or adapt to the new data. Historically, `bn.trainable = False`
-would only stop backprop but would not prevent the training-time statistics
-update. After extensive testing, we have found that it is *usually* better to freeze the moving statistics
-in fine-tuning use cases. **Starting in TensorFlow 2.0, setting `bn.trainable = False`
-will *also* force the layer to run in inference mode.**
+`BatchNormalization` 층의 이동 통곗값(moving statistic)을 새로운 데이터에 동결할지 변경할지 오랫동안 논란이 있었습니다.
+과거에 `bn.trainable = False`는 역전파만 중지하고 훈련시 통곗값 업데이트를 막지 않습니다.
+광범위한 테스트 끝에 미세 조정의 경우 이동 통곗값을 동결하는 것이 *일반적으로* 좋다는 것을 알았습니다.
+**텐서플로 2.0부터는 `bn.trainable = False`로 지정하면 이 층을 추론 모드에서 실행합니다.**
 
-This behavior only applies for `BatchNormalization`. For every other layer, weight trainability and
-"inference vs training mode" remain independent.
+이런 동작은 `BatchNormalization` 층에만 적용됩니다. 다른 모든 층은 가중치 학습 여부와 "추론 모드 vs 훈련 모드"가 독립적으로 구분됩니다.
 
 
 
 ---
 
-### In `fit()`, how is the validation split computed?
+### `fit()` 메서드에서 검증 세트는 어떻게 계산하나요?
 
+`model.fit` 메서드에서 `validation_split` 매개변수를 (가령 0.1로) 지정하면, 데이터의 *마지막 10%*를 검증 세트로 사용합니다. 0.25로 지정하면 데이터의 마지막 25%를 사용하는 식입니다. 검증 데이터를 뽑아내기 전에 데이터를 섞지 않습니다. 따라서 검증 세트는 글자 그대로 입력 샘플의 *마지막* x%가 됩니다.
 
-If you set the `validation_split` argument in `model.fit` to e.g. 0.1, then the validation data used will be the *last 10%* of the data. If you set it to 0.25, it will be the last 25% of the data, etc. Note that the data isn't shuffled before extracting the validation split, so the validation is literally just the *last* x% of samples in the input you passed.
+동일한 검증 세트가 (한 번의 `fit` 호출 안의) 모든 에포크에 사용됩니다.
 
-The same validation set is used for all epochs (within a same call to `fit`).
-
-Note that the `validation_split` option is only available if your data is passed as Numpy arrays (not `tf.data.Datasets`, which are not indexable).
-
-
----
-
-### In `fit()`, is the data shuffled during training?
-
-If you pass your data as NumPy arrays and if the `shuffle` argument in `model.fit()` is set to `True` (which is the default), the training data will be globally randomly shuffled at each epoch.
-
-If you pass your data as a `tf.data.Dataset` object and if the `shuffle` argument in `model.fit()` is set ot `True`, the dataset will be locally shuffled (buffered shuffling).
-
-When using `tf.data.Dataset` objects, prefer shuffling your data beforehand (e.g. by calling `dataset = dataset.shuffle(buffer_size)`) so as to be in control of the buffer size.
-
-Validation data is never shuffled.
+`validation_split` 옵션은 데이터가 넘파이 배열로 전달될 때만 사용할 수 있습니다(`tf.data.Datasets`는 인덱스 참조가 안됩니다).
 
 
 ---
 
-### What's the recommended way to monitor my metrics when training with `fit()`?
+### `fit()` 메서드에서 훈련하는 동안 데이터를 섞나요?
 
-Loss values and metric values are reported via the default progress bar displayed by calls to `fit()`.
-However, staring at changing ascii numbers in a console ins't an optimal metric-monitoring experience.
-We recommend the use of [TensorBoard](https://www.tensorflow.org/tensorboard), which will display nice-looking graphs of your training and validation metrics, regularly
-updated during training, which you can access from your browser.
+입력 데이터가 넘파이 배열이고 `model.fit()` 메서드의 `shuffle` 매개변수가 `True`(기본값입니다)이면 에포크마다 훈련 데이터를 랜덤하게 셔플링합니다.
 
-You can use TensorBoard with `fit()` via the [`TensorBoard` callback](/api/callbacks/tensorboard/).
+데이터가 `tf.data.Dataset` 객체이고 `model.fit()` 메서드의 `shuffle` 매개변수가 `True`이면 데이터셋은 지역적으로 셔플링됩니다(버퍼 셔플링).
+
+`tf.data.Dataset` 객체를 사용할 때 버퍼 크기에 제한이 있기 때문에 사전에 데이터를 섞는 것이 좋습니다(예를 들어 `dataset = dataset.shuffle(buffer_size)`).
+
+검증 데이터는 셔플링되지 않습니다.
+
+
+---
+
+### `fit()`으로 훈련할 때 측정 값을 어떻게 모니터링하는 것이 좋을까요?
+
+손실 값과 측정 지표 값은 `fit()` 메서드가 출력하는 기본적인 진행 막대를 통해 제공됩니다.
+하지만 콘솔에서 바뀌는 숫자를 들여다 보는 것은 좋은 모니터링 방법이 아닙니다.
+[텐서보드](https://www.tensorflow.org/tensorboard)를 사용하면 훈련 지표와 검증 지표를 훈련하는 동안 일정 간격으로 업데이트하여 멋진 그래프로 출력하고 브라우저에서 접속할 수 있습니다.
+
+이를 위해 `fit()` 메서드에 [`TensorBoard` 콜백](/api/callbacks/tensorboard/)을 사용합니다.
 
 ---
 

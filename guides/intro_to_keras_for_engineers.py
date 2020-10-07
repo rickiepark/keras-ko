@@ -72,7 +72,7 @@ from tensorflow import keras
 이를 통해 GPU를 최대로 활용할 수 있습니다.
 
 케라스는 디스크에 있는 원시 데이터를 `Dataset`으로 변환해 주는
-여러 유틸리티를 제공합니다(**옮긴이_** 아래 함수는 아직 tf-nightly 패키지에서만 제공합니다):
+여러 유틸리티를 제공합니다(**옮긴이** 아래 함수는 아직 tf-nightly 패키지에서만 제공합니다):
 
 - `tf.keras.preprocessing.image_dataset_from_directory`는 클래스별로 폴더에 나뉘어 있는 이미지 파일을
 레이블된 이미지 텐서 데이터셋으로 변환합니다.
