@@ -26,7 +26,7 @@
 - [`fit()` 메서드에서 검증 세트는 어떻게 계산하나요?](#fit-메서드에서-검증-세트는-어떻게-계산하나요)
 - [`fit()` 메서드에서 훈련하는 동안 데이터를 섞나요?](#fit-메서드에서-훈련하는-동안-데이터를-섞나요)
 - [`fit()`으로 훈련할 때 측정 값을 어떻게 모니터링하는 것이 좋을까요?](#fit으로-훈련할-때-측정-값을-어떻게-모니터링하는-것이-좋을까요)
-- [What if I need to customize what `fit()` does?](#what-if-i-need-to-customize-what-fit-does)
+- [어떻게 `fit()` 메서드를 커스터마이징할 수 있나요?](#어떻게-fit-메서드를-커스터마이징할-수-있나요)
 - [How can I train models in mixed precision?](#how-can-i-train-models-in-mixed-precision)
 
 ## 모델링과 관련된 질문
@@ -749,47 +749,44 @@ Consider a `BatchNormalization` layer in the frozen part of a model that's used 
 
 ---
 
-### What if I need to customize what `fit()` does?
+### 어떻게 `fit()` 메서드를 커스터마이징할 수 있나요?
 
-You have two options:
+두 가지 방법이 있습니다:
 
-**1) Write a low-level custom training looop**
+**1) 저수준 사용자 정의 훈련 루프를 만듭니다**
 
-This is a good option if you want to be in control of every last little detail. But it can be somewhat verbose. Example:
+상세한 모든 것을 제어하고 싶을 때 좋습니다. 대신 조금 번거롭습니다. 예를 들면:
 
 ```python
-# Prepare an optimizer.
+# 옵티마이저를 준비합니다.
 optimizer = tf.keras.optimizers.Adam()
-# Prepare a loss function.
+# 손실 함수를 준비합니다.
 loss_fn = tf.keras.losses.kl_divergence
 
-# Iterate over the batches of a dataset.
+# 데이터셋의 배치를 순회합니다.
 for inputs, targets in dataset:
-    # Open a GradientTape.
+    # GradientTape를 시작합니다.
     with tf.GradientTape() as tape:
-        # Forward pass.
+        # 정방향 계산.
         predictions = model(inputs)
-        # Compute the loss value for this batch.
+        # 배치에 대한 손실을 계산합니다.
         loss_value = loss_fn(targets, predictions)
 
-    # Get gradients of loss wrt the weights.
+    # 가중치에 대한 손실의 그레이디언트를 계산합니다.
     gradients = tape.gradient(loss_value, model.trainable_weights)
-    # Update the weights of the model.
+    # 모델의 가중치를 업데이트합니다.
     optimizer.apply_gradients(zip(gradients, model.trainable_weights))
 ```
 
-This examples does not include a lot of essential functionality like displaying a progress bar, calling callbacks,
-updating metrics, etc. You would have to do this yourself. It's not difficult at all, but it's a bit of work.
+이 예제는 진행 막대를 출력하거나, 콜백을 호출하고, 측정 지표를 업데이트하는 등의 기본적인 기능을 포함하고 있지 않습니다. 직접 만들어 보세요. 어렵지는 않지만 약간의 작업이 필요합니다.
 
+**2) `Model` 클래스를 상속하고 `train_step`(그리고 `test_step`) 메서드를 오버라이딩합니다**
 
-**2) Subclass the `Model` class and override the `train_step` (and `test_step`) methods**
+이 방법은 가중치 업데이트 규칙을 바꾸고 싶지만 `fit()` 메서에서 제공하는 콜백이나 효율적인 스텝 융합(step fusing) 같은 기능을 사용하고 싶을 때 좋습니다.
 
-This is a better option if you want to use custom update rules but still want to leverage the functionality provided by `fit()`,
-such as callbacks, efficient step fusing, etc.
+이 방법을 사용하면 함수형 API를 사용해 모델을 만들 수 있습니다(시퀀셜 모델도 사용할 수 있습니다).
 
-Note that this pattern does not prevent you from building models with the Functional API (or even Sequential models).
-
-The example below shows a Functional model with a custom `train_step`.
+다음은 사용자 정의 `train_step`과 함께 함수형 API를 사용하는 예입니다.
 
 ```python
 from tensorflow import keras
@@ -799,108 +796,108 @@ import numpy as np
 class MyCustomModel(keras.Model):
 
     def train_step(self, data):
-        # Unpack the data. Its structure depends on your model and
-        # on what you pass to `fit()`.
+        # 데이터를 언팩합니다. 데이터 구조는 모델에 따라 다르고
+        # `fit()` 메서드에 전달한 값에 따라 다릅니다.
         x, y = data
 
         with tf.GradientTape() as tape:
-            y_pred = self(x, training=True)  # Forward pass
-            # Compute the loss value
-            # (the loss function is configured in `compile()`)
+            y_pred = self(x, training=True)  # 정방향 계산
+            # 손실을 계산합니다
+            # (손실 함수는 `compile()`에서 설정합니다)
             loss = self.compiled_loss(y, y_pred,
                                       regularization_losses=self.losses)
 
-        # Compute gradients
+        # 그레이디언트를 계산합니다
         trainable_vars = self.trainable_variables
         gradients = tape.gradient(loss, trainable_vars)
-        # Update weights
+        # 가중치를 업데이트합니다
         self.optimizer.apply_gradients(zip(gradients, trainable_vars))
-        # Update metrics (includes the metric that tracks the loss)
+        # (손실을 포함하여) 측정 지표를 업데이트합니다
         self.compiled_metrics.update_state(y, y_pred)
-        # Return a dict mapping metric names to current value
+        # 측정 지표와 현재 값을 매핑한 딕셔너리를 반환합니다
         return {m.name: m.result() for m in self.metrics}
 
 
-# Construct and compile an instance of MyCustomModel
+# MyCustomModel의 객체를 만들고 컴파일합니다
 inputs = keras.Input(shape=(32,))
 outputs = keras.layers.Dense(1)(inputs)
 model = MyCustomModel(inputs, outputs)
 model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
 
-# Just use `fit` as usual
+# 평상시처럼 `fit` 메서드를 사용합니다
 x = np.random.random((1000, 32))
 y = np.random.random((1000, 1))
 model.fit(x, y, epochs=10)
 ```
 
-You can also easily add support for sample weighting:
+샘플 가중치도 쉽게 적용할 수 있습니다:
 
 ```python
 class MyCustomModel(keras.Model):
 
     def train_step(self, data):
-        # Unpack the data. Its structure depends on your model and
-        # on what you pass to `fit()`.
+        # 데이터를 언팩합니다. 데이터 구조는 모델에 따라 다르고
+        # `fit()` 메서드에 전달한 값에 따라 다릅니다.
         if len(data) == 3:
             x, y, sample_weight = data
         else:
             x, y = data
 
         with tf.GradientTape() as tape:
-            y_pred = self(x, training=True)  # Forward pass
-            # Compute the loss value.
-            # The loss function is configured in `compile()`.
+            y_pred = self(x, training=True)  # 정방향 계산
+            # 손실을 계산합니다
+            # (손실 함수는 `compile()`에서 설정합니다)
             loss = self.compiled_loss(y, y_pred,
                                       sample_weight=sample_weight,
                                       regularization_losses=self.losses)
 
-        # Compute gradients
+        # 그레이디언트를 계산합니다
         trainable_vars = self.trainable_variables
         gradients = tape.gradient(loss, trainable_vars)
 
-        # Update weights
+        # 가중치를 업데이트합니다
         self.optimizer.apply_gradients(zip(gradients, trainable_vars))
 
-        # Update the metrics.
-        # Metrics are configured in `compile()`.
+        # 측정 지표를 업데이트합니다
+        # 측정 지표는 `compile()`에서 설정합니다
         self.compiled_metrics.update_state(
             y, y_pred, sample_weight=sample_weight)
 
-        # Return a dict mapping metric names to current value.
-        # Note that it will include the loss (tracked in self.metrics).
+        # 측정 지표와 현재 값을 매핑한 딕셔너리를 반환합니다
+        # 여기에는 손실도 포함됩니다 (self.metrics에 기록되어 있습니다)
         return {m.name: m.result() for m in self.metrics}
 
 
-# Construct and compile an instance of MyCustomModel
+# MyCustomModel의 객체를 만들고 컴파일합니다
 inputs = keras.Input(shape=(32,))
 outputs = keras.layers.Dense(1)(inputs)
 model = MyCustomModel(inputs, outputs)
 model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
 
-# You can now use sample_weight argument
+# 이제 sample_weight 매개변수를 사용할 수 있습니다
 x = np.random.random((1000, 32))
 y = np.random.random((1000, 1))
 sw = np.random.random((1000, 1))
 model.fit(x, y, sample_weight=sw, epochs=10)
 ```
 
-Similarly, you can also customize evaluation by overriding `test_step`:
+비슷하게 `test_step` 오버라이딩하여 사용자 평가를 구현할 수 있습니다:
 
 ```python
 class MyCustomModel(keras.Model):
 
     def test_step(self, data):
-      # Unpack the data
+      # 데이터를 언팩합니다
       x, y = data
-      # Compute predictions
+      # 예측을 만듭니다
       y_pred = self(x, training=False)
-      # Updates the metrics tracking the loss
+      # 손실 지표를 업데이트합니다
       self.compiled_loss(
           y, y_pred, regularization_losses=self.losses)
-      # Update the metrics.
+      # 측정 지표를 업데이트합니다
       self.compiled_metrics.update_state(y, y_pred)
-      # Return a dict mapping metric names to current value.
-      # Note that it will include the loss (tracked in self.metrics).
+      # 측정 지표와 현재 값을 매핑한 딕셔너리를 반환합니다
+      # 여기에는 손실도 포함됩니다 (self.metrics에 기록되어 있습니다)
       return {m.name: m.result() for m in self.metrics}
 ```
 
