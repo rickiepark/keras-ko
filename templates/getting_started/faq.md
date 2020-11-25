@@ -27,13 +27,13 @@
 - [`fit()` 메서드에서 훈련하는 동안 데이터를 섞나요?](#fit-메서드에서-훈련하는-동안-데이터를-섞나요)
 - [`fit()`으로 훈련할 때 측정 값을 어떻게 모니터링하는 것이 좋을까요?](#fit으로-훈련할-때-측정-값을-어떻게-모니터링하는-것이-좋을까요)
 - [어떻게 `fit()` 메서드를 커스터마이징할 수 있나요?](#어떻게-fit-메서드를-커스터마이징할-수-있나요)
-- [How can I train models in mixed precision?](#how-can-i-train-models-in-mixed-precision)
+- [어떻게 모델을 혼합 정밀도로 훈련할 수 있나요?](#어떻게-모델을-혼합-정밀도로-훈련할-수-있나요)
 
 ## 모델링과 관련된 질문
 
-- [How can I obtain the output of an intermediate layer (feature extraction)?](#how-can-i-obtain-the-output-of-an-intermediate-layer-feature-extraction)
-- [How can I use pre-trained models in Keras?](#how-can-i-use-pre-trained-models-in-keras)
-- [How can I use stateful RNNs?](#how-can-i-use-stateful-rnns)
+- [어떻게 중간층의 출력(특성 추출)을 얻을 수 있나요?](#어떻게-중간층의-출력특성-추출을-얻을-수-있나요)
+- [케라스에서 사전 훈련된 모델을 사용할 수 있나요?](#케라스에서-사전-훈련된-모델을-사용할-수-있나요)
+- [상태가 있는 RNN을 어떻게 사용하나요?](#상태가-있는-RNN을-어떻게-사용하나요)
 
 
 ---
@@ -903,20 +903,18 @@ class MyCustomModel(keras.Model):
 
 ---
 
-### How can I train models in mixed precision?
+### 어떻게 모델을 혼합 정밀도로 훈련할 수 있나요?
 
-Keras has built-in support for mixed precision training on GPU and TPU.
-See [this extensive guide](https://www.tensorflow.org/guide/keras/mixed_precision).
+케라스는 기본적으로 GPU와 TPU에서 혼합 정밀도 훈련을 지원합니다. 자세한 내용은 [가이드 문서](https://www.tensorflow.org/guide/keras/mixed_precision)를 참고하세요.
 
 ---
 
 ## 모델링과 관련된 질문
 
 
-### How can I obtain the output of an intermediate layer (feature extraction)?
+### 어떻게 중간층의 출력(특성 추출)을 얻을 수 있나요?
 
-In the Functional API and Sequential API, if a layer has been called exactly once, you can retrieve its output via `layer.output` and its input via `layer.input`.
-This enables you do quickly instantiate feature-extraction models, like this one:
+함수형 API와 시퀀셜 API에서 정확히 층이 한 번 호출되면 `layer.output`으로 출력을 얻고 `layer.input`으로 입력을 얻을 수 있습니다. 이를 사용하면 다음처럼 특성 추출 모델을 간단히 만들 수 있습니다:
 
 ```python
 from tensorflow import keras
@@ -936,12 +934,12 @@ extractor = keras.Model(inputs=model.inputs,
 features = extractor(data)
 ```
 
-Naturally, this is not possible with models that are subclasses of `Model` that override `call`.
+당연히 `Model`을 서브클래싱하고 `call` 메서드를 오버라이딩하는 모델로는 불가능합니다.
 
-Here's another example: instantiating a `Model` that returns the output of a specific named layer:
+다음은 또 다른 예시입니다: 특정 층의 출력을 반환하는 `Model` 객체를 만듭니다:
 
 ```python
-model = ...  # create the original model
+model = ...  # 원본 모델을 만듭니다
 
 layer_name = 'my_layer'
 intermediate_layer_model = keras.Model(inputs=model.input,
@@ -951,43 +949,41 @@ intermediate_output = intermediate_layer_model(data)
 
 ---
 
-### How can I use pre-trained models in Keras?
+### 케라스에서 사전 훈련된 모델을 사용할 수 있나요?
 
-You could leverage the [models available in `keras.applications`](/api/applications/), or the models available on [TensorFlow Hub](https://www.tensorflow.org/hub).
-TensorFlow Hub is well-integrated with Keras.
+[`keras.applications`에 있는 모델](/api/applications/)이나 [텐서플로 허브(Hub)](https://www.tensorflow.org/hub)에 있는 모델을 사용할 수 있습니다. 텐서플로 허브는 케라스와 잘 통합됩니다.
 
 ---
 
-### How can I use stateful RNNs?
+### 상태가 있는 RNN을 어떻게 사용하나요?
 
+RNN이 상태를 가진다는 것은 각 배치의 샘플에 대한 상태가 다음 배치에 있는 샘플의 초기 상태로 재사용되는 것을 의미합니다.
 
-Making a RNN stateful means that the states for the samples of each batch will be reused as initial states for the samples in the next batch.
+따라서 상태가 있는 RNN을 사용할 때 다음을 가정합니다:
 
-When using stateful RNNs, it is therefore assumed that:
+- 모든 배치는 샘플의 개수가 동일합니다.
+- `x1`과 `x2`가 연속된 배치라면 모든 `i`에 대해 `x2[i]`는 `x1[i]`의 뒤를 잇습니다.
 
-- all batches have the same number of samples
-- If `x1` and `x2` are successive batches of samples, then `x2[i]` is the follow-up sequence to `x1[i]`, for every `i`.
+상태가 있는 RNN을 사용하려면 다음이 필요합니다:
 
-To use statefulness in RNNs, you need to:
+- 모델의 첫 번째 층에 `batch_size` 매개변수로 사용할 배치 크기를 명시적으로 지정해야 합니다. 예를 들어 타임스텝마다 16개의 특성을 가지고 10개의 타임스텝으로 구성된 32개 샘플의 배치라면 `batch_size=32`라고 지정합니다.
+- RNN 층을 `stateful=True`으로 지정합니다.
+- `fit()` 메서드를 호출할 때 `shuffle=False`로 설정합니다.
 
-- explicitly specify the batch size you are using, by passing a `batch_size` argument to the first layer in your model. E.g. `batch_size=32` for a 32-samples batch of sequences of 10 timesteps with 16 features per timestep.
-- set `stateful=True` in your RNN layer(s).
-- specify `shuffle=False` when calling `fit()`.
+누적된 상태를 초기화하려면:
 
-To reset the states accumulated:
+- 모델에 있는 모든 층의 상태를 초기화하려면 `model.reset_states()`를 사용합니다.
+- 특정 RNN 층의 상태를 초기화하려면 `layer.reset_states()`를 사용합니다.
 
-- use `model.reset_states()` to reset the states of all layers in the model
-- use `layer.reset_states()` to reset the states of a specific stateful RNN layer
-
-Example:
+예:
 
 ```python
 from tensorflow import keras
 from tensorflow.keras import layers
 import numpy as np
 
-x = np.random.random((32, 21, 16))  # this is our input data, of shape (32, 21, 16)
-# we will feed it to our model in sequences of length 10
+x = np.random.random((32, 21, 16))  # (32, 21, 16) 크기의 입력 데이터
+# 길이가 10인 시퀀스로 모델에 주입합니다.
 
 model = keras.Sequential()
 model.add(layers.LSTM(32, input_shape=(10, 16), batch_size=32, stateful=True))
@@ -995,20 +991,20 @@ model.add(layers.Dense(16, activation='softmax'))
 
 model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
 
-# we train the network to predict the 11th timestep given the first 10:
+# 처음 10개의 타입스텝이 주어지면 11번째 타임스텝을 예측하는 모델을 훈련합니다:
 model.train_on_batch(x[:, :10, :], np.reshape(x[:, 10, :], (32, 16)))
 
-# the state of the network has changed. We can feed the follow-up sequences:
+# 모델의 상태가 바뀌었습니다. 다음 시퀀스를 주입할 수 있습니다:
 model.train_on_batch(x[:, 10:20, :], np.reshape(x[:, 20, :], (32, 16)))
 
-# let's reset the states of the LSTM layer:
+# LSTM 층의 상태를 초기화해보죠:
 model.reset_states()
 
-# another way to do it in this case:
+# 초기화하는 다른 방법입니다:
 model.layers[0].reset_states()
 ```
 
-Note that the methods `predict`, `fit`, `train_on_batch`, `predict_classes`, etc. will *all* update the states of the stateful layers in a model. This allows you to do not only stateful training, but also stateful prediction.
+`predict`, `fit`, `train_on_batch`, `predict_classes`과 같은 메서드는 *모두* 상태가 있는 층의 상태를 업데이트합니다. 따라서 상태가 있는 훈련뿐만 아니라 상태가 있는 예측도 가능합니다.
 
 
 ---
