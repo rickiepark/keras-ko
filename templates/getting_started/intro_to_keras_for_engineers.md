@@ -393,27 +393,27 @@ model.summary()
 ```
 Model: "functional_1"
 _________________________________________________________________
-Layer (type)                 Output Shape              Param #   
+Layer (type)                 Output Shape              Param #
 =================================================================
-input_1 (InputLayer)         [(None, None, None, 3)]   0         
+input_1 (InputLayer)         [(None, None, None, 3)]   0
 _________________________________________________________________
-center_crop_1 (CenterCrop)   (None, 150, 150, 3)       0         
+center_crop_1 (CenterCrop)   (None, 150, 150, 3)       0
 _________________________________________________________________
-rescaling_1 (Rescaling)      (None, 150, 150, 3)       0         
+rescaling_1 (Rescaling)      (None, 150, 150, 3)       0
 _________________________________________________________________
-conv2d (Conv2D)              (None, 148, 148, 32)      896       
+conv2d (Conv2D)              (None, 148, 148, 32)      896
 _________________________________________________________________
-max_pooling2d (MaxPooling2D) (None, 49, 49, 32)        0         
+max_pooling2d (MaxPooling2D) (None, 49, 49, 32)        0
 _________________________________________________________________
-conv2d_1 (Conv2D)            (None, 47, 47, 32)        9248      
+conv2d_1 (Conv2D)            (None, 47, 47, 32)        9248
 _________________________________________________________________
-max_pooling2d_1 (MaxPooling2 (None, 15, 15, 32)        0         
+max_pooling2d_1 (MaxPooling2 (None, 15, 15, 32)        0
 _________________________________________________________________
-conv2d_2 (Conv2D)            (None, 13, 13, 32)        9248      
+conv2d_2 (Conv2D)            (None, 13, 13, 32)        9248
 _________________________________________________________________
-global_average_pooling2d (Gl (None, 32)                0         
+global_average_pooling2d (Gl (None, 32)                0
 _________________________________________________________________
-dense (Dense)                (None, 10)                330       
+dense (Dense)                (None, 10)                330
 =================================================================
 Total params: 19,722
 Trainable params: 19,722
@@ -508,19 +508,19 @@ history = model.fit(dataset, epochs=1)
 ```
 Model: "functional_3"
 _________________________________________________________________
-Layer (type)                 Output Shape              Param #   
+Layer (type)                 Output Shape              Param #
 =================================================================
-input_2 (InputLayer)         [(None, 28, 28)]          0         
+input_2 (InputLayer)         [(None, 28, 28)]          0
 _________________________________________________________________
-rescaling_2 (Rescaling)      (None, 28, 28)            0         
+rescaling_2 (Rescaling)      (None, 28, 28)            0
 _________________________________________________________________
-flatten (Flatten)            (None, 784)               0         
+flatten (Flatten)            (None, 784)               0
 _________________________________________________________________
-dense_1 (Dense)              (None, 128)               100480    
+dense_1 (Dense)              (None, 128)               100480
 _________________________________________________________________
-dense_2 (Dense)              (None, 128)               16512     
+dense_2 (Dense)              (None, 128)               16512
 _________________________________________________________________
-dense_3 (Dense)              (None, 10)                1290      
+dense_3 (Dense)              (None, 10)                1290
 =================================================================
 Total params: 118,282
 Trainable params: 118,282
@@ -929,9 +929,9 @@ def build_model(hp):
 
 
 ```python
-import kerastuner
+import keras_tuner
 
-tuner = kerastuner.tuners.Hyperband(
+tuner = keras_tuner.tuners.Hyperband(
   build_model,
   objective='val_loss',
   max_epochs=100,

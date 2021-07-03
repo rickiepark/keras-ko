@@ -929,9 +929,9 @@ def build_model(hp):
 
 
 ```python
-import kerastuner
+import keras_tuner
 
-tuner = kerastuner.tuners.Hyperband(
+tuner = keras_tuner.tuners.Hyperband(
   build_model,
   objective='val_loss',
   max_epochs=100,

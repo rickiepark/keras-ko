@@ -7,7 +7,7 @@
 
 ## 케라스 튜너
 
-[케라스 튜너 문서](https://keras-team.github.io/keras-tuner/) - [케라스 튜너 깃허브 저장소](https://github.com/keras-team/keras-tuner)
+[케라스 튜너 문서](/keras-tuner/) - [케라스 튜너 깃허브 저장소](https://github.com/keras-team/keras-tuner)
 
 
 케라스 튜너(Tuner)는 번거로운 하이퍼파라미터 탐색 문제를 해결해 주며 사용하기 쉽고 확장이 용이한 하이퍼파라미터 최적화 프레임워크입니다.

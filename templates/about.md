@@ -3,6 +3,13 @@
 케라스는 파이썬으로 작성된 딥러닝 API이며 [텐서플로](https://github.com/tensorflow/tensorflow) 머신러닝 플랫폼 위에서 실행됩니다.
 케라스는 실험을 빨리 수행하는데 초점을 맞추어 개발되었습니다. *가능한 빠르게 아이디어를 결과로 만드는 것이 성공적인 연구의 핵심 요소이기 때문입니다.*
 
+Keras is:
+
+- **Simple** -- but not simplistic. Keras reduces developer *cognitive load* to free you to focus on the parts of the problem that really matter.
+- **Flexible** -- Keras adopts the principle of *progressive disclosure of complexity*: simple workflows should be quick and easy,
+while arbitrarily advanced workflows should be *possible* via a clear path that builds upon what you've already learned.
+- **Powerful** -- Keras provides industry-strength performance and scalability: it is used by organizations and companies including NASA, YouTube, or Waymo.
+
 ---
 
 ## 케라스와 텐서플로 2
@@ -11,7 +18,7 @@
 
 - CPU, GPU, TPU에서 효율적으로 저수준 텐서 연산을 실행합니다.
 - 어떤한 미분가능한 표현식에 대해서도 그레이디언트(gradient)를 계산할 수 있습니다.
-- 여러 장치로 계산을 확장할 수 있습니다(예를 들면, Oak Ridge National Lab의 [Summit 수퍼컴퓨터](https://www.olcf.ornl.gov/summit/)는 GPU 27,000개를 가지고 있습니다).
+- 수 백개의 GPU 클러스터 같은 여러 장치로 계산을 확장할 수 있습니다.
 - 프로그램("그래프")를 서버, 브라우저, 모바일, 임베디드 장치와 같은 외부 런타임으로 내보낼 수 있습니다.
 
 케라스는 텐서플로 2의 고수준 API입니다. 머신러닝 문제, 특히 최신 딥러닝에 초점을 맞춘 사용하기 쉽고 생산성이 높은 인터페이스입니다.
@@ -63,7 +70,7 @@ model.compile(loss=keras.losses.categorical_crossentropy,
 이제 훈련 데이터 배치에서 반복합니다:
 
 ```python
-# 사이킷런(Scikit-Learn) API와 비슷하게 x_train과 y_train은 넘파이 배열입니다.
+# x_train과 y_train은 넘파이 배열입니다.
 model.fit(x_train, y_train, epochs=5, batch_size=32)
 ```
 
@@ -79,7 +86,7 @@ loss_and_metrics = model.evaluate(x_test, y_test, batch_size=128)
 classes = model.predict(x_test, batch_size=128)
 ```
 
-방금 본 것은 매우 기본적인 케라스 사용 방법으로 사이킷런 API와 닮았습니다.
+방금 본 것은 매우 기본적인 케라스 사용 방법입니다.
 
 하지만 케라스는 매우 유연한 프레임워크로 최신 연구를 수행하는데 적합합니다.
 케라스는 **단계적인 복잡성 노출** 원칙을 따릅니다.
@@ -113,8 +120,6 @@ for inputs, targets in dataset:
     optimizer.apply_gradients(zip(gradients, model.trainable_weights))
 ```
 
-딥러닝 이면에 있는 아이디어는 간단합니다. 따라서 구현이 어려울 필요가 있을까요?
-
 더 자세한 케라스 튜토리얼은 다음을 참고하세요:
 
 - [엔지니어에게 맞는 케라스 소개](/getting_started/intro_to_keras_for_engineers/)
@@ -141,6 +146,7 @@ for inputs, targets in dataset:
 
 개발 포럼에 가입하여 궁금한 점을 질문할 수 있습니다:
 
+- [텐서플로 포럼](https://discuss.tensorflow.org/).
 - [케라스 구글 그룹](https://groups.google.com/forum/#!forum/keras-users).
 - [케라스 슬랙 채널](https://kerasteam.slack.com). 채널에 초대 요청을 하려면 [이 링크](https://keras-slack-autojoin.herokuapp.com/)를 사용하세요.
 

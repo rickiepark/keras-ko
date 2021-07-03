@@ -447,5 +447,9 @@ MASTER = {
             'path': 'contributing',
             'title': '케라스에 기여하기',
         },
+        {
+            'path': 'keras_tuner/',
+            'title': 'KerasTuner',
+        },
     ]
 }

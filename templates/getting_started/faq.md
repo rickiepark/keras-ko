@@ -1004,7 +1004,7 @@ model.reset_states()
 model.layers[0].reset_states()
 ```
 
-`predict`, `fit`, `train_on_batch`, `predict_classes`과 같은 메서드는 *모두* 상태가 있는 층의 상태를 업데이트합니다. 따라서 상태가 있는 훈련뿐만 아니라 상태가 있는 예측도 가능합니다.
+`predict`, `fit`, `train_on_batch`과 같은 메서드는 *모두* 상태가 있는 층의 상태를 업데이트합니다. 따라서 상태가 있는 훈련뿐만 아니라 상태가 있는 예측도 가능합니다.
 
 
 ---
