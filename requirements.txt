@@ -4,7 +4,7 @@ markdown
 requests
 mdx_truly_sane_lists
 sphinx~=3.0.3
-black==19.10b0
+black==24.3.0
 pathlib
 tensorflow
 PyYAML
